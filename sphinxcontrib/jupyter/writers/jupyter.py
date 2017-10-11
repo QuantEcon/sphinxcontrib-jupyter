@@ -1,6 +1,8 @@
 import docutils.writers
 import nbformat
 
+from .translate_code import JupyterCodeTranslator
+from .translate_all import JupyterTranslator
 
 
 class JupyterWriter(docutils.writers.Writer):
