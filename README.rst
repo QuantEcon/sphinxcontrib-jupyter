@@ -4,8 +4,6 @@ sphinxcontrib.jupyter
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
 Generating Jupyter Notebooks
 
-    IN-WORK (Migrating)
-
 Summary
 -------
 
@@ -14,7 +12,7 @@ This sphinx extension can be used to build a collection of
 
 **Note:** It has mainly been written to support the use case of
 scientific publishing and hasn't been well tested outside of this
-domain.
+domain. Please provide feedback as an issue to this repository.
 
 Installation
 ------------
@@ -38,6 +36,10 @@ then run
 
     make jupyter
 
+.. note::
+
+    Check that the default Makefile works.
+
 Usage in RST Files
 ------------------
 
@@ -51,7 +53,9 @@ To generate an ``In`` style executable block you can use
 
     .. literalinclude:: 
 
-    TODO: document allowable alliases
+.. note:: 
+
+    document alliases
 
 To generate a notebook that looks precomputed you can specify output
 using the ``:class: output`` option.
@@ -71,7 +75,9 @@ that is meant to throw errors.
         :class: no-execute
 
 this will generate a highlighted markdown cell of the contents of the
-code-block.
+code-block. An alias for this is ``:class: skip-test``. This is used
+in the context of a test environment that is using the collection of 
+notebooks to test a collection of code snippets.
 
 Configuration
 -------------
@@ -80,9 +86,9 @@ The following additions can be made to ``conf.py`` file.
 
 .. code:: python
 
-    # -----------------------------------------
-    # sphinx.ext.jupyter Configuration Settings
-    # -----------------------------------------
+    # --------------------------------------------
+    # sphinxcontrib-jupyter Configuration Settings
+    # --------------------------------------------
 
     # Conversion Mode Settings
     # If "all", convert codes and texts into jupyter notebook
@@ -117,6 +123,16 @@ The following additions can be made to ``conf.py`` file.
     # Prepend a Welcome Message to Each Notebook
     jupyter_welcome_block = "welcome.rst"
 
+Credits
+-------
+
+This project is supported by `QuantEcon <https://www.quantecon.org>`__
+
+Many thanks to the lead developers of this project.
+
+  * `@NickSifniotis <https://github.com/NickSifniotis>`__
+  * `@myuuuuun <https://github.com/myuuuuun`__ 
+
 Projects using Extension
 ------------------------
 
@@ -124,12 +140,6 @@ Projects using Extension
 
 If you find this extension useful please let us know at
 contact@quantecon.org
-
-Credits
--------
-
-Many thanks to [@myuuuuun](https://github.com/myuuuuun) and
-[@NickSifniotis](https://github.com/NickSifniotis).
 
 LICENSE
 -------
