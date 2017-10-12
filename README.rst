@@ -4,6 +4,10 @@ sphinxcontrib.jupyter
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
 Generating Jupyter Notebooks
 
+.. image:: https://readthedocs.org/projects/sphinxcontrib-jupyter/badge/?version=latest
+   :target: http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 Summary
 -------
 
