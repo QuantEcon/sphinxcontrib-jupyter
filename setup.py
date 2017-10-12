@@ -11,18 +11,18 @@ This package contains the Jupyter Sphinx extension.
 requires = ['Sphinx>=0.6']
 
 setup(
-    name='sphinxcontrib-Jupyter',
+    name='sphinxcontrib-jupyter',
     version='0.1',
     url='http://bitbucket.org/birkenfeld/sphinx-contrib',
-    download_url='http://pypi.python.org/pypi/sphinxcontrib-Jupyter',
+    download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/0.1.tar.gz',
     license='BSD',
     author='QuantEcon',
     author_email='nick.sifniotis@anu.edu.au',
-    description='Sphinx "Jupyter" extension',
+    description='Sphinx "Jupyter" extension: Convert your RST files into executable Jupyter notebooks.',
     long_description=long_desc,
     zip_safe=False,
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
