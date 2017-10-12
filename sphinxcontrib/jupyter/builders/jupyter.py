@@ -22,9 +22,13 @@ class JupyterBuilder(Builder):
 
     def init(self):
         self.config['jupyter_python_autosave'] = False
+
         # If the user has overridden anything on the command line, set these things which have been overridden.
+        instructions = []
         overrides = self.config['jupyter_options']
-        instructions = overrides.split(",")
+        if overrides:
+            instructions = overrides.split(",")
+
         for instruction in instructions:
             if instruction:
                 if instruction == 'code_only':
