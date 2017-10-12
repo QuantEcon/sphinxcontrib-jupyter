@@ -36,9 +36,7 @@ then run
 
     make jupyter
 
-.. note::
-
-    Check that the default Makefile works.
+  Check that the default Makefile works.
 
 Usage in RST Files
 ------------------
@@ -51,11 +49,9 @@ To generate an ``In`` style executable block you can use
 
 .. code:: rst
 
-    .. literalinclude:: 
+    .. literalinclude::  
 
-.. note:: 
-
-    document alliases
+  document alliases
 
 To generate a notebook that looks precomputed you can specify output
 using the ``:class: output`` option.
