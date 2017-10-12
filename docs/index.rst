@@ -1,13 +1,18 @@
-Welcome to sphinxcontrib-jupyter's documentation!
-=================================================
+``sphinxcontrib-jupyter`` Documentation
+=======================================
 
 This sphinx extension can be used to build a collection of
 `Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects.
 
-**Note:** It has mainly been written to support the use case of
-scientific publishing and hasn't been well tested outside of this
-domain. Please provide feedback as an issue to this 
-`repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__.
+.. note:: 
+
+    It has mainly been written to support the use case of
+    scientific publishing and hasn't been well tested outside of this
+    domain. Please provide feedback as an issue to this 
+    `repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__.
+
+One of the benefits of writing notebooks as ``RST`` files is to simplify
+the task of version control.
 
 .. toctree::
    :maxdepth: 2
@@ -15,6 +20,7 @@ domain. Please provide feedback as an issue to this
 
    installation
    usage
+   sphinx-setup
 
 
 Credits
