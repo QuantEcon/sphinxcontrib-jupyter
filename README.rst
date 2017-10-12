@@ -36,8 +36,6 @@ then run
 
     make jupyter
 
-  Check that the default Makefile works.
-
 Usage in RST Files
 ------------------
 
@@ -51,8 +49,6 @@ To generate an ``In`` style executable block you can use
 
     .. literalinclude::  
 
-  document alliases
-
 To generate a notebook that looks precomputed you can specify output
 using the ``:class: output`` option.
 
@@ -61,9 +57,9 @@ using the ``:class: output`` option.
     .. code-block:: python
         :class: output
 
-To include code in the notbook that is not meant for execution can be
+To include code in the notebook that is not meant for execution can be
 included using ``:class: no-execute``. This is useful when writing code
-that is meant to throw errors.
+that is meant to throw errors, for example.
 
 .. code:: rst
 
@@ -78,7 +74,7 @@ notebooks to test a collection of code snippets.
 Configuration
 -------------
 
-The following additions can be made to ``conf.py`` file.
+The following additions must be made to ``conf.py`` file.
 
 .. code:: python
 
