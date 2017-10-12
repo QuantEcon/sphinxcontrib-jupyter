@@ -130,8 +130,8 @@ This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
 Many thanks to the lead developers of this project.
 
-  * `@NickSifniotis <https://github.com/NickSifniotis>`__
-  * `@myuuuuun <https://github.com/myuuuuun`__ 
+* `@NickSifniotis <https://github.com/NickSifniotis>`__
+* `@myuuuuun <https://github.com/myuuuuun>`__ 
 
 Projects using Extension
 ------------------------
