@@ -1,5 +1,5 @@
-sphinx.ext.jupyter
-==================
+sphinxcontrib.jupyter
+=====================
 
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
 Generating Jupyter Notebooks
@@ -19,11 +19,9 @@ domain.
 Installation
 ------------
 
-.. raw:: html
+.. code:: bash
 
-   <!-- ```bash
    pip install sphinxcontrib-jupyter
-   ``` -->
 
 Usage
 -----
