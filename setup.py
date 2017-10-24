@@ -12,9 +12,9 @@ requires = ['Sphinx>=0.6']
 
 setup(
     name='sphinxcontrib-jupyter',
-    version='0.2.1',
+    version='0.1',
     url='http://bitbucket.org/birkenfeld/sphinx-contrib',
-    download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/0.1.tar.gz',
+    # download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/0.1.tar.gz',
     license='BSD',
     author='QuantEcon',
     author_email='nick.sifniotis@anu.edu.au',
@@ -22,9 +22,10 @@ setup(
     long_description=long_desc,
     zip_safe=False,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Environment :: Web Environment',
+        'Framework :: Sphinx',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
