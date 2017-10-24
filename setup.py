@@ -14,7 +14,6 @@ setup(
     name='sphinxcontrib-jupyter',
     version='0.1',
     url='http://bitbucket.org/birkenfeld/sphinx-contrib',
-    # download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/0.1.tar.gz',
     license='BSD',
     author='QuantEcon',
     author_email='nick.sifniotis@anu.edu.au',
