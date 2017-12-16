@@ -28,7 +28,8 @@ Installation
 Usage
 -----
 
-Update project ``conf.py`` file to include the jupyter extension:
+Update project ``conf.py`` file to include the jupyter extension
+and the desired **Configuration** settings (see section below):
 
 .. code:: python
 
