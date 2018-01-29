@@ -15,7 +15,7 @@ One of the benefits of writing notebooks as ``RST`` files is to simplify
 the task of version control.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    installation

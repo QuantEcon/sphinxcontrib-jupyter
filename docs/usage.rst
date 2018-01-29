@@ -1,7 +1,9 @@
+.. _usage:
+
 Usage
 =====
 
-This details the relationship between default Sphinx directives
+This specifies the relationship between default Sphinx directives
 and how they will be interpreted by this Jupyter extension.
 
 Usage in RST Files
@@ -13,9 +15,19 @@ To generate an ``In`` style executable block you can use:
 
     .. code-block:: {{ language }}
 
+or,
+
 .. code:: rst
 
-    .. literalinclude::  
+    .. literalinclude::  {{ path_to_file }}
+
+A ``literalinclude`` will make use of the default language in Sphinx 
+to highlight the block, otherwise a language can be specified such as,
+
+.. code:: rst
+
+    .. literalinclude::  {{ path_to_file }}
+        :language: julia
 
 To generate a notebook that looks pre-computed you can specify output
 using the ``:class: output`` option.
@@ -25,8 +37,8 @@ using the ``:class: output`` option.
     .. code-block:: {{ language }}
         :class: output
 
-To include code in the notebook that is not meant for execution can be
-included using ``:class: no-execute``. This is useful when writing code
+To include code in the notebook that is not meant for execution you can use
+the ``:class: no-execute``. This is useful when writing code
 that is meant to throw errors, for example.
 
 .. code:: rst
@@ -65,5 +77,5 @@ Math
 Equations are transferred into the notebook environment and wrapped in 
 ``$`` for inline or `$$`` for display formulae. 
 
-Equation numbering is respected
-on the notebook level and is implemented using html links in each notebook.
+Equation numbering is respected on the individual notebook level and is 
+implemented using html links in each notebook.

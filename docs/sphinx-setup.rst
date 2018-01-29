@@ -20,3 +20,6 @@ will be generated as part of the quickstart script.
 This will by default provide the basic infrastructure required. After
 you follow the on-screen instructions you will be able to start writing 
 your project using RestructuredText.
+
+Once your repository is setup, you will then need to install the 
+jupyter extension, see :ref:`installation`
