@@ -57,6 +57,11 @@ To generate an ``In`` style executable block you can use
 To generate a notebook that looks precomputed you can specify output
 using the ``:class: output`` option.
 
+.. todo::
+
+    @mmcky check these features have been migrated from the extension used
+    by QuantEcon.
+
 .. code:: rst
 
     .. code-block:: python
@@ -75,6 +80,8 @@ this will generate a highlighted markdown cell of the contents of the
 code-block. An alias for this is ``:class: skip-test``. This is used
 in the context of a test environment that is using the collection of 
 notebooks to test a collection of code snippets.
+
+A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
 
 Configuration
 -------------
@@ -115,6 +122,14 @@ The following additions must be made to ``conf.py`` file.
                 },
             "file_extension": ".jl"
         }
+    }
+
+    # Configure Jupyter headers
+    jupyter_headers = {
+        "python3": [
+        ],
+        "julia": [
+        ],
     }
 
     # Prepend a Welcome Message to Each Notebook
