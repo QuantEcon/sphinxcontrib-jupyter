@@ -168,8 +168,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     #  code blocks
     # ================
     def visit_literal_block(self, node):
-        self.output_cell_type = JupyterOutputCellGenerators.GetGeneratorFromClasses(
-            node.attributes['classes'])
+        self.output_cell_type = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
         try:
             self.nodelang = node.attributes["language"].strip()
         except:
