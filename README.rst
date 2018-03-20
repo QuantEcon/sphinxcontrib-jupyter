@@ -57,11 +57,6 @@ To generate an ``In`` style executable block you can use
 To generate a notebook that looks precomputed you can specify output
 using the ``:class: output`` option.
 
-.. todo::
-
-    @mmcky check these features have been migrated from the extension used
-    by QuantEcon.
-
 .. code:: rst
 
     .. code-block:: python
