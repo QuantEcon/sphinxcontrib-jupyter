@@ -4,6 +4,9 @@ from .translate_code import JupyterCodeTranslator
 
 
 class JupyterTranslator(JupyterCodeTranslator):
+    """ Jupyter Translator for Text and Code
+    """
+
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
     def __init__(self, builder, document):
@@ -32,12 +35,14 @@ class JupyterTranslator(JupyterCodeTranslator):
         self.list_level = 0
         self.in_citation = False
 
+        self.table_builder = None
+
     # specific visit and depart methods
     # ---------------------------------
 
-    # ==============
-    #  Sections
-    # ==============
+    # =========
+    # Sections
+    # =========
     def visit_document(self, node):
         """at start
         """
@@ -63,14 +68,16 @@ class JupyterTranslator(JupyterCodeTranslator):
     def depart_section(self, node):
         self.section_level -= 1
 
-    # =================
+    #=================
     # Inline elements
-    # =================
+    #=================
     def visit_Text(self, node):
         text = node.astext()
 
         if self.in_code_block:
             self.code_lines.append(text)
+        elif self.table_builder:
+            self.table_builder['line_pending'] += text
         else:
             self.markdown_lines.append(text)
 
@@ -87,7 +94,11 @@ class JupyterTranslator(JupyterCodeTranslator):
         """inline math"""
         math_text = node.attributes["latex"].strip()
         formatted_text = "$ {} $".format(math_text)
-        self.markdown_lines.append(formatted_text)
+
+        if self.table_builder:
+            self.table_builder['line_pending'] += formatted_text
+        else:
+            self.markdown_lines.append(formatted_text)
 
     def visit_displaymath(self, node):
         """directive math"""
@@ -100,8 +111,8 @@ class JupyterTranslator(JupyterCodeTranslator):
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
 
-        formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'><td width=75%>" \
-                         + formatted_text \
+        formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'><td width=75%>"\
+                         + formatted_text\
                          + "</td><td width=25% style='text-align:center !important;'>"
 
         self.markdown_lines.append(formatted_text)
@@ -113,12 +124,63 @@ class JupyterTranslator(JupyterCodeTranslator):
 
         self.markdown_lines.append("</td></tr></table>")
 
+    def visit_table(self, node):
+        self.table_builder = dict()
+        self.table_builder['column_widths'] = []
+        self.table_builder['lines'] = []
+        self.table_builder['line_pending'] = ""
+
+        if 'align' in node:
+            self.table_builder['align'] = node['align']
+        else:
+            self.table_builder['align'] = "center"
+
+    def depart_table(self, node):
+        table_lines = "".join(self.table_builder['lines'])
+        self.markdown_lines.append(table_lines)
+        self.table_builder = None
+
+    def visit_thead(self, node):
+        """ Table Header """
+        self.table_builder['current_line'] = 0
+
+    def depart_thead(self, node):
+        """ create the header line which contains the alignment for each column """
+        header_line = "|"
+        for col_width in self.table_builder['column_widths']:
+            header_line += self.generate_alignment_line(
+                col_width, self.table_builder['align'])
+            header_line += "|"
+
+        self.table_builder['lines'].append(header_line + "\n")
+
+    def generate_alignment_line(self, line_length, alignment):
+        left = ":" if alignment != "right" else "-"
+        right = ":" if alignment != "left" else "-"
+        return left + "-" * (line_length - 2) + right
+
+    def visit_colspec(self, node):
+        self.table_builder['column_widths'].append(node['colwidth'])
+
+    def visit_row(self, node):
+        self.table_builder['line_pending'] = "|"
+
+    def depart_row(self, node):
+        finished_line = self.table_builder['line_pending'] + "\n"
+        self.table_builder['lines'].append(finished_line)
+
+    def visit_entry(self, node):
+        pass
+
+    def depart_entry(self, node):
+        self.table_builder['line_pending'] += "|"
+
     def visit_raw(self, node):
         pass
 
-    # ==================
-    #  markdown cells
-    # ==================
+    #================
+    # markdown cells
+    #================
 
     # general paragraph
     def visit_paragraph(self, node):
@@ -127,6 +189,8 @@ class JupyterTranslator(JupyterCodeTranslator):
     def depart_paragraph(self, node):
         if self.list_level > 0:
             self.markdown_lines.append(self.sep_lines)
+        elif self.table_builder:
+            pass
         else:
             self.markdown_lines.append(self.sep_paras)
 
@@ -137,12 +201,16 @@ class JupyterTranslator(JupyterCodeTranslator):
         if self.in_topic:
             self.markdown_lines.append(
                 "{} ".format("#" * (self.section_level + 1)))
+        elif self.table_builder:
+            self.markdown_lines.append(
+                "### {}\n".format(node.astext()))
         else:
             self.markdown_lines.append(
                 "{} ".format("#" * self.section_level))
 
     def depart_title(self, node):
-        self.markdown_lines.append(self.sep_paras)
+        if not self.table_builder:
+            self.markdown_lines.append(self.sep_paras)
 
     # emphasis(italic)
     def visit_emphasis(self, node):
@@ -175,7 +243,8 @@ class JupyterTranslator(JupyterCodeTranslator):
     def depart_reference(self, node):
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
-            uri_text = "".join(self.markdown_lines[self.reference_text_start:]).strip()
+            uri_text = "".join(
+                self.markdown_lines[self.reference_text_start:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             formatted_text = "](#{})".format(uri_text)
@@ -188,7 +257,8 @@ class JupyterTranslator(JupyterCodeTranslator):
 
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
+                    refuri = self.add_extension_to_inline_link(
+                        refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
@@ -331,18 +401,19 @@ class JupyterTranslator(JupyterCodeTranslator):
         if self.in_citation:
             self.markdown_lines.append("\] ")
 
-    # ================
-    #  code blocks are implemented in the superclass.
-    # ================
+    # ===============================================
+    #  code blocks are implemented in the superclass
+    # ===============================================
+
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
 
         if self.in_code_block:
             self.add_markdown_cell()
 
-    # ===================
-    #  general methods
-    # ===================
+    # ================
+    # general methods
+    # ================
     def add_markdown_cell(self):
         """split a markdown cell here
 

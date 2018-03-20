@@ -5,8 +5,8 @@ import os.path
 import datetime
 from .utils import LanguageTranslator, JupyterOutputCellGenerators, get_source_file_name
 
-
 class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
+
     URI_SPACE_REPLACE_FROM = re.compile(r"\s")
     URI_SPACE_REPLACE_TO = "-"
 
@@ -38,11 +38,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_headers = builder.config["jupyter_headers"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
 
-        # Override conf.py with any command line options that have been sent through.
-        using_autosave = builder.config["jupyter_python_autosave"]
-        if not using_autosave:
-            self.jupyter_headers['python3'] = []
-
         # Welcome message block
         template_paths = builder.config["templates_path"]
         welcome_block_filename = builder.config["jupyter_welcome_block"]
@@ -50,15 +45,18 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         full_path_to_welcome = None
         for template_path in template_paths:
             if os.path.isfile(template_path + "/" + welcome_block_filename):
-                full_path_to_welcome = os.path.normpath(template_path + "/" + welcome_block_filename)
+                full_path_to_welcome = os.path.normpath(
+                    template_path + "/" + welcome_block_filename)
 
         if full_path_to_welcome:
             with open(full_path_to_welcome) as input_file:
                 lines = input_file.readlines()
 
             line_text = "".join(lines)
-            formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-            nb_header_block = nbformat.v4.new_markdown_cell(formatted_line_text)
+            formatted_line_text = self.strip_blank_lines_in_end_of_block(
+                line_text)
+            nb_header_block = nbformat.v4.new_markdown_cell(
+                formatted_line_text)
 
             # Add the welcome block to the output stream straight away
             self.output["cells"].append(nb_header_block)
@@ -66,14 +64,15 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         # Write metadata
         if self.jupyter_write_metadata:
             meta_text = \
-                "Notebook created: {:%Y-%m-%d %H:%M:%S}  \n" \
+                "Notebook created: {:%Y-%m-%d %H:%M:%S}  \n"\
                 "Generated from: {}  "
 
             metadata = meta_text.format(
                 datetime.datetime.now(),
                 self.source_file_name)
 
-            self.output["cells"].append(nbformat.v4.new_markdown_cell(metadata))
+            self.output["cells"].append(
+                nbformat.v4.new_markdown_cell(metadata))
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
@@ -97,12 +96,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     # specific visit and depart methods
     # ---------------------------------
 
-    # ==============
-    #  Sections
-    # ==============
+    # =========
+    # Sections
+    # =========
     def visit_document(self, node):
-        """
-        at start
+        """at start
         """
         # we need to give the translator a default language!
         # the translator needs to know what language the document is written in
@@ -110,8 +108,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.lang = self.default_lang
 
     def depart_document(self, node):
-        """
-        at end
+        """at end
         """
         if not self.lang:
             self.warn(
@@ -121,27 +118,28 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         # Header(insert after metadata)
         if self.jupyter_headers is not None:
-            if self.lang in self.jupyter_headers:
+            try:
                 for h in self.jupyter_headers[self.lang][::-1]:
                     if self.jupyter_write_metadata:
                         self.output["cells"].insert(1, h)
                     else:
                         self.output["cells"].insert(0, h)
-            else:
+            except:
                 self.warn(
                     "Invalid jupyter headers. "
                     "jupyter_headers: {}, lang: {}"
-                        .format(self.jupyter_headers, self.lang))
+                    .format(self.jupyter_headers, self.lang))
 
         # Update metadata
         if self.jupyter_kernels is not None:
-            if "kernelspec" in self.jupyter_kernels[self.lang]:
-                self.output.metadata.kernelspec = self.jupyter_kernels[self.lang]["kernelspec"]
-            else:
+            try:
+                self.output.metadata.kernelspec = \
+                    self.jupyter_kernels[self.lang]["kernelspec"]
+            except:
                 self.warn(
                     "Invalid jupyter kernels. "
                     "jupyter_kernels: {}, lang: {}"
-                        .format(self.jupyter_kernels, self.lang))
+                    .format(self.jupyter_kernels, self.lang))
 
     def visit_highlightlang(self, node):
         lang = node.attributes["lang"].strip()
@@ -152,7 +150,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
                 "Highlighting language({}) is not defined "
                 "in jupyter_kernels in conf.py. "
                 "Set kernel as default(python3)"
-                    .format(lang))
+                .format(lang))
             self.lang = self.default_lang
 
     # =================
@@ -171,7 +169,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     # ================
     def visit_literal_block(self, node):
         self.output_cell_type = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
-        self.nodelang = node.attributes["language"].strip() if "language" in node.attributes else self.lang
+        try:
+            self.nodelang = node.attributes["language"].strip()
+        except:
+            self.nodelang = self.lang
 
         # Translate the language name across from the Sphinx to the Jupyter namespace
         self.nodelang = self.langTranslator.translate(self.nodelang)
@@ -198,15 +199,15 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             #
             # It is assumed that code cells may only have one output block - any more than
             # one will raise a warning and be ignored.
-            most_recent_cell = self.output["cells"][-1]
-            if most_recent_cell.cell_type != "code":
-                self.warn(
-                    "Warning: Class: output block found after a " + most_recent_cell.cell_type + " cell. Outputs may only come after code cells.")
-            elif most_recent_cell.outputs:
+            mostRecentCell = self.output["cells"][-1]
+            if mostRecentCell.cell_type != "code":
+                self.warn("Warning: Class: output block found after a " +
+                          mostRecentCell.cell_type + " cell. Outputs may only come after code cells.")
+            elif mostRecentCell.outputs:
                 self.warn(
                     "Warning: Multiple class: output blocks found after a code cell. Each code cell may only be followed by either zero or one output blocks.")
             else:
-                most_recent_cell.outputs.append(new_code_cell)
+                mostRecentCell.outputs.append(new_code_cell)
         else:
             self.output["cells"].append(new_code_cell)
 
