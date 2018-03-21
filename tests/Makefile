@@ -1,12 +1,12 @@
 SHELL := bash
 #
-# Minimal makefile for Sphinx documentation
+# Makefile for Sphinx Extension Test Cases
 #
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = sphinxcontrib-jupyterminimal
+SPHINXPROJ    = sphinxcontrib-jupyter-testcases
 SOURCEDIR     = .
 BUILDDIR      = _build
 
