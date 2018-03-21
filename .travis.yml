@@ -20,8 +20,7 @@ before_install:
   - conda update --yes conda
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION anaconda
-  - pip install coveralls coverage
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx nbformat
   - pip install nbdime
   - python setup.py install
 
