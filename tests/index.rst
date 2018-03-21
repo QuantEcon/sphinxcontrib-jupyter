@@ -11,7 +11,13 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :caption: Contents:
 
    simple_notebook
-
+   code_blocks
+   images
+   links
+   lists
+   math
+   quote
+   tables
 
 Indices and tables
 ==================
