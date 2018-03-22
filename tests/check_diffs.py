@@ -1,17 +1,27 @@
 """
 Check diffs for each test file
+
+Diff Configuration
+------------------
+Currently this is setup to ignore metadata as the extension will generate
+a minimal notebook. So opening a notebook and saving will add metadata
+that will cause the diff checker to fail.
+
 """
 
 import nbformat
 import glob
 import os
-from nbdime.diffing.notebooks import diff_notebooks
+from nbdime.diffing.notebooks import diff_notebooks, set_notebook_diff_targets
 
 NB_VERSION = 4
 GENERATED_IPYNB_FILES = glob.glob("_build/jupyter/*.ipynb")
 REFERENCE_IPYNB_FILES = [os.path.basename(
     fl) for fl in glob.glob("ipynb/*.ipynb")]
 SKIP = ["index.ipynb"]
+
+#-Diff Configuration-#
+set_notebook_diff_targets(metadata=False)
 
 for fl in GENERATED_IPYNB_FILES:
     flname = fl.split("/")[-1]
