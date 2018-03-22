@@ -4,9 +4,16 @@ sphinxcontrib.jupyter
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
 Generating Jupyter Notebooks
 
-.. image:: https://readthedocs.org/projects/sphinxcontrib-jupyter/badge/?version=latest
+.. |status-docs| image:: https://readthedocs.org/projects/sphinxcontrib-jupyter/badge/?version=latest
    :target: http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+
+.. |status-travis| image:: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter.svg?branch=master
+    :target: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter
+
++---------------+-----------------+
+| |status-docs| | |status-travis| |
++---------------+-----------------+
 
 Summary
 -------
