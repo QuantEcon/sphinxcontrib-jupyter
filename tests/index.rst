@@ -11,10 +11,12 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :caption: Contents:
 
    simple_notebook
+   math
    links
    links_target
    lists
 
+   
 Indices and tables
 ==================
 
