@@ -10,6 +10,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   equation_labels
    simple_notebook
    images
    math
