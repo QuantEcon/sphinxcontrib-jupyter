@@ -11,6 +11,8 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :caption: Contents:
 
    simple_notebook
+   links
+   links_target
 
 Indices and tables
 ==================
