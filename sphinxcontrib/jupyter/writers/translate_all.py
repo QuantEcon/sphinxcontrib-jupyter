@@ -20,8 +20,8 @@ class JupyterTranslator(JupyterCodeTranslator):
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
+        self.in_block_quote = False
         self.code_lines = []
-
         self.markdown_lines = []
 
         self.indents = []
@@ -77,6 +77,8 @@ class JupyterTranslator(JupyterCodeTranslator):
             self.code_lines.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
+        elif self.in_block_quote:
+            pass
         else:
             self.markdown_lines.append(text)
 
@@ -425,6 +427,14 @@ class JupyterTranslator(JupyterCodeTranslator):
     # ===============================================
     #  code blocks are implemented in the superclass
     # ===============================================
+
+    def visit_block_quote(self, node):
+        self.in_block_quote = True
+        block_quote = "\n    {}".format(node.astext())
+        self.markdown_lines.append(block_quote)
+
+    def depart_block_quote(self, node): 
+        self.in_block_quote = False
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
