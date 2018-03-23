@@ -138,18 +138,12 @@ class JupyterTranslator(JupyterCodeTranslator):
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
 
-        formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'><td width=75%>"\
-                         + formatted_text\
-                         + "</td><td width=25% style='text-align:center !important;'>"
-
         self.markdown_lines.append(formatted_text)
 
         # Add the line number reference.
         if node["ids"]:
             referenceBuilder = "(" + str(node["number"]) + ")"
             self.markdown_lines.append(referenceBuilder)
-
-        self.markdown_lines.append("</td></tr></table>")
 
     def visit_table(self, node):
         self.table_builder = dict()
