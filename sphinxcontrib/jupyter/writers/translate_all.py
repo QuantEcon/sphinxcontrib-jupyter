@@ -2,7 +2,6 @@ import re
 import nbformat.v4
 from .translate_code import JupyterCodeTranslator
 
-
 class JupyterTranslator(JupyterCodeTranslator):
     """ Jupyter Translator for Text and Code
     """
@@ -86,8 +85,36 @@ class JupyterTranslator(JupyterCodeTranslator):
 
     # image
     def visit_image(self, node):
+        """
+        Notes
+        -----
+        1. Should this use .has_attrs()?
+        2. the scale, height and width properties are not combined in this
+        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image 
+        
+        """
+        return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
-        self.markdown_lines.append("![{0}]({0})".format(uri))
+        attrs = node.attributes
+        # Construct HTML image
+        image = '<img src="{}" '.format(uri)
+        if "alt" in attrs.keys():
+            image += 'alt="{}" '.format(attrs["alt"])
+        style = ""
+        if "width" in attrs.keys():
+            style += "width:{};".format(attrs["width"])
+        if "height" in attrs.keys():
+            style += "height:{};".format(attrs["height"])
+        if "scale" in attrs.keys():
+            style = "width:{0}%;height:{0}%".format(attrs["scale"])
+        image += 'style="{}" '.format(style)
+        if "align" in attrs.keys():
+            image += 'align="{}"'.format(attrs["align"])
+        image = image.rstrip() + ">\n\n"  #Add double space for html
+        #-Construct MD image
+        if return_markdown:
+            image = "![{0}]({0})".format(uri)
+        self.markdown_lines.append(image)
 
     # math
     def visit_math(self, node):
