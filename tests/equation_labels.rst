@@ -43,3 +43,28 @@ And an equation that doesn't have a label
     \mu_t
 
 should be rendered without an html border
+
+and then the same equation added with a label
+
+.. math::
+   :label: eq_old2
+
+    \begin{bmatrix}
+      1 \\
+      \theta_{t+1}
+    \end{bmatrix} =
+    \begin{bmatrix}
+      1 & 0 \\
+      0 & \frac{1+\alpha}{\alpha}
+    \end{bmatrix}
+    \begin{bmatrix}
+      1 \\
+      \theta_{t}
+    \end{bmatrix}  +
+    \begin{bmatrix}
+      0 \\
+      -\frac{1}{\alpha}
+    \end{bmatrix}
+    \mu_t
+
+will now have a :eq:`eq_old2` label associated with it in an html box.
