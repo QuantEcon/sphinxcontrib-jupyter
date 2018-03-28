@@ -12,11 +12,13 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
 
    equation_labels
    simple_notebook
+   quote
    images
    math
    links
    links_target
    lists
+
 
    
 Indices and tables
