@@ -141,9 +141,12 @@ class JupyterTranslator(JupyterCodeTranslator):
         #check for labelled math
         if node["label"]:
             print(node.attributes["label"])
-            formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'><td width=75%>\n"\
-                             + formatted_text.strip("\n")\
-                             + "\n</td><td width=25% style='text-align:center !important;'>\n"
+            formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
+                             + "<td width=10%></td>\n"\
+                             + "<td width=80%>\n"\
+                             + formatted_text.rstrip("\n")\
+                             + "\n</td>"\
+                             + "<td width=10% style='text-align:center !important;'>\n"
 
         self.markdown_lines.append(formatted_text)
 
