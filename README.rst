@@ -25,6 +25,8 @@ This sphinx extension can be used to build a collection of
 scientific publishing and hasn't been well tested outside of this
 domain. Please provide feedback as an issue to this repository.
 
+**Requires:** Sphinx >= 1.7.2
+
 Installation
 ------------
 
