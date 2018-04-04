@@ -1,6 +1,10 @@
 Code blocks
 -----------
 
+This is a collection to test various code-blocks
+
+This is a **.. code::** directive
+
 .. code:: python
 
     this = 'is a code block'
@@ -8,11 +12,15 @@ Code blocks
     no = 'really!'
     p = argwhere(x == 2)
 
+This is another **.. code::** directive
+
 .. code:: python
 
     from pylab import linspace
     t = linspace(0, 1)
     x = t**2
+
+This is a **::** directive
 
 ::
 
@@ -22,6 +30,34 @@ Code blocks
     figure()
     plot(x, y)
     show()
+
+This is a **.. code-block:: julia** test with showing snippet for another language *Julia*
+and it is included as a non-execute cell
+
+.. code-block:: julia
+
+    using QuantEcon
+
+However this **currently** means **.. code-block:: python** is also included as a non-execute 
+cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`__]
+
+.. code-block:: python
+
+    import pandas as pd
+
+No Execute
+----------
+
+This is a **.. code::** directive with **:class: no-execute**
+
+.. code:: python
+   :class: no-execute
+
+    import numpy as np
+
+
+Other Examples from rst2ipynb
+-----------------------------
 
 Support for Python doctest code blocks::
 
@@ -35,6 +71,8 @@ Support for Python doctest code blocks::
     2
     >>> x = 1
     >>> x = 2
+
+but the input to this cell is not parsed into separate blocks unlike `rst2ipynb <https://github.com/nthiery/rst-to-ipynb>`__
 
 Function with pycon code block style:
 
@@ -51,6 +89,11 @@ Function with pycon code block style:
    ...
    >>> f(1, 2, 3)
    6
+
+Output Test Cases
+-----------------
+
+**Note:** This sphinx extension does not currently parse blocks internally
 
 Long Pandas DataFrame's with more than three digits in the index column will
 have a ``...`` in the output which shouldn't be considered a Python line

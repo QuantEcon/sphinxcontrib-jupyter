@@ -12,6 +12,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
 
    equation_labels
    simple_notebook
+   code_blocks
    quote
    images
    math
