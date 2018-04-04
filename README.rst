@@ -25,6 +25,8 @@ This sphinx extension can be used to build a collection of
 scientific publishing and hasn't been well tested outside of this
 domain. Please provide feedback as an issue to this repository.
 
+**Requires:** Sphinx >= 1.7.2 (for running tests)
+
 Installation
 ------------
 
@@ -36,7 +38,7 @@ Usage
 -----
 
 Update project ``conf.py`` file to include the jupyter extension
-and the desired **Configuration** settings (see section below):
+and the desired **Configuration** settings (see configuration_ section below):
 
 .. code:: python
 
@@ -51,6 +53,9 @@ then run
 Usage in RST Files
 ------------------
 
+A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
+which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
+
 To generate an ``In`` style executable block you can use
 
 .. code:: rst
@@ -60,14 +65,6 @@ To generate an ``In`` style executable block you can use
 .. code:: rst
 
     .. literalinclude::  
-
-To generate a notebook that looks precomputed you can specify output
-using the ``:class: output`` option.
-
-.. code:: rst
-
-    .. code-block:: python
-        :class: output
 
 To include code in the notebook that is not meant for execution can be
 included using ``:class: no-execute``. This is useful when writing code
@@ -83,7 +80,7 @@ code-block. An alias for this is ``:class: skip-test``. This is used
 in the context of a test environment that is using the collection of 
 notebooks to test a collection of code snippets.
 
-A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
+.. _configuration:
 
 Configuration
 -------------
@@ -137,15 +134,24 @@ The following additions must be made to ``conf.py`` file.
     # Prepend a Welcome Message to Each Notebook
     jupyter_welcome_block = "welcome.rst"
 
+TODO
+----
+
+1. remove need for Jupyter headers from configuration
+2. include support for adding output to In cells to give a precompiled look to generated notebook
+3. `Issues list <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues>`__
+
+
 Credits
 -------
 
 This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
-Many thanks to the lead developers of this project.
+Many thanks to the contributors of this project.
 
-* `@NickSifniotis <https://github.com/NickSifniotis>`__
+* `@mmcky <https://github.com/mmcky>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
+* `@NickSifniotis <https://github.com/NickSifniotis>`__
 
 Projects using Extension
 ------------------------
@@ -158,7 +164,7 @@ contact@quantecon.org
 LICENSE
 -------
 
-Copyright © 2017 QuantEcon Development Team: BSD-3 All rights reserved.
+Copyright © 2018 QuantEcon Development Team: BSD-3 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
