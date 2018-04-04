@@ -2,7 +2,6 @@ import re
 import nbformat.v4
 from .translate_code import JupyterCodeTranslator
 
-
 class JupyterTranslator(JupyterCodeTranslator):
     """ Jupyter Translator for Text and Code
     """
@@ -21,8 +20,8 @@ class JupyterTranslator(JupyterCodeTranslator):
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
+        self.in_block_quote = False
         self.code_lines = []
-
         self.markdown_lines = []
 
         self.indents = []
@@ -78,6 +77,8 @@ class JupyterTranslator(JupyterCodeTranslator):
             self.code_lines.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
+        elif self.in_block_quote:
+            pass
         else:
             self.markdown_lines.append(text)
 
@@ -86,8 +87,36 @@ class JupyterTranslator(JupyterCodeTranslator):
 
     # image
     def visit_image(self, node):
+        """
+        Notes
+        -----
+        1. Should this use .has_attrs()?
+        2. the scale, height and width properties are not combined in this
+        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image 
+        
+        """
+        return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
-        self.markdown_lines.append("![{0}]({0})".format(uri))
+        attrs = node.attributes
+        # Construct HTML image
+        image = '<img src="{}" '.format(uri)
+        if "alt" in attrs.keys():
+            image += 'alt="{}" '.format(attrs["alt"])
+        style = ""
+        if "width" in attrs.keys():
+            style += "width:{};".format(attrs["width"])
+        if "height" in attrs.keys():
+            style += "height:{};".format(attrs["height"])
+        if "scale" in attrs.keys():
+            style = "width:{0}%;height:{0}%".format(attrs["scale"])
+        image += 'style="{}" '.format(style)
+        if "align" in attrs.keys():
+            image += 'align="{}"'.format(attrs["align"])
+        image = image.rstrip() + ">\n\n"  #Add double space for html
+        #-Construct MD image
+        if return_markdown:
+            image = "![{0}]({0})".format(uri)
+        self.markdown_lines.append(image)
 
     # math
     def visit_math(self, node):
@@ -111,9 +140,15 @@ class JupyterTranslator(JupyterCodeTranslator):
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
 
-        formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'><td width=75%>"\
-                         + formatted_text\
-                         + "</td><td width=25% style='text-align:center !important;'>"
+        #check for labelled math
+        if node["label"]:
+            print(node.attributes["label"])
+            formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
+                             + "<td width=10%></td>\n"\
+                             + "<td width=80%>\n"\
+                             + formatted_text.rstrip("\n")\
+                             + "\n</td>"\
+                             + "<td width=10% style='text-align:center !important;'>\n"
 
         self.markdown_lines.append(formatted_text)
 
@@ -122,7 +157,8 @@ class JupyterTranslator(JupyterCodeTranslator):
             referenceBuilder = "(" + str(node["number"]) + ")"
             self.markdown_lines.append(referenceBuilder)
 
-        self.markdown_lines.append("</td></tr></table>")
+        if node["label"]:
+            self.markdown_lines.append("\n</td></tr></table>\n\n")
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -404,6 +440,14 @@ class JupyterTranslator(JupyterCodeTranslator):
     # ===============================================
     #  code blocks are implemented in the superclass
     # ===============================================
+
+    def visit_block_quote(self, node):
+        self.in_block_quote = True
+        block_quote = "\n    {}".format(node.astext())
+        self.markdown_lines.append(block_quote)
+
+    def depart_block_quote(self, node): 
+        self.in_block_quote = False
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
