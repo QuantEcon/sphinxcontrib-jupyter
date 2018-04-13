@@ -2,6 +2,8 @@
 
 from setuptools import setup, find_packages
 
+VERSION = 'v0.2-beta'
+
 long_desc = '''
 This package contains the Jupyter Sphinx extension.
 
@@ -12,12 +14,12 @@ requires = ['Sphinx>=0.6']
 
 setup(
     name='sphinxcontrib-jupyter',
-    version='0.1',
-    url='http://bitbucket.org/birkenfeld/sphinx-contrib',
-    # download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/0.1.tar.gz',
+    version=VERSION,
+    url='https://github.com/QuantEcon/sphinxcontrib-jupyter',
+    download_url='https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/{}.tar.gz'.format(VERSION),
     license='BSD',
     author='QuantEcon',
-    author_email='nick.sifniotis@anu.edu.au',
+    author_email='admin@quantecon.org',
     description='Sphinx "Jupyter" extension: Convert your RST files into executable Jupyter notebooks.',
     long_description=long_desc,
     zip_safe=False,
