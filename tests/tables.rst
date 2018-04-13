@@ -6,17 +6,7 @@ These tables are from the `RST specification <http://docutils.sourceforge.net/do
 Grid Tables
 -----------
 
-A simple table:
-
-+------+------+
-| C1   | C2   |
-+------+------+
-| a    | b    |
-+------+------+
-| c    | d    |
-+------+------+
-
-A table with more formatting:
+A simple rst table with header
 
 +------+------+
 | C1   | C2   |
@@ -25,6 +15,10 @@ A table with more formatting:
 +------+------+
 | c    | d    |
 +------+------+
+
+**Note:** Tables without a header are currently not supported as markdown does
+not support tables without headers.
+
 
 Simple Tables
 -------------
@@ -45,6 +39,7 @@ These table types are provided by `sphinx docs <http://www.sphinx-doc.org/en/mas
 
 
 List Table directive
+~~~~~~~~~~~~~~~~~~~~
 
 .. list-table:: Frozen Delights!
    :widths: 15 10 30
@@ -65,6 +60,7 @@ List Table directive
 
 
 CSV Table Directive
+~~~~~~~~~~~~~~~~~~~
 
 .. csv-table:: Frozen Delights!
    :header: "Treat", "Quantity", "Description"
@@ -73,3 +69,8 @@ CSV Table Directive
    "Albatross", 2.99, "On a stick!"
    "Crunchy Frog", 1.49, "If we took the bones out, it wouldn't be crunchy, now would it?"
    "Gannet Ripple", 1.99, "On a stick!"
+
+Complex Tables
+--------------
+
+**MultiColumn and MultiRow** tables are currently **not** supported by this extension
