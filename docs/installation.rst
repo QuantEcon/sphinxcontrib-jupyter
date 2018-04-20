@@ -1,3 +1,5 @@
+.. _installation:
+
 Installation
 ============
 
@@ -14,11 +16,14 @@ and configuration values shown in section below:
 
     extensions = ["sphinxcontrib.jupyter"]
 
-then you will be able to run the jupyter builder
+Once you have updated the ``conf.py`` file with the additional configuration as
+specified in :ref:`configuration`, you will be able to run the jupyter builder
 
 .. code:: bash
 
     make jupyter
+
+.. _configuration:
 
 Configuration
 -------------
