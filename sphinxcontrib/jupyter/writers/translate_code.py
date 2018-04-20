@@ -35,7 +35,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         # Variables defined in conf.py
         self.jupyter_kernels = builder.config["jupyter_kernels"]
-        self.jupyter_headers = builder.config["jupyter_headers"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
 
         # Welcome message block
@@ -115,20 +114,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
                 "Highlighting language is not given in .rst file. "
                 "Set kernel as default(python3)")
             self.lang = self.default_lang
-
-        # Header(insert after metadata)
-        if self.jupyter_headers is not None:
-            try:
-                for h in self.jupyter_headers[self.lang][::-1]:
-                    if self.jupyter_write_metadata:
-                        self.output["cells"].insert(1, h)
-                    else:
-                        self.output["cells"].insert(0, h)
-            except:
-                self.warn(
-                    "Invalid jupyter headers. "
-                    "jupyter_headers: {}, lang: {}"
-                    .format(self.jupyter_headers, self.lang))
 
         # Update metadata
         if self.jupyter_kernels is not None:
