@@ -202,13 +202,5 @@ jupyter_kernels = {
     }
 }
 
-# Configure Jupyter headers
-jupyter_headers = {
-    "python3": [
-    ],
-    "julia": [
-    ],
-}
-
 # Prepend a Welcome Message to Each Notebook
 jupyter_welcome_block = "welcome.rst"
