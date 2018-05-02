@@ -37,18 +37,18 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
 
-        # Welcome message block
+        # Header Block
         template_paths = builder.config["templates_path"]
-        welcome_block_filename = builder.config["jupyter_welcome_block"]
+        header_block_filename = builder.config["jupyter_header_block"]
 
-        full_path_to_welcome = None
+        full_path_to_header_block = None
         for template_path in template_paths:
-            if os.path.isfile(template_path + "/" + welcome_block_filename):
-                full_path_to_welcome = os.path.normpath(
-                    template_path + "/" + welcome_block_filename)
+            if os.path.isfile(template_path + "/" + header_block_filename):
+                full_path_to_header_block = os.path.normpath(
+                    template_path + "/" + header_block_filename)
 
-        if full_path_to_welcome:
-            with open(full_path_to_welcome) as input_file:
+        if full_path_to_header_block:
+            with open(full_path_to_header_block) as input_file:
                 lines = input_file.readlines()
 
             line_text = "".join(lines)
@@ -57,7 +57,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             nb_header_block = nbformat.v4.new_markdown_cell(
                 formatted_line_text)
 
-            # Add the welcome block to the output stream straight away
+            # Add the header block to the output stream straight away
             self.output["cells"].append(nb_header_block)
 
         # Write metadata

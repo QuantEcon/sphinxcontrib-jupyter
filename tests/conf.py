@@ -204,3 +204,4 @@ jupyter_kernels = {
 
 # Prepend a Welcome Message to Each Notebook
 jupyter_welcome_block = "welcome.rst"
+
