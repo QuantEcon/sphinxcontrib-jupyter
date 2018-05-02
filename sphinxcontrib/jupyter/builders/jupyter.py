@@ -21,8 +21,6 @@ class JupyterBuilder(Builder):
     _writer_class = JupyterWriter
 
     def init(self):
-        self.config['jupyter_python_autosave'] = False
-
         # If the user has overridden anything on the command line, set these things which have been overridden.
         instructions = []
         overrides = self.config['jupyter_options']
@@ -33,8 +31,6 @@ class JupyterBuilder(Builder):
             if instruction:
                 if instruction == 'code_only':
                     self.config["jupyter_conversion_mode"] = "code"
-                elif instruction == 'autosave_on':
-                    self.config['jupyter_python_autosave'] = True
                 else:
                     # Fail on unrecognised command.
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
