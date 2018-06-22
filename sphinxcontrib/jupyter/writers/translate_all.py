@@ -361,7 +361,7 @@ class JupyterTranslator(JupyterCodeTranslator):
         br_removed_flag = False
 
         # remove last breakline
-        if self.markdown_lines[-1][-1] == "\n":
+        if self.markdown_lines and self.markdown_lines[-1][-1] == "\n":
             br_removed_flag = True
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]
 
