@@ -9,6 +9,7 @@ def setup(app):
     app.add_config_value("jupyter_static_file_path", [], "jupyter")
     app.add_config_value("jupyter_header_block", "", "jupyter")
     app.add_config_value("jupyter_options", None, "jupyter")
+    app.add_config_value("jupyter_default_lang", "python3", "jupyter")
 
     return {
         "version": "0.2.1",

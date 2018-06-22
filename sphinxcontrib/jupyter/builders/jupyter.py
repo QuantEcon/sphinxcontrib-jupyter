@@ -21,6 +21,15 @@ class JupyterBuilder(Builder):
     _writer_class = JupyterWriter
 
     def init(self):
+        # Check default language is defined in the jupyter kernels
+        def_lng = self.config["jupyter_default_lang"]
+        if  def_lng not in self.config["jupyter_kernels"]:
+            self.warn(
+                "Default language defined in conf.py ({}) is not "
+                "defined in the jupyter_kernels in conf.py. "
+                "Set default language to python3"
+                .format(def_lng))
+            self.config["jupyter_default_lang"] = "python3"
         # If the user has overridden anything on the command line, set these things which have been overridden.
         instructions = []
         overrides = self.config['jupyter_options']
