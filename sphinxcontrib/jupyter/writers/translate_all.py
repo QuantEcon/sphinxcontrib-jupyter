@@ -101,7 +101,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         # Construct HTML image
         image = '<img src="{}" '.format(uri)
         if "alt" in attrs.keys():
-            image += 'alt="{}" '.format(attrs["alt"])
+            image += u'alt="{}" '.format(attrs["alt"])
         style = ""
         if "width" in attrs.keys():
             style += "width:{};".format(attrs["width"])
@@ -283,7 +283,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.markdown_lines[self.reference_text_start:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
-            formatted_text = "](#{})".format(uri_text)
+            formatted_text = u"](#{})".format(uri_text)
             self.markdown_lines.append(formatted_text)
 
         else:
@@ -305,7 +305,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     self.error("Invalid reference")
                     refuri = ""
 
-            self.markdown_lines.append("]({})".format(refuri))
+            self.markdown_lines.append(u"]({})".format(refuri))
 
         self.in_reference = False
 
@@ -314,7 +314,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
             self.markdown_lines.append(
-                "\n<a id='{}'></a>\n".format(refid))
+                u"\n<a id='{}'></a>\n".format(refid))
 
     # list items
     def visit_bullet_list(self, node):
@@ -443,7 +443,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_block_quote(self, node):
         self.in_block_quote = True
-        block_quote = "\n    {}".format(node.astext())
+        block_quote = u"\n    {}".format(node.astext())
         self.markdown_lines.append(block_quote)
 
     def depart_block_quote(self, node): 
