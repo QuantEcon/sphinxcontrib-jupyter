@@ -167,3 +167,100 @@ continuation prompt:
    10.00000  999
 
    [1000 rows x 1 columns]
+
+Nested Code Blocks
+------------------
+
+Due to the linear structure of Jupyter notebooks (a list of cells),
+many nested structures can't be rendered exactly. Nevertheless we want
+to make sure that, despite some degrading, the end result is
+reasonably readable, and code blocks are rendered as code cells.
+
+The tests are taken from `rst2ipynb`, where many of them fail.
+
+#. Nested code block A
+
+   ::
+
+       1+1
+
+#.  Nested code block B
+
+    ::
+
+       1+1
+
+#. Nested code block C; ok to fail? (the inner indent does not match the itemized text indent)
+
+    ::
+
+       1+1
+
+.. NOTE::
+
+   A code block in a note::
+
+       >>> 1+1
+
+   Another one::
+
+       >>> 1+1
+
+
+.. TOPIC:: Note
+
+   A code block in a topic::
+
+       >>> 1+1
+
+   Another one::
+
+       >>> 1+1
+
+.. TOPIC:: Doubly nested code blocks
+
+    #.  Foo
+
+        ::
+
+            1+1
+
+        ::
+
+            >>> def plus_grand_element(liste):
+            ...     """
+            ...     Renvoie le plus grand élément de la liste
+            ...     EXAMPLES::
+            ...         >>> plus_grand_element([7,3,1,10,4,10,2,9])
+            ...         10
+            ...         >>> plus_grand_element([7])
+            ...         7
+            ...     """
+            ...     resultat = liste[0]
+            ...     for i in range(1, len(liste)-1):
+            ...         # Invariant: resultat est le plus grand element de liste[:i]
+            ...         assert resultat in liste[:i]
+            ...         assert all(resultat >= x for x in liste[:i])
+            ...         if liste[i] > resultat:
+            ...             resultat = liste[i]
+            ...     return resultat
+            >>> plus_grand_element([7,3,1,10,4,10,2,9])
+            10
+
+        Foo.
+
+        Bla::
+
+            >>> 1+1
+
+        ok to fail? (missing mandatory new line after `::`)::
+            >>> 1+1
+
+.. TOPIC:: A code block in a list in a topic
+
+    #.  Foo
+
+        ::
+
+	    >>> def fusion(l1, l2):
+	    ...     sort(l1+l2)
