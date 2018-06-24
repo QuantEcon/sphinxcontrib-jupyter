@@ -2,14 +2,14 @@ import re
 import nbformat.v4
 from .translate_code import JupyterCodeTranslator
 
-class JupyterTranslator(JupyterCodeTranslator):
+class JupyterTranslator(JupyterCodeTranslator, object):
     """ Jupyter Translator for Text and Code
     """
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
     def __init__(self, builder, document):
-        super().__init__(builder, document)
+        super(JupyterTranslator, self).__init__(builder, document)
 
         # Settings
         self.sep_lines = "  \n"
