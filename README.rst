@@ -129,6 +129,10 @@ The following additions must be made to ``conf.py`` file.
         }
     }
 
+    # Configure default language for Jupyter notebooks
+    # Can be changed in each notebook thanks to the ..highlight:: directive
+    jupyter_default_lang = "python3"
+ 
     # Configure Jupyter headers
     jupyter_headers = {
         "python3": [

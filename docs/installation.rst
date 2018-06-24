@@ -66,5 +66,9 @@ The following additions must be made to ``conf.py`` file.
         }
     }
 
+    # Define default language of Jupyter notebooks
+    # Can be changed in each notebook thanks to the ..highlight:: directive
+    jupyter_default_lang = "python3"
+
     # Prepend a Welcome Message to Each Notebook
     jupyter_welcome_block = "welcome.rst"

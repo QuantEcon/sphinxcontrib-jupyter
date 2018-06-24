@@ -28,7 +28,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.source_file_name = get_source_file_name(
             self.settings._source,
             self.settings.env.srcdir)
-        self.default_lang = "python3"
+        self.default_lang = builder.config["jupyter_default_lang"]
 
         # Create output notebook
         self.output = nbformat.v4.new_notebook()
@@ -134,8 +134,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             self.warn(
                 "Highlighting language({}) is not defined "
                 "in jupyter_kernels in conf.py. "
-                "Set kernel as default(python3)"
-                .format(lang))
+                "Set kernel as default({})"
+                .format(lang, self.default_lang))
             self.lang = self.default_lang
 
     # =================
