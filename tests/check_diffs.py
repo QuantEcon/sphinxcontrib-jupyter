@@ -23,6 +23,7 @@ SKIP = ["index.ipynb"]
 #-Diff Configuration-#
 set_notebook_diff_targets(metadata=False)
 
+failed = 0
 for fl in GENERATED_IPYNB_FILES:
     flname = fl.split("/")[-1]
     if flname in SKIP:
@@ -30,7 +31,8 @@ for fl in GENERATED_IPYNB_FILES:
     print("Testing {} ...".format(fl))
     if flname not in REFERENCE_IPYNB_FILES:
         print("[FAIL] Notebook {} has no matching test case in ipynb/".format(flname))
-        exit(1)
+        failed += 1
+        continue
     nb1 = nbformat.read(fl, NB_VERSION)
     nb2 = nbformat.read(os.path.join("ipynb", flname), NB_VERSION)
     diff = diff_notebooks(nb1, nb2)
@@ -38,6 +40,6 @@ for fl in GENERATED_IPYNB_FILES:
         print("[FAIL] {} and {} are different:".format(
             fl, os.path.join("ipynb", flname)))
         print(diff)
-        exit(1)
+        failed += 1
 
-exit(0)
+exit(failed)
