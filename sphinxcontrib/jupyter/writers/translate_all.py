@@ -1,8 +1,7 @@
+from __future__ import unicode_literals
 import re
 import nbformat.v4
 from .translate_code import JupyterCodeTranslator
-
-from __future__ import unicode_literals
 
 class JupyterTranslator(JupyterCodeTranslator, object):
     """ Jupyter Translator for Text and Code
