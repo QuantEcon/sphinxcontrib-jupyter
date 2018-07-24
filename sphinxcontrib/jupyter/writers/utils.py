@@ -115,4 +115,4 @@ def get_source_file_name(filepath, srcdir):
             raise ValueError("File path does not exist in the source directory")
 
     file_name_list = file_path_list[len(srcdir_path_list) - 1:]
-    return delimiter.join(file_name_list)
+    return delimiter.join("/") # Does this also need to be changed? 
