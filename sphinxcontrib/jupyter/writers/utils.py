@@ -1,4 +1,5 @@
 import os.path
+import os 
 import nbformat.v4
 from xml.etree.ElementTree import ElementTree
 from enum import Enum
@@ -105,12 +106,13 @@ class JupyterOutputCellGenerators(Enum):
 
 
 def get_source_file_name(filepath, srcdir):
-    file_path_list = filepath.split("/")
-    srcdir_path_list = srcdir.split("/")
+    delimiter = os.sep 
+    file_path_list = filepath.split(delimiter)
+    srcdir_path_list = srcdir.split(delimiter)
 
     for i in range(len(srcdir_path_list)):
         if srcdir_path_list[i] != file_path_list[i]:
             raise ValueError("File path does not exist in the source directory")
 
     file_name_list = file_path_list[len(srcdir_path_list) - 1:]
-    return "/".join(file_name_list)
+    return "/".join(file_name_list) # Does this also need to be changed? 
