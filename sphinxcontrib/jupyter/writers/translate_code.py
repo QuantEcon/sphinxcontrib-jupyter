@@ -36,6 +36,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         # Variables defined in conf.py
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
+        self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -153,7 +154,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     #  code blocks
     # ================
     def visit_literal_block(self, node):
-        self.output_cell_type = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
+        _parse_class = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
+        self.output_cell_type = _parse_class["type"]
+        self.solution = _parse_class["solution"]
+
         try:
             self.nodelang = node.attributes["language"].strip()
         except:
@@ -172,29 +176,32 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             self.output_cell_type = JupyterOutputCellGenerators.MARKDOWN
 
     def depart_literal_block(self, node):
-        line_text = "".join(self.code_lines)
-        formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-
-        new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
-        if self.output_cell_type is JupyterOutputCellGenerators.CODE_OUTPUT:
-            # Output blocks must  be added to code cells to make any sense.
-            # This script assumes that any output blocks will immediately follow a code
-            # cell; a warning is raised if the cell immediately preceding this output
-            # block is not a code cell.
-            #
-            # It is assumed that code cells may only have one output block - any more than
-            # one will raise a warning and be ignored.
-            mostRecentCell = self.output["cells"][-1]
-            if mostRecentCell.cell_type != "code":
-                self.warn("Warning: Class: output block found after a " +
-                          mostRecentCell.cell_type + " cell. Outputs may only come after code cells.")
-            elif mostRecentCell.outputs:
-                self.warn(
-                    "Warning: Multiple class: output blocks found after a code cell. Each code cell may only be followed by either zero or one output blocks.")
-            else:
-                mostRecentCell.outputs.append(new_code_cell)
+        if self.solution and self.jupyter_drop_solutions:    
+            pass
         else:
-            self.output["cells"].append(new_code_cell)
+            line_text = "".join(self.code_lines)
+            formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
+
+            new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
+            if self.output_cell_type is JupyterOutputCellGenerators.CODE_OUTPUT:
+                # Output blocks must  be added to code cells to make any sense.
+                # This script assumes that any output blocks will immediately follow a code
+                # cell; a warning is raised if the cell immediately preceding this output
+                # block is not a code cell.
+                #
+                # It is assumed that code cells may only have one output block - any more than
+                # one will raise a warning and be ignored.
+                mostRecentCell = self.output["cells"][-1]
+                if mostRecentCell.cell_type != "code":
+                    self.warn("Warning: Class: output block found after a " +
+                            mostRecentCell.cell_type + " cell. Outputs may only come after code cells.")
+                elif mostRecentCell.outputs:
+                    self.warn(
+                        "Warning: Multiple class: output blocks found after a code cell. Each code cell may only be followed by either zero or one output blocks.")
+                else:
+                    mostRecentCell.outputs.append(new_code_cell)
+            else:
+                self.output["cells"].append(new_code_cell)
 
         self.in_code_block = False
 
