@@ -73,15 +73,21 @@ class JupyterOutputCellGenerators(Enum):
         Note that there is no guarantee as to the ordering or priority of output classes; a cell with the
         attribute ":class: no-execute output" is not considered to be well-defined.
         """
-        res = JupyterOutputCellGenerators.CODE
+        res = { 
+            "type" : JupyterOutputCellGenerators.CODE,
+            "solution" : False 
+            }
 
         for item in class_list:
             if item == "no-execute":
-                res = JupyterOutputCellGenerators.MARKDOWN
+                res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "skip-test":
-                res = JupyterOutputCellGenerators.MARKDOWN
+                res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
-                res = JupyterOutputCellGenerators.CODE_OUTPUT
+                res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT
+            #Check for Solution
+            if item == "solution":
+                res["solution"] = True
 
         return res
 

@@ -20,6 +20,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    links
    links_target
    lists
+   solutions
 
 
    

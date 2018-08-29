@@ -208,3 +208,6 @@ jupyter_default_lang = "python3"
 # Prepend a Welcome Message to Each Notebook
 jupyter_welcome_block = "welcome.rst"
 
+# Solutions Configuration
+jupyter_drop_solutions = True
+
