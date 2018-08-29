@@ -87,10 +87,10 @@ class JupyterOutputCellGenerators(Enum):
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT
             # Check for Solution
-            if item == "solution":
+            elif item == "solution":
                 res["solution"] = True
             # Check for Test. 
-            if item == "test":
+            elif item == "test":
                 res["test"] = True 
 
         return res

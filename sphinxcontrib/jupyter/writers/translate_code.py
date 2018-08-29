@@ -180,7 +180,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     def depart_literal_block(self, node):
         if self.solution and self.jupyter_drop_solutions:    
             pass # Skip solutions if we say to. 
-        if self.test and self.jupyter_drop_tests:
+        elif self.test and self.jupyter_drop_tests:
             pass # Skip tests if we say to.
         else: # Don't skip otherwise. 
             line_text = "".join(self.code_lines)

@@ -21,7 +21,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    links_target
    lists
    solutions
-
+   tests
 
    
 Indices and tables

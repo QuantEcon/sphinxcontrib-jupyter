@@ -194,16 +194,16 @@ jupyter_kernels = {
     },
     "julia": {
         "kernelspec": {
-            "display_name": "Julia 0.6.0",
+            "display_name": "Julia 1.0.0",
             "language": "julia",
-            "name": "julia-0.6"
+            "name": "julia-1.0"
         },
         "file_extension": ".jl"
     }
 }
 
 # Default language for Jupyter notebooks
-jupyter_default_lang = "python3"
+jupyter_default_lang = "julia"
 
 # Prepend a Welcome Message to Each Notebook
 jupyter_welcome_block = "welcome.rst"
