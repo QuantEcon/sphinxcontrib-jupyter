@@ -37,6 +37,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
+        self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -157,6 +158,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         _parse_class = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
         self.output_cell_type = _parse_class["type"]
         self.solution = _parse_class["solution"]
+        self.test = _parse_class["test"]
 
         try:
             self.nodelang = node.attributes["language"].strip()
@@ -177,8 +179,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
     def depart_literal_block(self, node):
         if self.solution and self.jupyter_drop_solutions:    
-            pass
-        else:
+            pass # Skip solutions if we say to. 
+        if self.test and self.jupyter_drop_tests:
+            pass # Skip tests if we say to.
+        else: # Don't skip otherwise. 
             line_text = "".join(self.code_lines)
             formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
 

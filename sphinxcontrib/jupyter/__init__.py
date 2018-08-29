@@ -11,6 +11,8 @@ def setup(app):
     app.add_config_value("jupyter_options", None, "jupyter")
     app.add_config_value("jupyter_default_lang", "python3", "jupyter")
     app.add_config_value("jupyter_drop_solutions", False, "jupyter")
+    app.add_config_value("jupyter_drop_tests", False, "jupyter")
+    
 
     return {
         "version": "0.2.1",

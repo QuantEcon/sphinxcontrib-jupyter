@@ -76,6 +76,7 @@ class JupyterOutputCellGenerators(Enum):
         res = { 
             "type" : JupyterOutputCellGenerators.CODE,
             "solution" : False 
+            "test" : False 
             }
 
         for item in class_list:
@@ -85,9 +86,12 @@ class JupyterOutputCellGenerators(Enum):
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT
-            #Check for Solution
+            # Check for Solution
             if item == "solution":
                 res["solution"] = True
+            # Check for Test. 
+            if item == "test":
+                res["test"] = True 
 
         return res
 
