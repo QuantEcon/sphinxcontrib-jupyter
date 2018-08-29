@@ -75,7 +75,7 @@ class JupyterOutputCellGenerators(Enum):
         """
         res = { 
             "type" : JupyterOutputCellGenerators.CODE,
-            "solution" : False 
+            "solution" : False,
             "test" : False 
             }
 
