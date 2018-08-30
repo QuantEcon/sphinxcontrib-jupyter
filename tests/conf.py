@@ -211,3 +211,5 @@ jupyter_welcome_block = "welcome.rst"
 # Solutions Configuration
 jupyter_drop_solutions = True
 
+# Tests configurations 
+jupyter_drop_tests = True
