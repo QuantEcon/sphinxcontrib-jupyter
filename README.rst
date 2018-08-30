@@ -86,6 +86,23 @@ code-block. An alias for this is ``:class: skip-test``. This is used
 in the context of a test environment that is using the collection of 
 notebooks to test a collection of code snippets.
 
+Exercise Solutions
+~~~~~~~~~~~~~~~~~~
+
+The extension has support for ``:class: solution`` on code-blocks. This
+allows for the compilation of two sets of notebooks, one containing solutions
+and one without.
+
+
+Test Blocks
+~~~~~~~~~~~
+
+Other class options for code-blocks include `test` to indicate the 
+code block contains a test which can be used for adding test logic
+for automatic testing of notebooks. This is by default set to `False`
+in the configuration and all test blocks are dropped.
+
+
 .. _configuration:
 
 Configuration
