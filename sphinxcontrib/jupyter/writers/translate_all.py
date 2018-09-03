@@ -456,6 +456,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if self.in_code_block:
             self.add_markdown_cell()
 
+    def visit_note(self, node):
+        # type: (nodes.Node) -> None
+        self.in_note = True
+        note = ">**Note**\n>{}".format(node.astext())
+        self.markdown_lines.append(note)
+
+    def depart_note(self, node):
+        # type: (nodes.Node) -> None
+        self.in_note = False
+
     # ================
     # general methods
     # ================
