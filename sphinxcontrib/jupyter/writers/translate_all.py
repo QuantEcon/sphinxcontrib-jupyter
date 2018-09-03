@@ -22,6 +22,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
         self.in_block_quote = False
+        self.in_note = False
         self.code_lines = []
         self.markdown_lines = []
 
@@ -78,7 +79,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.code_lines.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
-        elif self.in_block_quote:
+        elif self.in_block_quote or self.in_note:
             pass
         else:
             self.markdown_lines.append(text)
@@ -251,17 +252,29 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # emphasis(italic)
     def visit_emphasis(self, node):
-        self.markdown_lines.append("*")
+        if self.in_note or self.in_block_quote:
+            pass
+        else:
+            self.markdown_lines.append("*")
 
     def depart_emphasis(self, node):
-        self.markdown_lines.append("*")
+        if self.in_note or self.in_block_quote:
+            pass
+        else:
+            self.markdown_lines.append("*")
 
     # strong(bold)
     def visit_strong(self, node):
-        self.markdown_lines.append("**")
+        if self.in_note or self.in_block_quote:
+            pass
+        else:
+            self.markdown_lines.append("**")
 
     def depart_strong(self, node):
-        self.markdown_lines.append("**")
+        if self.in_note or self.in_block_quote:
+            pass
+        else:
+            self.markdown_lines.append("**")
 
     # figures
     def visit_figure(self, node):
@@ -457,13 +470,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.add_markdown_cell()
 
     def visit_note(self, node):
-        # type: (nodes.Node) -> None
         self.in_note = True
-        note = ">**Note**\n>{}".format(node.astext())
+        note = ">**Note**\n>\n>{}".format(node.rawsource)
         self.markdown_lines.append(note)
 
     def depart_note(self, node):
-        # type: (nodes.Node) -> None
         self.in_note = False
 
     # ================

@@ -17,6 +17,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    quote
    images
    math
+   notes
    links
    links_target
    lists
