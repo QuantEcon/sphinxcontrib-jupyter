@@ -102,6 +102,11 @@ code block contains a test which can be used for adding test logic
 for automatic testing of notebooks. This is by default set to `False`
 in the configuration and all test blocks are dropped.
 
+Other Supported Directives
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. ``.. note::`` - the raw contents of this directive is included 
+into the notebook as a block quote with a **Note** title. 
 
 .. _configuration:
 
