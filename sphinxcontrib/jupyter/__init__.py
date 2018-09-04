@@ -1,7 +1,9 @@
 from .builders.jupyter import JupyterBuilder
-
+from .directive.jupyter import jupyter_node
+from .directive.jupyter import Jupyter as JupyterDirective
 
 def setup(app):
+    # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", None, "jupyter")
@@ -13,7 +15,10 @@ def setup(app):
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
     
-
+    # Jupyter Directive
+    app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
+    app.add_directive("jupyter", JupyterDirective)
+    
     return {
         "version": "0.2.1",
         "parallel_read_safe": True,
