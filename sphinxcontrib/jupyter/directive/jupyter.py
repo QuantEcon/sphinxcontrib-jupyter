@@ -34,26 +34,28 @@ class Jupyter(Directive):
         # we create the content of the blog post
         # because it contains any kind of RST
         # we parse parse it with function nested_parse
-        par = nodes.paragraph()
-        self.state.nested_parse(content, self.content_offset, par)
+        # par = nodes.paragraph()
+        # self.state.nested_parse(content, self.content_offset, par)
          
         # we create a blogpost and we add the section
-        node=jupyter_node()
+        node = jupyter_node()
         if 'cell-break' in self.options:
             node['cell-break'] = True
 
-        if 'slide' in self.options:
-            node['slide'] = True
-        node += cell
-        node += par
+        # if 'slide' in self.options:
+        #     node['slide'] = True
+        # node += cell
+        # node += par
          
         # we return the result
         return [ node ]
 
 
-def visit_cell_node(self, node):
-    #do something here
+# FUTURE SUPPORT FOR HTML, LATEX writers
 
-def depart_cell_node(self, node):
-    pass
+# def visit_jupyter_node(self, node):
+#     pass
+
+# def depart_jupyter_node(self, node):
+#     pass
 

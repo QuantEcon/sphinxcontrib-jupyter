@@ -14,6 +14,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    simple_notebook
    tables
    code_blocks
+   jupyter
    quote
    images
    math

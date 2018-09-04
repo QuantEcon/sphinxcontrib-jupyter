@@ -456,6 +456,20 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if self.in_code_block:
             self.add_markdown_cell()
 
+    # =============
+    # Jupyter Nodes
+    # =============
+
+    def visit_jupyter_node(self, node):
+        if node['cell-break']:
+            self.add_markdown_cell()
+        else:
+            pass
+
+    def depart_jupyter_node(self, node):
+        pass
+
+
     # ================
     # general methods
     # ================
