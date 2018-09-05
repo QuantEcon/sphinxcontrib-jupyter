@@ -3,8 +3,8 @@ Ignore
 
 This contains a set of tests to see what elements are ignored
 
-comment
-~~~~~~~
+Comments
+~~~~~~~~
 
 the following ``comment`` contains ``COMMENT HERE`` text and should be ignored
 
