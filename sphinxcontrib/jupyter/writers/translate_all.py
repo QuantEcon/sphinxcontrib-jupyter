@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 import re
 import nbformat.v4
+from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
+
 
 class JupyterTranslator(JupyterCodeTranslator, object):
     """ Jupyter Translator for Text and Code
@@ -483,6 +485,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_note(self, node):
         self.in_note = False
+
+    def visit_comment(self, node):
+        raise nodes.SkipNode
 
     # ================
     # general methods
