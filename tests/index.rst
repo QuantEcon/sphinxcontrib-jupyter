@@ -16,6 +16,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    code_blocks
    quote
    images
+   inline
    math
    notes
    only

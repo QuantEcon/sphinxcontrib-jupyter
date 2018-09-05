@@ -283,6 +283,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         else:
             self.markdown_lines.append("**")
 
+    def visit_literal(self, node):
+        self.markdown_lines.append("`")
+
+    def depart_literal(self, node):
+        self.markdown_lines.append("`")
+
     # figures
     def visit_figure(self, node):
         pass
