@@ -18,6 +18,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    images
    math
    notes
+   only
    links
    links_target
    lists

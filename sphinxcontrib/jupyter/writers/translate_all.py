@@ -41,9 +41,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # specific visit and depart methods
     # ---------------------------------
 
-    # =========
-    # Sections
-    # =========
     def visit_document(self, node):
         """at start
         """
@@ -56,6 +53,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.add_markdown_cell()
         JupyterCodeTranslator.depart_document(self, node)
+
+    # =========
+    # Sections
+    # =========
+
+    def visit_only(self, node):
+        pass
+    
+    def depart_only(self, node):
+        pass
 
     def visit_topic(self, node):
         self.in_topic = True
