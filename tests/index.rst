@@ -15,6 +15,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    tables
    code_blocks
    quote
+   ignore
    images
    inline
    math
