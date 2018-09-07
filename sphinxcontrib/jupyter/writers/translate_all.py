@@ -89,7 +89,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         elif self.table_builder:
             self.table_builder['line_pending'] += text
         elif self.in_block_quote or self.in_note:
-            pass
+            self.markdown_lines.append(text)
         else:
             self.markdown_lines.append(text)
 
@@ -261,29 +261,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # emphasis(italic)
     def visit_emphasis(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("*")
+        self.markdown_lines.append("*")
 
     def depart_emphasis(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("*")
+        self.markdown_lines.append("*")
 
     # strong(bold)
     def visit_strong(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("**")
+        self.markdown_lines.append("**")
 
     def depart_strong(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("**")
+        self.markdown_lines.append("**")
 
     def visit_literal(self, node):
         self.markdown_lines.append("`")
@@ -486,8 +474,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_note(self, node):
         self.in_note = True
-        note = ">**Note**\n>\n>{}".format(node.rawsource)
-        self.markdown_lines.append(note)
+        self.markdown_lines.append(">**Note**\n>\n>")
 
     def depart_note(self, node):
         self.in_note = False
