@@ -196,6 +196,9 @@ The tests are taken from `rst2ipynb`, where many of them fail.
 
        1+1
 
+The following note contains a code block -- and these get rendered as code-blocks which
+breaks the note structure. This is the currently accepted solution.
+
 .. NOTE::
 
    A code block in a note::
