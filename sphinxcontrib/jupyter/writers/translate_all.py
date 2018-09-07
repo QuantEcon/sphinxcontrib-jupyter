@@ -460,8 +460,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_block_quote(self, node):
         self.in_block_quote = True
-        block_quote = "\n    {}".format(node.astext())
-        self.markdown_lines.append(block_quote)
+        self.markdown_lines.append("\n    ")
 
     def depart_block_quote(self, node): 
         self.in_block_quote = False
