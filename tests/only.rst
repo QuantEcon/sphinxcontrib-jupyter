@@ -7,7 +7,7 @@ This tests for support of the only directive with an html only block to follow t
 
     this text should **not** show up for Jupyter notebook
 
-there should be no html block above this text
+there should be no html block above this text unless option jupyter_allow_html_only is True
 
 and one related to Jupyter
 

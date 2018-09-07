@@ -12,6 +12,7 @@ def setup(app):
     app.add_config_value("jupyter_default_lang", "python3", "jupyter")
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
+    app.add_config_value("jupyter_allow_html_only", True, "jupyter")
     
 
     return {
