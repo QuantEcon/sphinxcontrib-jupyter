@@ -60,3 +60,13 @@ Bullets
   * and some subitems
 
 * and here the parent list continues
+
+Malformed Lists that seem to work in HTML
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* first item
+
+* second item
+
+    * a sub item that is spaced with four spaces rather than two
+
