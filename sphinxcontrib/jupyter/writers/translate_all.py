@@ -338,7 +338,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1]) + 1)
+        self.indents.append(len(self.bullets[-1]))
 
     def depart_bullet_list(self, node):
         self.list_level -= 1
@@ -354,7 +354,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("1.")
-        self.indents.append(len(self.bullets[-1]) + 1)
+        self.indents.append(len(self.bullets[-1]))
 
     def depart_enumerated_list(self, node):
         self.list_level -= 1
