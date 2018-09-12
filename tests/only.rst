@@ -1,11 +1,11 @@
 Only
 ====
 
-This tests for support of the only directive with an html only block to follow this
+This tests for support of the only directive with an html only block to follow this (unless option **jupyter_allow_html_only** is True)
 
 .. only:: html
 
-    this text should **not** show up for Jupyter notebook
+    I am inside an HTML only block
 
 there should be no html block above this text
 
