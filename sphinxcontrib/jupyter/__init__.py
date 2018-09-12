@@ -1,5 +1,5 @@
 from .builders.jupyter import JupyterBuilder
-
+from .transform import JupyterOnlyTransform
 
 def setup(app):
     app.add_builder(JupyterBuilder)
@@ -12,7 +12,9 @@ def setup(app):
     app.add_config_value("jupyter_default_lang", "python3", "jupyter")
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
-    
+
+    app.add_transform(JupyterOnlyTransform)
+    app.add_config_value("jupyter_allow_html_only", False, "jupyter")
 
     return {
         "version": "0.2.1",
