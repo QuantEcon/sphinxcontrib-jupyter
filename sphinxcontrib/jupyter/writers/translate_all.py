@@ -24,7 +24,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
         self.in_block_quote = False
+        self.block_quote_type = "block-quote"
         self.in_note = False
+        self.in_attribution = False
         self.code_lines = []
         self.markdown_lines = []
 
@@ -89,12 +91,22 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         elif self.table_builder:
             self.table_builder['line_pending'] += text
         elif self.in_block_quote or self.in_note:
-            self.markdown_lines.append(text)
+            if self.block_quote_type == "epigraph":
+                self.markdown_lines.append(text.replace("\n", " "))   #make sure quote is on a single line for markdown indentation
+            else:
+                self.markdown_lines.append(text)
         else:
             self.markdown_lines.append(text)
 
     def depart_Text(self, node):
         pass
+
+    def visit_attribution(self, node):
+        self.in_attribution = True
+        self.markdown_lines.append("    ")
+
+    def depart_attribution(self, node):
+        self.in_attribution = False
 
     # image
     def visit_image(self, node):
@@ -453,16 +465,20 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_label(self, node):
         if self.in_citation:
             self.markdown_lines.append("\] ")
-
+ 
     # ===============================================
     #  code blocks are implemented in the superclass
     # ===============================================
 
     def visit_block_quote(self, node):
         self.in_block_quote = True
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "epigraph"
         self.markdown_lines.append("\n    ")
 
     def depart_block_quote(self, node): 
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "block-quote"
         self.in_block_quote = False
 
     def visit_literal_block(self, node):
