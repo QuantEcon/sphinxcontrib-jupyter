@@ -267,3 +267,15 @@ breaks the note structure. This is the currently accepted solution.
 
 	    >>> def fusion(l1, l2):
 	    ...     sort(l1+l2)
+
+
+Code Block with None
+====================
+
+A code block with none specified as highlighter
+
+.. code-block:: none
+
+   import numpy as np
+
+should be a markdown block with no 
