@@ -107,6 +107,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_attribution(self, node):
         self.in_attribution = False
+        self.markdown_lines.append("\n")
 
     # image
     def visit_image(self, node):
