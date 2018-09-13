@@ -30,3 +30,11 @@ and labeled test cases
         f_0(v) & \mbox{if } x = x_0, \\
         f_1(v) & \mbox{if } x = x_1
     \end{cases} 
+
+Further Inline
+--------------
+
+A continuation Ramsey planner at :math:`t \geq 1` takes 
+:math:`(x_{t-1}, s_{t-1}) = (x_-, s_-)` as given and before 
+:math:`s` is realized chooses 
+:math:`(n_t(s_t), x_t(s_t)) = (n(s), x(s))` for :math:`s \in  {\cal S}` 
