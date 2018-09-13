@@ -92,7 +92,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.table_builder['line_pending'] += text
         elif self.in_block_quote or self.in_note:
             if self.block_quote_type == "epigraph":
-                self.markdown_lines.append(text.replace("\n", " "))   #make sure quote is on a single line for markdown indentation
+                self.markdown_lines.append(text.replace("\n", "\n    ")) #Ensure all lines are indented
             else:
                 self.markdown_lines.append(text)
         else:
