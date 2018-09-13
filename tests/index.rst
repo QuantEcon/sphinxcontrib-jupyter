@@ -18,6 +18,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    ignore
    images
    inline
+   literal_include
    math
    notes
    only
