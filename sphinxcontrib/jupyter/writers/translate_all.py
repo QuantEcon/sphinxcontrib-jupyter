@@ -106,7 +106,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_attribution(self, node):
         self.in_attribution = True
-        self.markdown_lines.append("    ")
+        self.markdown_lines.append("> ")
 
     def depart_attribution(self, node):
         self.in_attribution = False
@@ -279,6 +279,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.markdown_lines.append(self.sep_lines)
         elif self.table_builder:
             pass
+        elif self.block_quote_type == "epigraph":
+            try:
+                attribution = node.parent.children[1]
+                self.markdown_lines.append("\n>\n")   #Continue block for attribution
+            except:
+                self.markdown_lines.append(self.sep_paras)
         else:
             self.markdown_lines.append(self.sep_paras)
 
@@ -516,6 +522,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_block_quote(self, node): 
         if "epigraph" in node.attributes["classes"]:
             self.block_quote_type = "block-quote"
+        self.markdown_lines.append("\n")
         self.in_block_quote = False
 
     def visit_literal_block(self, node):
