@@ -30,6 +30,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_rubric = False
         self.in_footnote = False
         self.in_footnote_reference = False
+        self.in_list = False
+
         self.code_lines = []
         self.markdown_lines = []
 
@@ -411,14 +413,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indents.pop()
 
     def visit_list_item(self, node):
-        # self.first_line_in_list_item = True
+        self.in_list = True
         head = "{} ".format(self.bullets[-1])
         self.markdown_lines.append(head)
         self.list_item_starts.append(len(self.markdown_lines))
 
     def depart_list_item(self, node):
-        # self.first_line_in_list_item = False
-
+        self.in_list = False
         list_item_start = self.list_item_starts.pop()
         indent = self.indent_char * self.indents[-1]
         br_removed_flag = False
@@ -514,6 +515,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # ===============================================
 
     def visit_block_quote(self, node):
+        if self.in_list:               #allow for 4 spaces interpreted as block_quote
+            self.markdown_lines.append("\n")
+            return
         self.in_block_quote = True
         if "epigraph" in node.attributes["classes"]:
             self.block_quote_type = "epigraph"
@@ -527,7 +531,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
-
         if self.in_code_block:
             self.add_markdown_cell()
 
