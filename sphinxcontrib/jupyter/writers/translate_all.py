@@ -27,6 +27,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.block_quote_type = "block-quote"
         self.in_note = False
         self.in_attribution = False
+        self.in_rubric = False
+        self.in_footnote = False
+        self.in_footnote_reference = False
         self.code_lines = []
         self.markdown_lines = []
 
@@ -238,6 +241,31 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_raw(self, node):
         pass
 
+    def visit_rubric(self, node):
+        self.in_rubric = True
+        self.add_markdown_cell()
+        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
+            self.markdown_lines.append('**{}**\n\n'.format(node.children[0].astext()))
+            raise nodes.SkipNode
+
+    def depart_rubric(self, node):
+        self.add_markdown_cell()
+        self.in_rubric = False
+
+    def visit_footnote_reference(self, node):
+        self.in_footnote_reference = True
+        self.markdown_lines.append("<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid']))
+        raise nodes.SkipNode
+
+    def depart_footnote_reference(self, node):
+        self.in_footnote_reference = False
+
+    def visit_footnote(self, node):
+        self.in_footnote = True
+
+    def depart_footnote(self, node):
+        self.in_footnote = False
+
     #================
     # markdown cells
     #================
@@ -315,7 +343,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             formatted_text = "](#{})".format(uri_text)
             self.markdown_lines.append(formatted_text)
-
         else:
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
@@ -460,6 +487,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # label
     def visit_label(self, node):
+        if self.in_footnote:
+            ids = node.parent.attributes["ids"]
+            id_text = ""
+            for id_ in ids:
+                id_text += "{} ".format(id_)
+            else:
+                id_text = id_text[:-1]
+            self.markdown_lines.append("<a id='{}'></a>\n*[{}]* ".format(id_text, node.astext()))
+            raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
 
