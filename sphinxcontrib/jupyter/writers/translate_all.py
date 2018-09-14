@@ -169,7 +169,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         #check for labelled math
         if node["label"]:
-            print(node.attributes["label"])
             formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
                              + "<td width=10%></td>\n"\
                              + "<td width=80%>\n"\
