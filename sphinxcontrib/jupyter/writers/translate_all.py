@@ -30,6 +30,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_rubric = False
         self.in_footnote = False
         self.in_footnote_reference = False
+        self.in_download_reference = False
         self.in_list = False
 
         self.code_lines = []
@@ -267,6 +268,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_footnote(self, node):
         self.in_footnote = False
 
+    def visit_download_reference(self, node):
+        self.in_download_reference = True
+        html = "<a href={} download>".format(node["reftarget"])
+        self.markdown_lines.append(html)
+
+    def depart_download_reference(self, node):
+        print(self.markdown_lines[-1])
+        self.markdown_lines.append("</a>")
+        self.in_download_reference = False
+
     #================
     # markdown cells
     #================
@@ -322,9 +333,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.markdown_lines.append("**")
 
     def visit_literal(self, node):
+        if self.in_download_reference:
+            return
         self.markdown_lines.append("`")
 
     def depart_literal(self, node):
+        if self.in_download_reference:
+            return
         self.markdown_lines.append("`")
 
     # figures
