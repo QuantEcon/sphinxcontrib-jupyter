@@ -274,7 +274,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.markdown_lines.append(html)
 
     def depart_download_reference(self, node):
-        print(self.markdown_lines[-1])
         self.markdown_lines.append("</a>")
         self.in_download_reference = False
 
