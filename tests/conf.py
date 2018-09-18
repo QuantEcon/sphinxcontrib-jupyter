@@ -213,3 +213,5 @@ jupyter_drop_solutions = True
 
 # Tests configurations 
 jupyter_drop_tests = True
+
+jupyter_lang_synonyms = ["ipython"]

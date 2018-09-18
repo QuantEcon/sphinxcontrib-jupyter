@@ -38,6 +38,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
+        self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -175,7 +176,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         # was specified as the default language, do not create a code block for it - turn it into
         # markup instead.
         if self.nodelang != self.langTranslator.translate(self.lang):
-            self.output_cell_type = JupyterOutputCellGenerators.MARKDOWN
+            if self.nodelang in self.jupyter_lang_synonyms:
+                pass
+            else:
+                self.output_cell_type = JupyterOutputCellGenerators.MARKDOWN
 
     def depart_literal_block(self, node):
         if self.solution and self.jupyter_drop_solutions:    
