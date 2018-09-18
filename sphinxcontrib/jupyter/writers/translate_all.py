@@ -31,6 +31,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_footnote = False
         self.in_footnote_reference = False
         self.in_download_reference = False
+        self.in_caption = False
+        self.in_toctree = True
         self.in_list = False
 
         self.code_lines = []
@@ -101,6 +103,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.markdown_lines.append(text)
+        elif self.in_caption and self.in_toctree:
+            self.markdown_lines.append("# {}".format(text))
         else:
             self.markdown_lines.append(text)
 
@@ -385,6 +389,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
             self.markdown_lines.append("]({})".format(refuri))
 
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
+
         self.in_reference = False
 
     # target: make anchor
@@ -556,6 +563,28 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_comment(self, node):
         raise nodes.SkipNode
+
+    def visit_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = True
+        except:
+            pass  #Should this execute visit_compact_paragragh in BaseTranslator?
+
+    def depart_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = False
+        except:
+            pass
+
+    def visit_caption(self, node):
+        self.in_caption = True
+
+    def depart_caption(self, node):
+        self.in_caption = False
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
 
     # ================
     # general methods
