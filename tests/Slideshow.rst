@@ -33,8 +33,3 @@ The previous function was
 We can also include the figures from some folder
 
 .. figure:: _static/hood.jpg
-
-
-
-    
-
