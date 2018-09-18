@@ -39,6 +39,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
+        self.jupyter_slide = builder.config["jupyter_slide"]
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -117,6 +118,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
                 "Highlighting language is not given in .rst file. "
                 "Set kernel as default(python3)")
             self.lang = self.default_lang
+
+        # metadata for slides, this activates the option where each cell can be a slide
+        if self.jupyter_slide:
+            self.output.metadata.celltoolbar="Slideshow"
+
 
         # Update metadata
         if self.jupyter_kernels is not None:
