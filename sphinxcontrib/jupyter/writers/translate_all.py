@@ -32,7 +32,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_footnote_reference = False
         self.in_download_reference = False
         self.in_caption = False
-        self.in_toctree = True
+        self.in_toctree = False
         self.in_list = False
 
         self.code_lines = []
