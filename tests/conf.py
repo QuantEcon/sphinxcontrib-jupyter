@@ -217,4 +217,4 @@ jupyter_drop_tests = True
 # Add Ipython as Synonym for tests
 jupyter_lang_synonyms = ["ipython"]
 
-jupyter_contents_droplevel = True
+jupyter_contents_droplevel = False
