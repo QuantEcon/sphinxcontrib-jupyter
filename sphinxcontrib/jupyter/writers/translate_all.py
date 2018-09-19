@@ -416,15 +416,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1]))
+        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
 
     def depart_bullet_list(self, node):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
+            if self.in_contents and self.jupyter_contents_droplevel:
+                from .utils import adjust_contents_depth
+                self.markdown_lines = adjust_contents_depth(self.markdown_lines)
             if self.in_topic:
                 self.add_markdown_cell()
-
         self.bullets.pop()
         self.indents.pop()
 
@@ -438,7 +440,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
-
         self.bullets.pop()
         self.indents.pop()
 
@@ -461,7 +462,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         for i in range(list_item_start, len(self.markdown_lines)):
             self.markdown_lines[i] = self.markdown_lines[i].replace(
-                "\n", "\n{}".format(indent))
+                "-", "{}-".format(indent))
 
         # add breakline
         if br_removed_flag:

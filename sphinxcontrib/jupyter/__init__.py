@@ -13,6 +13,7 @@ def setup(app):
     app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
+    app.add_config_value("jupyter_contents_droplevel", False, "jupyter")
 
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")

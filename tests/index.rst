@@ -11,6 +11,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :caption: Contents:
 
    code_synonyms
+   contents
    download
    equation_labels
    simple_notebook

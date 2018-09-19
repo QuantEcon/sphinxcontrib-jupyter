@@ -126,3 +126,24 @@ def get_source_file_name(filepath, srcdir):
 
     file_name_list = file_path_list[len(srcdir_path_list) - 1:]
     return "/".join(file_name_list) # Does this also need to be changed? 
+
+
+def adjust_contents_depth(markdown_lines):
+    """ 
+    simple utility to adjust contents to remove the top level
+    this is used by QuantEcon
+    """
+    skip = False
+    new_markdown_lines = []
+    for item in markdown_lines:
+        if "- " in item:
+            spaces = len(item) - 2
+            if spaces == 0:
+                skip = True
+            else:
+                skip = False
+        if not skip:
+            if "- " in item:
+                item = item.lstrip(" ")
+            new_markdown_lines.append(item)
+    return new_markdown_lines
