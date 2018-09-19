@@ -462,7 +462,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         for i in range(list_item_start, len(self.markdown_lines)):
             self.markdown_lines[i] = self.markdown_lines[i].replace(
-                "-", "{}-".format(indent))
+                "- ", "{}- ".format(indent))
 
         # add breakline
         if br_removed_flag:
