@@ -20,6 +20,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indent_char = " "
         self.indent = self.indent_char * 4
         self.default_ext = ".ipynb"
+        self.html_ext = ".html"
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
@@ -371,8 +372,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    refuri = self.add_extension_to_inline_link(
-                        refuri, self.default_ext)
+                    if self.jupyter_target_html:
+                        refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                    else:
+                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
