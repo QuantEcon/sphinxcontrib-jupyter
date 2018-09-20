@@ -191,6 +191,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
 
             new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
+            #Save Collapse Cell Option for HTML Parser
+            if "collapse" in node["classes"]:
+                new_code_cell["metadata"]["html-class"] = 'collapse'
+            #Code Output
             if self.output_cell_type is JupyterOutputCellGenerators.CODE_OUTPUT:
                 # Output blocks must  be added to code cells to make any sense.
                 # This script assumes that any output blocks will immediately follow a code
