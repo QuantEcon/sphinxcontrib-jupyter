@@ -164,6 +164,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """directive math"""
         math_text = node.attributes["latex"].strip()
 
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
         if self.list_level == 0:
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
@@ -189,6 +192,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if node["label"]:
             self.markdown_lines.append("\n</td></tr></table>\n\n")
+
+    def depart_displaymath(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
     def visit_table(self, node):
         self.table_builder = dict()
