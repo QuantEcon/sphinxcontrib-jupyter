@@ -16,6 +16,7 @@ def setup(app):
 
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
+    app.add_config_value("jupyter_target_html", False, "jupyter")
 
     return {
         "version": "0.2.1",
