@@ -133,17 +133,17 @@ def adjust_contents_depth(markdown_lines):
     simple utility to adjust contents to remove the top level
     this is used by QuantEcon
     """
-    skip = False
+    skip = True
     new_markdown_lines = []
     for item in markdown_lines:
-        if "- " in item:
-            spaces = len(item) - 2
-            if spaces == 0:
-                skip = True
-            else:
+        if "\n" in item:
+            spaces = item.lstrip(" ").count(" ")  #count right hand spaces for indentation
+            if spaces != 0:
                 skip = False
+            else:
+                skip = True
         if not skip:
-            if "- " in item:
-                item = item.lstrip(" ")
+            if "\n" in item:
+                item = item[:-2]   #dedent two spaces
             new_markdown_lines.append(item)
     return new_markdown_lines
