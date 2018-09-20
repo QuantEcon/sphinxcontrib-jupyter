@@ -12,6 +12,8 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
 
    code_blocks
    collapse
+   code_synonyms
+   download
    equation_labels
    simple_notebook
    tables
