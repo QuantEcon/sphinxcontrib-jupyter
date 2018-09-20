@@ -20,6 +20,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indent_char = " "
         self.indent = self.indent_char * 4
         self.default_ext = ".ipynb"
+        self.html_ext = ".html"
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
@@ -174,6 +175,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """directive math"""
         math_text = node.attributes["latex"].strip()
 
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
         if self.list_level == 0:
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
@@ -199,6 +203,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if node["label"]:
             self.markdown_lines.append("\n</td></tr></table>\n\n")
+
+    def depart_displaymath(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -385,8 +393,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    refuri = self.add_extension_to_inline_link(
-                        refuri, self.default_ext)
+                    if self.jupyter_target_html:
+                        refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                    else:
+                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
