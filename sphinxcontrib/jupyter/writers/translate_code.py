@@ -39,7 +39,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
-        self.jupyter_contents_droplevel = builder.config["jupyter_contents_droplevel"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
 
         # Header Block

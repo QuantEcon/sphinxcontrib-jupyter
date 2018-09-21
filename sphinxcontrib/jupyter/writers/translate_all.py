@@ -34,7 +34,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_download_reference = False
         self.in_caption = False
         self.in_toctree = False
-        self.in_contents = False
         self.in_list = False
 
         self.code_lines = []
@@ -80,15 +79,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_topic(self, node):
         self.in_topic = True
-        if 'classes' in node.attributes:
-            if 'contents' in node.attributes['classes']:
-                self.in_contents = True
 
     def depart_topic(self, node):
         self.in_topic = False
-        if 'classes' in node.attributes:
-            if 'contents' in node.attributes['classes']:
-                self.in_contents = False
 
     def visit_section(self, node):
         self.section_level += 1
@@ -323,10 +316,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.add_markdown_cell()
 
         if self.in_topic:
-            if self.in_contents:
-                raise nodes.SkipNode                 #skip default Contents listing when in .. contents::
-            else:
-                self.markdown_lines.append(
+            self.markdown_lines.append(
                     "{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.markdown_lines.append(
@@ -432,9 +422,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
-            if self.in_contents and self.jupyter_contents_droplevel:
-                from .utils import adjust_contents_depth
-                self.markdown_lines = adjust_contents_depth(self.markdown_lines)
             if self.in_topic:
                 self.add_markdown_cell()
         self.bullets.pop()

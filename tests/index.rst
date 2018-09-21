@@ -13,7 +13,6 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    code_blocks
    code_synonyms
    collapse
-   contents
    download
    equation_labels
    footnotes
