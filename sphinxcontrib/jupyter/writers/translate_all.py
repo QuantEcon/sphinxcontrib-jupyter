@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 import re
 import nbformat.v4
+from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
+
 
 class JupyterTranslator(JupyterCodeTranslator, object):
     """ Jupyter Translator for Text and Code
@@ -18,11 +20,22 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indent_char = " "
         self.indent = self.indent_char * 4
         self.default_ext = ".ipynb"
+        self.html_ext = ".html"
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
         self.in_block_quote = False
+        self.block_quote_type = "block-quote"
         self.in_note = False
+        self.in_attribution = False
+        self.in_rubric = False
+        self.in_footnote = False
+        self.in_footnote_reference = False
+        self.in_download_reference = False
+        self.in_caption = False
+        self.in_toctree = False
+        self.in_list = False
+
         self.code_lines = []
         self.markdown_lines = []
 
@@ -41,9 +54,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # specific visit and depart methods
     # ---------------------------------
 
-    # =========
-    # Sections
-    # =========
     def visit_document(self, node):
         """at start
         """
@@ -56,6 +66,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.add_markdown_cell()
         JupyterCodeTranslator.depart_document(self, node)
+
+    # =========
+    # Sections
+    # =========
+
+    def visit_only(self, node):
+        pass
+    
+    def depart_only(self, node):
+        pass
 
     def visit_topic(self, node):
         self.in_topic = True
@@ -80,12 +100,25 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         elif self.table_builder:
             self.table_builder['line_pending'] += text
         elif self.in_block_quote or self.in_note:
-            pass
+            if self.block_quote_type == "epigraph":
+                self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+            else:
+                self.markdown_lines.append(text)
+        elif self.in_caption and self.in_toctree:
+            self.markdown_lines.append("# {}".format(text))
         else:
             self.markdown_lines.append(text)
 
     def depart_Text(self, node):
         pass
+
+    def visit_attribution(self, node):
+        self.in_attribution = True
+        self.markdown_lines.append("> ")
+
+    def depart_attribution(self, node):
+        self.in_attribution = False
+        self.markdown_lines.append("\n")
 
     # image
     def visit_image(self, node):
@@ -135,6 +168,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """directive math"""
         math_text = node.attributes["latex"].strip()
 
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
         if self.list_level == 0:
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
@@ -144,7 +180,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         #check for labelled math
         if node["label"]:
-            print(node.attributes["label"])
             formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
                              + "<td width=10%></td>\n"\
                              + "<td width=80%>\n"\
@@ -161,6 +196,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if node["label"]:
             self.markdown_lines.append("\n</td></tr></table>\n\n")
+
+    def depart_displaymath(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -216,6 +255,40 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_raw(self, node):
         pass
 
+    def visit_rubric(self, node):
+        self.in_rubric = True
+        self.add_markdown_cell()
+        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
+            self.markdown_lines.append('**{}**\n\n'.format(node.children[0].astext()))
+            raise nodes.SkipNode
+
+    def depart_rubric(self, node):
+        self.add_markdown_cell()
+        self.in_rubric = False
+
+    def visit_footnote_reference(self, node):
+        self.in_footnote_reference = True
+        self.markdown_lines.append("<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid']))
+        raise nodes.SkipNode
+
+    def depart_footnote_reference(self, node):
+        self.in_footnote_reference = False
+
+    def visit_footnote(self, node):
+        self.in_footnote = True
+
+    def depart_footnote(self, node):
+        self.in_footnote = False
+
+    def visit_download_reference(self, node):
+        self.in_download_reference = True
+        html = "<a href={} download>".format(node["reftarget"])
+        self.markdown_lines.append(html)
+
+    def depart_download_reference(self, node):
+        self.markdown_lines.append("</a>")
+        self.in_download_reference = False
+
     #================
     # markdown cells
     #================
@@ -229,16 +302,22 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.markdown_lines.append(self.sep_lines)
         elif self.table_builder:
             pass
+        elif self.block_quote_type == "epigraph":
+            try:
+                attribution = node.parent.children[1]
+                self.markdown_lines.append("\n>\n")   #Continue block for attribution
+            except:
+                self.markdown_lines.append(self.sep_paras)
         else:
             self.markdown_lines.append(self.sep_paras)
 
     # title(section)
     def visit_title(self, node):
+        JupyterCodeTranslator.visit_title(self, node)
         self.add_markdown_cell()
-
         if self.in_topic:
             self.markdown_lines.append(
-                "{} ".format("#" * (self.section_level + 1)))
+                    "{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.markdown_lines.append(
                 "### {}\n".format(node.astext()))
@@ -252,29 +331,27 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # emphasis(italic)
     def visit_emphasis(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("*")
+        self.markdown_lines.append("*")
 
     def depart_emphasis(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("*")
+        self.markdown_lines.append("*")
 
     # strong(bold)
     def visit_strong(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("**")
+        self.markdown_lines.append("**")
 
     def depart_strong(self, node):
-        if self.in_note or self.in_block_quote:
-            pass
-        else:
-            self.markdown_lines.append("**")
+        self.markdown_lines.append("**")
+
+    def visit_literal(self, node):
+        if self.in_download_reference:
+            return
+        self.markdown_lines.append("`")
+
+    def depart_literal(self, node):
+        if self.in_download_reference:
+            return
+        self.markdown_lines.append("`")
 
     # figures
     def visit_figure(self, node):
@@ -299,7 +376,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             formatted_text = "](#{})".format(uri_text)
             self.markdown_lines.append(formatted_text)
-
         else:
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
@@ -307,8 +383,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    refuri = self.add_extension_to_inline_link(
-                        refuri, self.default_ext)
+                    if self.jupyter_target_html:
+                        refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                    else:
+                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
@@ -320,6 +398,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     refuri = ""
 
             self.markdown_lines.append("]({})".format(refuri))
+
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
 
         self.in_reference = False
 
@@ -335,7 +416,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1]) + 1)
+        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
 
     def depart_bullet_list(self, node):
         self.list_level -= 1
@@ -343,7 +424,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.markdown_lines.append(self.sep_paras)
             if self.in_topic:
                 self.add_markdown_cell()
-
         self.bullets.pop()
         self.indents.pop()
 
@@ -351,25 +431,23 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("1.")
-        self.indents.append(len(self.bullets[-1]) + 1)
+        self.indents.append(len(self.bullets[-1]))
 
     def depart_enumerated_list(self, node):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
-
         self.bullets.pop()
         self.indents.pop()
 
     def visit_list_item(self, node):
-        # self.first_line_in_list_item = True
+        self.in_list = True
         head = "{} ".format(self.bullets[-1])
         self.markdown_lines.append(head)
         self.list_item_starts.append(len(self.markdown_lines))
 
     def depart_list_item(self, node):
-        # self.first_line_in_list_item = False
-
+        self.in_list = False
         list_item_start = self.list_item_starts.pop()
         indent = self.indent_char * self.indents[-1]
         br_removed_flag = False
@@ -444,35 +522,49 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # label
     def visit_label(self, node):
+        if self.in_footnote:
+            ids = node.parent.attributes["ids"]
+            id_text = ""
+            for id_ in ids:
+                id_text += "{} ".format(id_)
+            else:
+                id_text = id_text[:-1]
+            self.markdown_lines.append("<a id='{}'></a>\n*[{}]* ".format(id_text, node.astext()))
+            raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
 
     def depart_label(self, node):
         if self.in_citation:
             self.markdown_lines.append("\] ")
-
+ 
     # ===============================================
     #  code blocks are implemented in the superclass
     # ===============================================
 
     def visit_block_quote(self, node):
+        if self.in_list:               #allow for 4 spaces interpreted as block_quote
+            self.markdown_lines.append("\n")
+            return
         self.in_block_quote = True
-        block_quote = "\n    {}".format(node.astext())
-        self.markdown_lines.append(block_quote)
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "epigraph"
+        self.markdown_lines.append("> ")
 
     def depart_block_quote(self, node): 
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "block-quote"
+        self.markdown_lines.append("\n")
         self.in_block_quote = False
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
-
         if self.in_code_block:
             self.add_markdown_cell()
 
     def visit_note(self, node):
         self.in_note = True
-        note = ">**Note**\n>\n>{}".format(node.rawsource)
-        self.markdown_lines.append(note)
+        self.markdown_lines.append(">**Note**\n>\n>")
 
     def depart_note(self, node):
         self.in_note = False
@@ -490,6 +582,30 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_jupyter_node(self, node):
         pass
 
+    def visit_comment(self, node):
+        raise nodes.SkipNode
+
+    def visit_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = True
+        except:
+            pass  #Should this execute visit_compact_paragragh in BaseTranslator?
+
+    def depart_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = False
+        except:
+            pass
+
+    def visit_caption(self, node):
+        self.in_caption = True
+
+    def depart_caption(self, node):
+        self.in_caption = False
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
 
     # ================
     # general methods

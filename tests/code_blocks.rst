@@ -196,6 +196,9 @@ The tests are taken from `rst2ipynb`, where many of them fail.
 
        1+1
 
+The following note contains a code block -- and these get rendered as code-blocks which
+breaks the note structure. This is the currently accepted solution.
+
 .. NOTE::
 
    A code block in a note::
@@ -264,3 +267,15 @@ The tests are taken from `rst2ipynb`, where many of them fail.
 
 	    >>> def fusion(l1, l2):
 	    ...     sort(l1+l2)
+
+
+Code Block with None
+====================
+
+A code block with none specified as highlighter
+
+.. code-block:: none
+
+   import numpy as np
+
+should be a markdown block with no 

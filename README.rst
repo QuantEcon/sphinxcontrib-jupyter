@@ -106,7 +106,8 @@ Other Supported Directives
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. ``.. note::`` - the raw contents of this directive is included 
-into the notebook as a block quote with a **Note** title. 
+into the notebook as a block quote with a **Note** title.
+1. ``.. only::`` - this will skip any only content that is not jupyter 
 
 .. _configuration:
 
