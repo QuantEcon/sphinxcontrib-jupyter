@@ -569,19 +569,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_note(self, node):
         self.in_note = False
 
-    # =============
-    # Jupyter Nodes
-    # =============
-
-    def visit_jupyter_node(self, node):
-        if node['cell-break']:
-            self.add_markdown_cell()
-        else:
-            pass
-
-    def depart_jupyter_node(self, node):
-        pass
-
     def visit_comment(self, node):
         raise nodes.SkipNode
 
@@ -607,6 +594,24 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if self.in_toctree:
             self.markdown_lines.append("\n")
 
+    # =============
+    # Jupyter Nodes
+    # =============
+
+    def visit_jupyter_node(self, node):
+        if 'cell-break' in node.attributes:
+            self.add_markdown_cell()
+        elif 'type' in node.attributes:
+            if node.attributes['type'] == 'output':
+                pass
+        else:
+            pass
+
+    def depart_jupyter_node(self, node):
+        if 'type' in node.attributes:
+            if node.attributes['type'] == 'output':
+                self.add_output_cell()
+
     # ================
     # general methods
     # ================
@@ -623,6 +628,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
+
+    def add_output_cell(self):
+        line_text = "".join(self.markdown_lines)
+        formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
+        new_out_cell = nbformat.v4.new_output(output_type='execute_result', \
+            data=formatted_line_text, execution_count=0)
+        self.output["cells"].append(new_out_cell)
+        self.markdown_lines = []
 
     @classmethod
     def split_uri_id(cls, uri):
