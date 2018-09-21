@@ -309,8 +309,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # title(section)
     def visit_title(self, node):
+        JupyterCodeTranslator.visit_title(self, node)
         self.add_markdown_cell()
-
         if self.in_topic:
             self.markdown_lines.append(
                 "{} ".format("#" * (self.section_level + 1)))

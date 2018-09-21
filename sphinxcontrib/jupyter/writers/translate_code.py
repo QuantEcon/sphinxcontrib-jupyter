@@ -15,6 +15,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         self.lang = None
         self.nodelang = None
+        self.visit_first_title = True
 
         self.langTranslator = LanguageTranslator(builder.config["templates_path"])
 
@@ -124,6 +125,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             try:
                 self.output.metadata.kernelspec = \
                     self.jupyter_kernels[self.lang]["kernelspec"]
+                self.output.metadata["filename"] = self.source_file_name.split("/")[-1]
+                self.output.metadata["title"] = self.title
             except:
                 self.warn(
                     "Invalid jupyter kernels. "
@@ -152,6 +155,12 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
     def depart_Text(self, node):
         pass
+
+    def visit_title(self, node):
+        #TODO: add support for docutils .. title::
+        if self.visit_first_title:
+            self.title = node.astext()
+        self.visit_first_title = False
 
     # ================
     #  code blocks
