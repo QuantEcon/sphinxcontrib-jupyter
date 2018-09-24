@@ -15,6 +15,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         self.lang = None
         self.nodelang = None
+        self.visit_first_title = True
 
         self.langTranslator = LanguageTranslator(builder.config["templates_path"])
 
@@ -39,7 +40,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
+<<<<<<< HEAD
         self.jupyter_slide = builder.config["jupyter_slide"]
+=======
+        self.jupyter_target_html = builder.config["jupyter_target_html"]
+>>>>>>> cc6ab08a9c7af7f28588c47bfba5c0233b86062e
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -129,6 +134,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             try:
                 self.output.metadata.kernelspec = \
                     self.jupyter_kernels[self.lang]["kernelspec"]
+                self.output.metadata["filename"] = self.source_file_name.split("/")[-1]
+                self.output.metadata["title"] = self.title
             except:
                 self.warn(
                     "Invalid jupyter kernels. "
@@ -157,6 +164,12 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
     def depart_Text(self, node):
         pass
+
+    def visit_title(self, node):
+        #TODO: add support for docutils .. title::
+        if self.visit_first_title:
+            self.title = node.astext()
+        self.visit_first_title = False
 
     # ================
     #  code blocks
@@ -197,6 +210,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
 
             new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
+            #Save Collapse Cell Option for HTML Parser
+            if "collapse" in node["classes"]:
+                new_code_cell["metadata"]["html-class"] = 'collapse'
+            #Code Output
             if self.output_cell_type is JupyterOutputCellGenerators.CODE_OUTPUT:
                 # Output blocks must  be added to code cells to make any sense.
                 # This script assumes that any output blocks will immediately follow a code

@@ -1,7 +1,10 @@
 from .builders.jupyter import JupyterBuilder
+from .directive.jupyter import jupyter_node
+from .directive.jupyter import Jupyter as JupyterDirective
 from .transform import JupyterOnlyTransform
 
 def setup(app):
+    # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", None, "jupyter")
@@ -13,9 +16,18 @@ def setup(app):
     app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
+<<<<<<< HEAD
     app.add_config_value("jupyter_slide", True, "jupyter")  
+=======
+    
+    # Jupyter Directive
+    app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
+    app.add_directive("jupyter", JupyterDirective)
+   
+>>>>>>> cc6ab08a9c7af7f28588c47bfba5c0233b86062e
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
+    app.add_config_value("jupyter_target_html", False, "jupyter")
 
     return {
         "version": "0.2.1",

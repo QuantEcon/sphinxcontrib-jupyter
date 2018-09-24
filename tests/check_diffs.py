@@ -18,7 +18,7 @@ NB_VERSION = 4
 GENERATED_IPYNB_FILES = glob.glob("_build/jupyter/*.ipynb")
 REFERENCE_IPYNB_FILES = [os.path.basename(
     fl) for fl in glob.glob("ipynb/*.ipynb")]
-SKIP = ["index.ipynb"]
+SKIP = []  # "index.ipynb"
 
 #-Diff Configuration-#
 set_notebook_diff_targets(metadata=False)

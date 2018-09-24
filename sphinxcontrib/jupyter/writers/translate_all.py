@@ -20,6 +20,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indent_char = " "
         self.indent = self.indent_char * 4
         self.default_ext = ".ipynb"
+        self.html_ext = ".html"
 
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
@@ -31,6 +32,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_footnote = False
         self.in_footnote_reference = False
         self.in_download_reference = False
+        self.in_caption = False
+        self.in_toctree = False
         self.in_list = False
 
         self.code_lines = []
@@ -101,6 +104,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.markdown_lines.append(text)
+        elif self.in_caption and self.in_toctree:
+            self.markdown_lines.append("# {}".format(text))
         else:
             self.markdown_lines.append(text)
 
@@ -163,6 +168,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """directive math"""
         math_text = node.attributes["latex"].strip()
 
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
         if self.list_level == 0:
             formatted_text = "$$\n{0}\n$${1}".format(
                 math_text, self.sep_paras)
@@ -188,6 +196,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if node["label"]:
             self.markdown_lines.append("\n</td></tr></table>\n\n")
+
+    def depart_displaymath(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -301,11 +313,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # title(section)
     def visit_title(self, node):
+        JupyterCodeTranslator.visit_title(self, node)
         self.add_markdown_cell()
-
         if self.in_topic:
             self.markdown_lines.append(
-                "{} ".format("#" * (self.section_level + 1)))
+                    "{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.markdown_lines.append(
                 "### {}\n".format(node.astext()))
@@ -371,8 +383,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    refuri = self.add_extension_to_inline_link(
-                        refuri, self.default_ext)
+                    if self.jupyter_target_html:
+                        refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                    else:
+                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
@@ -384,6 +398,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     refuri = ""
 
             self.markdown_lines.append("]({})".format(refuri))
+
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
 
         self.in_reference = False
 
@@ -399,7 +416,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level += 1
         # markdown does not have option changing bullet chars
         self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1]))
+        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
 
     def depart_bullet_list(self, node):
         self.list_level -= 1
@@ -407,7 +424,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.markdown_lines.append(self.sep_paras)
             if self.in_topic:
                 self.add_markdown_cell()
-
         self.bullets.pop()
         self.indents.pop()
 
@@ -421,7 +437,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
-
         self.bullets.pop()
         self.indents.pop()
 
@@ -554,8 +569,43 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_note(self, node):
         self.in_note = False
 
+    # =============
+    # Jupyter Nodes
+    # =============
+
+    def visit_jupyter_node(self, node):
+        if node['cell-break']:
+            self.add_markdown_cell()
+        else:
+            pass
+
+    def depart_jupyter_node(self, node):
+        pass
+
     def visit_comment(self, node):
         raise nodes.SkipNode
+
+    def visit_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = True
+        except:
+            pass  #Should this execute visit_compact_paragragh in BaseTranslator?
+
+    def depart_compact_paragraph(self, node):
+        try:
+            if node.attributes['toctree']:
+                self.in_toctree = False
+        except:
+            pass
+
+    def visit_caption(self, node):
+        self.in_caption = True
+
+    def depart_caption(self, node):
+        self.in_caption = False
+        if self.in_toctree:
+            self.markdown_lines.append("\n")
 
     # ================
     # general methods
