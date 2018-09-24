@@ -19,6 +19,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    ignore
    images
    inline
+   jupyter
    links
    links_target
    lists

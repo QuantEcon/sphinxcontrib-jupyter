@@ -569,6 +569,19 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_note(self, node):
         self.in_note = False
 
+    # =============
+    # Jupyter Nodes
+    # =============
+
+    def visit_jupyter_node(self, node):
+        if node['cell-break']:
+            self.add_markdown_cell()
+        else:
+            pass
+
+    def depart_jupyter_node(self, node):
+        pass
+
     def visit_comment(self, node):
         raise nodes.SkipNode
 
