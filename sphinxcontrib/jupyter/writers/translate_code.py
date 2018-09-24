@@ -40,11 +40,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
-<<<<<<< HEAD
         self.jupyter_slide = builder.config["jupyter_slide"]
-=======
         self.jupyter_target_html = builder.config["jupyter_target_html"]
->>>>>>> cc6ab08a9c7af7f28588c47bfba5c0233b86062e
 
         # Header Block
         template_paths = builder.config["templates_path"]
