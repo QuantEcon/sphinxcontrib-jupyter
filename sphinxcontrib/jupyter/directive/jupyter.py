@@ -14,7 +14,8 @@ class Jupyter(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     option_spec = {'cell-break': directives.flag,
-                   'type': directives.unchanged}
+                   'type': directives.unchanged,
+                   'slide': directives.unchanged}
     has_content = True
     add_index = False
  
@@ -24,14 +25,15 @@ class Jupyter(Directive):
         # in the main configuration file (conf.py)
         config = env.config
          
-        # we create a cell
-        idb = nodes.make_id("new-cell")
-        cell = nodes.section(ids=[idb])
-         
         # we create a new cell and we add it to the node tree
         node = jupyter_node()
         if 'cell-break' in self.options:
             node['cell-break'] = True
+        
+        if 'slide' in self.options:
+            node.children.append(nodes.literal(self.content.data))
+            node['slide'] = self.options['slide']
+
  
         # we return the result
         return [ node ]
