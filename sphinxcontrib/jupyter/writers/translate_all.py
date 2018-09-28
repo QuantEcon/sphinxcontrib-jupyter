@@ -626,9 +626,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            new_md_cell.metadata.Slideshow = slide_info
-            print("i'm here")
-            self.output["cells"].append(new_md_cell)
+            new_md_cell.metadata["Slideshow"] = slide_info
+            #print("i'm here")
+          #  self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
     @classmethod
