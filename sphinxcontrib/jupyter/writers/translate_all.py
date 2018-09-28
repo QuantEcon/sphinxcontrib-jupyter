@@ -50,6 +50,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_citation = False
 
         self.table_builder = None
+        self.slide = "Slide" #value by default
 
     # specific visit and depart methods
     # ---------------------------------
@@ -576,6 +577,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_jupyter_node(self, node):
         if node['cell-break']:
             self.add_markdown_cell()
+        elif node['slide'] in node.attributes:
+            pass
         else:
             pass
 
@@ -618,9 +621,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         line_text = "".join(self.markdown_lines)
         formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
+        slide_info = { 'Slide_type': 'Slide'}
+         
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
+            new_md_cell.metadata.Slideshow = slide_info
+            print("i'm here")
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 

@@ -123,7 +123,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         # metadata for slides, this activates the option where each cell can be a slide
         if self.jupyter_slide:
-            self.output.metadata.celltoolbar="Slideshow"
+            self.output.metadata.celltoolbar = "Slideshow"
 
 
         # Update metadata
