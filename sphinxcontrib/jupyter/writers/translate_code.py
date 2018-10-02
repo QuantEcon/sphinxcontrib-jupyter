@@ -43,6 +43,9 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_slide = builder.config["jupyter_slide"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
 
+        # set the value of the cell metadata["slideshow"] to slide as the default option
+        self.slide = "slide" 
+
         # Header Block
         template_paths = builder.config["templates_path"]
         header_block_filename = builder.config["jupyter_header_block"]
@@ -207,6 +210,9 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
 
             new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
+
+            # add slide metadata on each cell, value by default: slide
+            new_code_cell.metadata["slideshow"] = { 'slide_type': self.slide}
             #Save Collapse Cell Option for HTML Parser
             if "collapse" in node["classes"]:
                 new_code_cell["metadata"]["html-class"] = 'collapse'

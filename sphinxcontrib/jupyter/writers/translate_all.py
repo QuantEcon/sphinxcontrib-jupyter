@@ -50,7 +50,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_citation = False
 
         self.table_builder = None
-        self.slide = "Slide" #value by default
+        self.slide = "slide" #value by default
+
 
     # specific visit and depart methods
     # ---------------------------------
@@ -269,7 +270,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_footnote_reference(self, node):
         self.in_footnote_reference = True
-        self.markdown_lines.append("<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid']))
+        if self.jupyter_target_html:
+            link = "<sup><a href=#{}>[{}]</a></sup>".format(node.attributes['refid'], node.astext())
+        else:
+            link = "<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid'])
+        self.markdown_lines.append(link)
         raise nodes.SkipNode
 
     def depart_footnote_reference(self, node):
@@ -530,7 +535,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.markdown_lines.append("<a id='{}'></a>\n*[{}]* ".format(id_text, node.astext()))
+            self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
             raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
@@ -577,8 +582,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_jupyter_node(self, node):
         if node['cell-break']:
             self.add_markdown_cell()
-        elif node['slide'] in node.attributes:
-            pass
+        elif 'slide' in node.attributes:
+            self.slide = node['slide']  #to set the value to something different than slide
         else:
             pass
 
@@ -616,19 +621,19 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def add_markdown_cell(self):
         """split a markdown cell here
 
+        * add the slideshow metadata
         * append `markdown_lines` to notebook
         * reset `markdown_lines`
         """
         line_text = "".join(self.markdown_lines)
         formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-        slide_info = { 'Slide_type': 'Slide'}
-         
+        slide_info = { 'slide_type': self.slide}
+
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            new_md_cell.metadata["Slideshow"] = slide_info
-            #print("i'm here")
-          #  self.output["cells"].append(new_md_cell)
+            new_md_cell.metadata["slideshow"] = slide_info
+            self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
     @classmethod
