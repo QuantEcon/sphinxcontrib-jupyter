@@ -37,4 +37,16 @@ Further Inline
 A continuation Ramsey planner at :math:`t \geq 1` takes 
 :math:`(x_{t-1}, s_{t-1}) = (x_-, s_-)` as given and before 
 :math:`s` is realized chooses 
-:math:`(n_t(s_t), x_t(s_t)) = (n(s), x(s))` for :math:`s \in  {\cal S}` 
+:math:`(n_t(s_t), x_t(s_t)) = (n(s), x(s))` for :math:`s \in  {\cal S}`
+
+Referenced Math
+---------------
+
+Simple test case with reference in text
+
+.. math::
+   :label: test
+
+    v = p + \beta v
+
+this is a reference to :eq:`test` which is the above equation
