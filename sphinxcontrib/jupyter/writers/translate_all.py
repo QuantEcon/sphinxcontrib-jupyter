@@ -268,7 +268,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_footnote_reference(self, node):
         self.in_footnote_reference = True
-        self.markdown_lines.append("<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid']))
+        if self.jupyter_target_html:
+            link = "<sup><a href=#{}>[{}]</a></sup>".format(node.attributes['refid'], node.astext())
+        else:
+            link = "<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid'])
+        self.markdown_lines.append(link)
         raise nodes.SkipNode
 
     def depart_footnote_reference(self, node):
