@@ -533,7 +533,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.markdown_lines.append("<a id='{}'></a>\n*[{}]* ".format(id_text, node.astext()))
+            self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
             raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
