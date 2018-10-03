@@ -12,17 +12,4 @@ blocks in the notebook
 
 This text should follow in a separate cell.
 
-Output Cells
-------------
 
-The following code block should have an output block
-
-.. code-block:: python3
-
-    import numpy as np 
-
-.. jupyter::
-   :type: output
-
-   This text is in an output block
-   that contains two lines of text
