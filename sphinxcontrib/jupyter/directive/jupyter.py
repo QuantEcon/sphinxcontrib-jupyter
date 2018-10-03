@@ -1,7 +1,7 @@
 from docutils import nodes
 from docutils.parsers.rst import directives, Directive
 
-class JupyterNode(nodes.Structural, nodes.Element): 
+class jupyter_node(nodes.Structural, nodes.Element): 
     pass
 
 class Jupyter(Directive):
@@ -13,10 +13,8 @@ class Jupyter(Directive):
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True
-    option_spec = {
-        'cell-break': directives.flag,
-        'type': directives.unchanged
-        }
+    option_spec = {'cell-break': directives.flag,
+                   'type': directives.unchanged}
     has_content = True
     add_index = False
  
@@ -25,16 +23,16 @@ class Jupyter(Directive):
         # gives you access to the parameter stored
         # in the main configuration file (conf.py)
         config = env.config
-        options = self.options
-
+         
+        # we create a cell
+        idb = nodes.make_id("new-cell")
+        cell = nodes.section(ids=[idb])
+         
         # we create a new cell and we add it to the node tree
-        node = JupyterNode()
+        node = jupyter_node()
         if 'cell-break' in self.options:
             node['cell-break'] = True
-        elif 'type' in self.options:
-            node.children.append(nodes.literal(self.content.data))
-            node['type'] = self.options['type']
-
+ 
         # we return the result
         return [ node ]
 
