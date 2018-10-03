@@ -50,6 +50,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_citation = False
 
         self.table_builder = None
+
+        # Slideshow option variable defined in the conf.py
+        self.jupyter_slide = builder.config["jupyter_slide"] #True or false depending if we want to create slides or not
         self.slide = "slide" #value by default
 
 
@@ -632,7 +635,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            new_md_cell.metadata["slideshow"] = slide_info
+            if self.jupyter_slide:
+                new_md_cell.metadata["slideshow"] = slide_info
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
