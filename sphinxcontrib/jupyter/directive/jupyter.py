@@ -25,7 +25,6 @@ class Jupyter(Directive):
         # gives you access to the parameter stored
         # in the main configuration file (conf.py)
         config = env.config
-        options = self.options
 
         # we create a new cell and we add it to the node tree
         node = JupyterNode()
