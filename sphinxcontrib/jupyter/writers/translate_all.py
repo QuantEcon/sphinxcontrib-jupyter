@@ -585,13 +585,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_jupyter_node(self, node):
         if node['cell-break']:
             self.add_markdown_cell()
-        elif 'slide' in node.attributes:
+        elif node['slide'] is not None:
             self.slide = node['slide']  #to set the value to something different than slide
         else:
             pass
 
     def depart_jupyter_node(self, node):
         pass
+       # if node['slide'] is not None:
+       #     pass
 
     def visit_comment(self, node):
         raise nodes.SkipNode
