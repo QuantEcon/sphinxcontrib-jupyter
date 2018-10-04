@@ -29,6 +29,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    only
    quote
    simple_notebook
+   Slideshow
    solutions
    tables
    tests

@@ -28,8 +28,7 @@ The previous function was
 
 
 .. jupyter::
-    :cell-break:
-    :slide: subslide
+    :slide: fragment
 
 We can also include the figures from some folder
 

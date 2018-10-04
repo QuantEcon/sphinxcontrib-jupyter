@@ -30,7 +30,7 @@ class Jupyter(Directive):
             node['cell-break'] = True
         
         elif 'slide' in self.options:
-            node.append(nodes.literal(self.content.data))
+          #  node.append(nodes.literal(self.content.data))
             node['slide'] = self.options['slide']
         
 
