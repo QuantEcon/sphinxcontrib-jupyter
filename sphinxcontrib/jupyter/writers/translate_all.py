@@ -268,11 +268,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_footnote_reference(self, node):
         self.in_footnote_reference = True
-        if self.jupyter_target_html:
-            link = "<sup><a href=#{}>[{}]</a></sup>".format(node.attributes['refid'], node.astext())
-        else:
-            link = "<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid'])
-        self.markdown_lines.append(link)
+        self.markdown_lines.append("<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid']))
         raise nodes.SkipNode
 
     def depart_footnote_reference(self, node):
@@ -533,7 +529,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            self.markdown_lines.append("<a id='{}'></a>\n*[{}]* ".format(id_text, node.astext()))
             raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
@@ -573,19 +569,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_note(self, node):
         self.in_note = False
 
-    # =============
-    # Jupyter Nodes
-    # =============
-
-    def visit_jupyter_node(self, node):
-        if node['cell-break']:
-            self.add_markdown_cell()
-        else:
-            pass
-
-    def depart_jupyter_node(self, node):
-        pass
-
     def visit_comment(self, node):
         raise nodes.SkipNode
 
@@ -611,6 +594,24 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if self.in_toctree:
             self.markdown_lines.append("\n")
 
+    # =============
+    # Jupyter Nodes
+    # =============
+
+    def visit_jupyter_node(self, node):
+        if 'cell-break' in node.attributes:
+            self.add_markdown_cell()
+        elif 'type' in node.attributes:
+            if node.attributes['type'] == 'output':
+                pass
+        else:
+            pass
+
+    def depart_jupyter_node(self, node):
+        if 'type' in node.attributes:
+            if node.attributes['type'] == 'output':
+                self.add_output_cell()
+
     # ================
     # general methods
     # ================
@@ -628,6 +629,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
+    def add_output_cell(self):
+        line_text = "".join(self.markdown_lines)
+        formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
+        new_out_cell = nbformat.v4.new_output(output_type='execute_result', \
+            data=formatted_line_text, execution_count=0)
+        self.output["cells"].append(new_out_cell)
+        self.markdown_lines = []
+
     @classmethod
     def split_uri_id(cls, uri):
         return re.search(cls.SPLIT_URI_ID_REGEX, uri).groups()
@@ -639,4 +648,3 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             return "{}{}#{}".format(uri, ext, id_)
 
         return uri
-
