@@ -268,10 +268,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_footnote_reference(self, node):
         self.in_footnote_reference = True
+        refid = node.attributes['refid']
+        ids = node.astext()
         if self.jupyter_target_html:
-            link = "<sup><a href=#{}>[{}]</a></sup>".format(node.attributes['refid'], node.astext())
+            link = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(refid, refid, ids)
         else:
-            link = "<sup>[{}](#{})</sup>".format(node.astext(), node.attributes['refid'])
+            link = "<sup>[{}](#{})</sup>".format(ids, refid)
         self.markdown_lines.append(link)
         raise nodes.SkipNode
 
@@ -533,7 +535,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            if self.jupyter_target_html:
+                self.markdown_lines.append("<p><a id={} href={}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
+            else:
+                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
             raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
