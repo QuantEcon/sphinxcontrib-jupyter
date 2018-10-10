@@ -578,6 +578,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_note(self, node):
         self.in_note = False
 
+    def depart_raw(self, node):
+        self.markdown_lines.append("\n\n")
+
     # =============
     # Jupyter Nodes
     # =============
