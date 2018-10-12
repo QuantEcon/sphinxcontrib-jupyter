@@ -83,7 +83,7 @@ class JupyterOutputCellGenerators(Enum):
         for item in class_list:
             if item == "no-execute" and not obj.jupyter_ignore_no_execute:
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
-            elif item == "skip-test":
+            elif item == "skip-test" and not obj.jupyter_ignore_skip_test:
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT

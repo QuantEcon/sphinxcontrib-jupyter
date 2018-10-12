@@ -17,6 +17,7 @@ def setup(app):
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
+    app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     
     # Jupyter Directive
     app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
