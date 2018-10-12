@@ -40,6 +40,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]
+        self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
 
