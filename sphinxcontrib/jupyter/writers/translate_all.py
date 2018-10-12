@@ -380,6 +380,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.markdown_lines[self.reference_text_start:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
+            if self.jupyter_target_html:
+                #Adjust contents (toc) text when targetting html to prevent nbconvert from breaking html on )
+                uri_text = uri_text.replace("(", "%28")
+                uri_text = uri_text.replace(")", "%29")
             formatted_text = "](#{})".format(uri_text)
             self.markdown_lines.append(formatted_text)
         else:
