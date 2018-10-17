@@ -9,7 +9,7 @@ blocks in the notebook
 
 .. jupyter::
    :cell-break:
-   :slide: slide
+   :slide-type: subslide
 
 This text should follow in a separate cell.
 

@@ -92,13 +92,15 @@ class JupyterBuilder(Builder):
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
+            self.info(static_path)
+            print(static_path)
             entry = os.path.join(self.confdir, static_path)
             if not os.path.exists(entry):
                 self.warn(
                     "jupyter_static_path entry {} does not exist"
                     .format(entry))
             else:
-                copy_asset(entry, os.path.join(self.outdir, "_static"))
+                copy_asset(entry, os.path.join(self.outdir, "jupyter_static_file_path"))
         self.info("done")
 
     def finish(self):

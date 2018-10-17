@@ -14,7 +14,7 @@ class Jupyter(Directive):
     optional_arguments = 0
     final_argument_whitespace = True
     option_spec = {'cell-break': directives.flag,
-                   'slide': directives.unchanged}
+                   'slide-type': directives.unchanged}
     has_content = True
     add_index = False
  
@@ -29,9 +29,12 @@ class Jupyter(Directive):
         if 'cell-break' in self.options:
             node['cell-break'] = True
         
-        elif 'slide' in self.options:
-          #  node.append(nodes.literal(self.content.data))
-            node['slide'] = self.options['slide']
+        elif 'slide-type' in self.options:
+            #node.parent.append(nodes.literal(self.content.data))
+            node['slide-type'] = self.options['slide-type']
+        
+        else:
+            pass
         
 
  
