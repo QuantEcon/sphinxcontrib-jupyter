@@ -63,7 +63,7 @@ class JupyterBuilder(Builder):
                 pass
 
     def get_target_uri(self, docname, typ=None):
-        return docname
+        return docname 
 
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
@@ -88,7 +88,6 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
-        ensuredir(os.path.join(self.outdir, '_static'))
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -98,7 +97,7 @@ class JupyterBuilder(Builder):
                     "jupyter_static_path entry {} does not exist"
                     .format(entry))
             else:
-                copy_asset(entry, os.path.join(self.outdir, "_static"))
+                copy_asset(entry, os.path.join(self.outdir, static_path))
         self.info("done")
 
     def finish(self):

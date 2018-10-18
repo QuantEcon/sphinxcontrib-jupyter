@@ -180,7 +180,12 @@ jupyter_conversion_mode = "all"
 jupyter_write_metadata = False
 
 # Location for _static folder
-jupyter_static_file_path = ["_static"]
+# Include in folders the name of each one of the lecture folders
+folders =  ["images", "simple_notebook"]
+# We will include the path so the subfolder _static to copy their elements
+jupyter_static_file_path = []
+for i in range(len(folders)):
+    jupyter_static_file_path.append(folders[i]+"/_static")
 
 # Configure Jupyter Kernels
 jupyter_kernels = {

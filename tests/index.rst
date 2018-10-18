@@ -17,7 +17,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    equation_labels
    footnotes
    ignore
-   images
+   images/images
    inline
    jupyter
    links
@@ -28,10 +28,11 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    notes
    only
    quote
-   simple_notebook
+   simple_notebook/simple_notebook
    solutions
    tables
    tests
+   test_static/test_static
 
    
 Indices and tables
