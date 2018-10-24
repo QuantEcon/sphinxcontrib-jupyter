@@ -102,3 +102,4 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
+ 

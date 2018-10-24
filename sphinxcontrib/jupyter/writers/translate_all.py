@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import re
 import nbformat.v4
+import os.path
 from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
 
@@ -50,6 +51,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_citation = False
 
         self.table_builder = None
+        self.jupyter_static_folder = True
 
     # specific visit and depart methods
     # ---------------------------------
@@ -132,6 +134,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
+        if self.jupyter_static_folder:
+            uri = os.path.join("_static/", os.path.basename(uri))
+        print(uri)
         attrs = node.attributes
         # Construct HTML image
         image = '<img src="{}" '.format(uri)

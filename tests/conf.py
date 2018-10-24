@@ -181,7 +181,7 @@ jupyter_write_metadata = False
 
 # Location for _static folder
 # Include in folders the name of each one of the lecture folders
-folders =  ["images", "simple_notebook"]
+folders =  ["images", "simple_notebook", "test_static"]
 # We will include the path so the subfolder _static to copy their elements
 jupyter_static_file_path = []
 for i in range(len(folders)):
