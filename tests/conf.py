@@ -221,3 +221,6 @@ jupyter_drop_tests = True
 
 # Add Ipython as Synonym for tests
 jupyter_lang_synonyms = ["ipython"]
+
+# Add static folders per lecture
+jupyter_static_folder = True 
