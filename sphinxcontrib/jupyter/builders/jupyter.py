@@ -88,7 +88,7 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
-
+        ensuredir(os.path.join(self.outdir, '_static'))
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)

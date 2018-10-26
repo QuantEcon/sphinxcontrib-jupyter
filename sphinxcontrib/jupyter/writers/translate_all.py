@@ -136,7 +136,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         uri = node.attributes["uri"]
         if self.jupyter_static_folder:
             uri = os.path.join("_static/", os.path.basename(uri))
-        print(uri)
         attrs = node.attributes
         # Construct HTML image
         image = '<img src="{}" '.format(uri)

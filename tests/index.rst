@@ -18,6 +18,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    footnotes
    ignore
    images/images
+   images
    inline
    jupyter
    links

@@ -177,15 +177,21 @@ texinfo_documents = [
 # If "code", convert code-blocks only
 jupyter_conversion_mode = "all"
 
-jupyter_write_metadata = False
+jupyter_write_metadata = True
 
 # Location for _static folder
-# Include in folders the name of each one of the lecture folders
+# Include in *folders* the name of each one of the lecture folders
+# in this case given by "images", "simple_notebook" and "test_static"
 folders =  ["images", "simple_notebook", "test_static"]
-# We will include the path so the subfolder _static to copy their elements
-jupyter_static_file_path = []
+
+# We will include the path to the subfolder _static to copy their elements
+# its first element is "_static" to have a global static folder
+jupyter_static_file_path = ["_static"]
 for i in range(len(folders)):
     jupyter_static_file_path.append(folders[i]+"/_static")
+
+
+
 
 # Configure Jupyter Kernels
 jupyter_kernels = {
@@ -223,4 +229,4 @@ jupyter_drop_tests = True
 jupyter_lang_synonyms = ["ipython"]
 
 # Add static folders per lecture
-jupyter_static_folder = True 
+jupyter_static_folder = True
