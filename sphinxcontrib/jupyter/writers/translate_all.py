@@ -583,18 +583,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # =============
 
     def visit_jupyter_node(self, node):
-        if node['cell-break']:
+        if 'cell-break' in node.attributes:
             self.add_markdown_cell()
-        elif node['slide-type']!= 'slide': 
+        if 'slide-type' in node.attributes: 
             # pass   
             self.slide = node['slide-type']
         else:
             pass
 
     def depart_jupyter_node(self, node):
-        # if node['slide-type']!= 'slide':    
-            # self.slide = node['slide-type']
-        pass
+        if 'slide-type' in node.attributes: 
+            #self.slide = "slide"
+            pass
 
         
 
@@ -642,6 +642,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
             if self.jupyter_slide:
                 new_md_cell.metadata["slideshow"] = slide_info
+                self.slide = "slide"
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 

@@ -5,6 +5,7 @@ This is a collection of different types of cells where the toolbar: Slideshow ha
 
 .. jupyter::
 	:cell-break:
+    :slide-type: fragment
 
 
 The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, *note*) for each one. We used our **jupyter** directive  to break the markdown cell into two different cells.
@@ -22,15 +23,17 @@ The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, 
 Math 
 ++++
 
+
+.. jupyter::
+    :cell-break:
+    :slide-type: subslide
+    
 The previous function was 
 
 .. math:: f(x)=\sin(4\pi x)e^{-5x}
 
 
-.. jupyter::
-    :cell-break:
-    :slide-type: fragment
-    
+
 
 We can also include the figures from some folder
 
