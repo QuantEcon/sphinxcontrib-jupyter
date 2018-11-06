@@ -182,7 +182,7 @@ jupyter_write_metadata = True
 # Location for _static folder
 # Include in *folders* the name of each one of the lecture folders
 # in this case given by "images", "simple_notebook" and "test_static"
-folders =  ["images", "simple_notebook", "test_static", "Lect1"]
+folders =  ["images", "simple_notebook", "test_static"]
 
 # We will include the path to the subfolder _static to copy their elements
 # its first element is "_static" to have a global static folder
