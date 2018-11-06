@@ -4,8 +4,8 @@ This provides a collection of source RST documents and compiled ``jupyter`` note
 
 
 
-Usage of local folders
-======================
+Usage of local static folders
+=============================
 
 The following additions must be made to ``conf.py`` file.
 
