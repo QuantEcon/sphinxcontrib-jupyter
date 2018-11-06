@@ -29,12 +29,12 @@ class Jupyter(Directive):
         if 'cell-break' in self.options:
             node['cell-break'] = True
         
-        elif 'slide-type' in self.options:
+        if 'slide-type' in self.options:
             #node.parent.append(nodes.literal(self.content.data))
             node['slide-type'] = self.options['slide-type']
         
-        else:
-            pass
+        
+        
         
 
  

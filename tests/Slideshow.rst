@@ -3,13 +3,13 @@ Tool bar activated
 
 This is a collection of different types of cells where the toolbar: Slideshow has been activated
 
-.. jupyter::
-	:cell-break:
-    :slide-type: fragment
-
 
 The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, *note*) for each one. We used our **jupyter** directive  to break the markdown cell into two different cells.
 
+
+.. jupyter::
+    :cell-break:
+    :slide-type: subslide
 
 .. code:: python3
 
@@ -20,20 +20,29 @@ The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, 
 
     print(y)
 
+.. code:: python3
+
+    import numpy as np
+
+    z = np.cos(3 * np.pi * x) * np.exp(-2 * x)
+    w = z*y
+
+    print(w)
+
+
 Math 
 ++++
 
 
-.. jupyter::
-    :cell-break:
-    :slide-type: subslide
     
 The previous function was 
 
-.. math:: f(x)=\sin(4\pi x)e^{-5x}
+.. math:: f(x)=\sin(4\pi x)\cos(4\pi x)e^{-7x}
 
 
-
+.. jupyter::
+    :cell-break:
+    :slide-type: fragment
 
 We can also include the figures from some folder
 

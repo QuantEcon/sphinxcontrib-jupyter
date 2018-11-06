@@ -214,6 +214,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             # add slide metadata on each cell, value by default: slide
             if self.jupyter_slide:
                 new_code_cell.metadata["slideshow"] = { 'slide_type': self.slide}
+                self.slide = "slide"
             #Save Collapse Cell Option for HTML Parser
             if "collapse" in node["classes"]:
                 new_code_cell["metadata"]["html-class"] = 'collapse'

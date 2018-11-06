@@ -592,8 +592,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             pass
 
     def depart_jupyter_node(self, node):
+        if 'cell-break' in node.attributes:
+            pass
         if 'slide-type' in node.attributes: 
-            #self.slide = "slide"
             pass
 
         
