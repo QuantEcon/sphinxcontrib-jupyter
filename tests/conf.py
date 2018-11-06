@@ -177,7 +177,7 @@ texinfo_documents = [
 # If "code", convert code-blocks only
 jupyter_conversion_mode = "all"
 
-jupyter_write_metadata = True
+jupyter_write_metadata = False
 
 # Location for _static folder
 # Include in *folders* the name of each one of the lecture folders
