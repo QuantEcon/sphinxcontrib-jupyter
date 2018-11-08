@@ -109,7 +109,7 @@ class JupyterOutputCellGenerators(Enum):
             # so that Jupyter renders the markdown correctly.
             language = translator.nodelang if translator.nodelang else ""
             if language == "none":
-                raw_markdown = "```" + "\n" + formatted_text + "\n```\n"
+                raw_markdown = "```" + "text" + "\n" + formatted_text + "\n```\n"
             else:
                 raw_markdown = "```" + language + "\n" + formatted_text + "\n```\n"
             res = nbformat.v4.new_markdown_cell(raw_markdown)
