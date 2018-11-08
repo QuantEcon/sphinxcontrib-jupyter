@@ -35,6 +35,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.output = nbformat.v4.new_notebook()
 
         # Variables defined in conf.py
+        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]

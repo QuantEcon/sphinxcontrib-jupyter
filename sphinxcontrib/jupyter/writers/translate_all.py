@@ -135,8 +135,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_images_urlpath is not None:
-            fln = uri.split("/")[-1]
-            uri = self.jupyter_images_urlpath + fln
+            for file_path in self.jupyter_static_file_path:
+                if file_path in uri:
+                    uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
+                    break  #don't need to check other matches
         attrs = node.attributes
         # Construct HTML image
         image = '<img src="{}" '.format(uri)
