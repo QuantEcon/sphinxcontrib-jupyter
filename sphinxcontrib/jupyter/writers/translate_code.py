@@ -43,6 +43,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
+        self.jupyter_images_urlpath = builder.config["jupyter_images_urlpath"]
 
         # Header Block
         template_paths = builder.config["templates_path"]

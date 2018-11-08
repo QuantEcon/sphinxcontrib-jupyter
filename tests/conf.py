@@ -216,3 +216,8 @@ jupyter_drop_tests = True
 
 # Add Ipython as Synonym for tests
 jupyter_lang_synonyms = ["ipython"]
+
+# Image Prefix (enable web storage references)
+# jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+
+

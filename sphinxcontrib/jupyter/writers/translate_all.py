@@ -49,6 +49,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level = 0
         self.in_citation = False
 
+        self.images = []
         self.table_builder = None
 
     # specific visit and depart methods
@@ -132,6 +133,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
+        self.images.append(uri)             #TODO: list of image files
+        if self.jupyter_images_urlpath is not None:
+            fln = uri.split("/")[-1]
+            uri = self.jupyter_images_urlpath + fln
         attrs = node.attributes
         # Construct HTML image
         image = '<img src="{}" '.format(uri)
