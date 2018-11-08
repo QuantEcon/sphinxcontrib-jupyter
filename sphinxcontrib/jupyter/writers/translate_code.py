@@ -39,6 +39,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
+        self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]
+        self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
         self.jupyter_slide = builder.config["jupyter_slide"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
@@ -175,7 +177,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     #  code blocks
     # ================
     def visit_literal_block(self, node):
-        _parse_class = JupyterOutputCellGenerators.GetGeneratorFromClasses(node.attributes['classes'])
+        _parse_class = JupyterOutputCellGenerators.GetGeneratorFromClasses(self, node)
         self.output_cell_type = _parse_class["type"]
         self.solution = _parse_class["solution"]
         self.test = _parse_class["test"]

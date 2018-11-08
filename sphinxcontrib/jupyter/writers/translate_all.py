@@ -385,6 +385,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.markdown_lines[self.reference_text_start:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
+            if self.jupyter_target_html:
+                #Adjust contents (toc) text when targetting html to prevent nbconvert from breaking html on )
+                uri_text = uri_text.replace("(", "%28")
+                uri_text = uri_text.replace(")", "%29")
             formatted_text = "](#{})".format(uri_text)
             self.markdown_lines.append(formatted_text)
         else:
@@ -543,7 +547,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_html:
                 self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
             else:
-                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))            raise nodes.SkipNode
+                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
 
@@ -581,6 +586,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_note(self, node):
         self.in_note = False
+
+    def depart_raw(self, node):
+        self.markdown_lines.append("\n\n")
 
     # =============
     # Jupyter Nodes
