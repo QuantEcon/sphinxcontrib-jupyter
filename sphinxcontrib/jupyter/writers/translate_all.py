@@ -543,7 +543,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_html:
                 self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
             else:
-                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))            raise nodes.SkipNode
+                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))            
+                raise nodes.SkipNode
         if self.in_citation:
             self.markdown_lines.append("\[")
 

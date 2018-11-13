@@ -3,6 +3,8 @@ Tool bar activated
 
 This is a collection of different types of cells where the toolbar: Slideshow has been activated
 
+.. jupyter::
+    :cell-break:
 
 The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, *note*) for each one. We used our **jupyter** directive  to break the markdown cell into two different cells.
 
