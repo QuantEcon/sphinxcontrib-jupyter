@@ -3,6 +3,8 @@ import re
 import nbformat.v4
 from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
+from shutil import copyfile
+
 
 
 class JupyterTranslator(JupyterCodeTranslator, object):
@@ -50,6 +52,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_citation = False
 
         self.images = []
+        self.files = []
         self.table_builder = None
 
     # specific visit and depart methods
@@ -66,6 +69,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         Almost the exact same implementation as that of the superclass.
         """
         self.add_markdown_cell()
+        if len(self.files) > 0:
+            for fl in self.files:
+                out_fl = fl.replace(self.jupyter_static_file_path[0] + "/", "_build/jupyter/")
+                print("Copying {} to {}".format(fl, out_fl))
+                copyfile(fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
 
     # =========
@@ -597,9 +605,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # =============
 
     def visit_jupyter_node(self, node):
-        if node['cell-break']:
-            self.add_markdown_cell()
-        else:
+        try:
+            if node['cell-break']:
+                self.add_markdown_cell()
+        except:
+            pass
+
+        #Parse jupyter_dependency directive
+        try:
+            self.files.append(node['uri'])
+        except:
             pass
 
     def depart_jupyter_node(self, node):
