@@ -35,6 +35,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.output = nbformat.v4.new_notebook()
 
         # Variables defined in conf.py
+        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
@@ -44,6 +45,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
         self.jupyter_slide = builder.config["jupyter_slide"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
+        self.jupyter_images_urlpath = builder.config["jupyter_images_urlpath"]
 
         # set the value of the cell metadata["slideshow"] to slide as the default option
         self.slide = "slide" 

@@ -108,7 +108,10 @@ class JupyterOutputCellGenerators(Enum):
             # Add triple backticks and the name of the language to the code block,
             # so that Jupyter renders the markdown correctly.
             language = translator.nodelang if translator.nodelang else ""
-            raw_markdown = "```" + language + "\n" + formatted_text + "\n```\n"
+            if language == "none":
+                raw_markdown = "```" + "text" + "\n" + formatted_text + "\n```\n"
+            else:
+                raw_markdown = "```" + language + "\n" + formatted_text + "\n```\n"
             res = nbformat.v4.new_markdown_cell(raw_markdown)
         else:
             raise Exception("Invalid output cell type passed to JupyterOutputCellGenerator.Generate.")
