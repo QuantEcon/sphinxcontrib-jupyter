@@ -71,7 +71,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.add_markdown_cell()
         if len(self.files) > 0:
             for fl in self.files:
-                out_fl = fl.replace(self.jupyter_static_file_path[0] + "/", "_build/jupyter/")
+                out_fl = fl.replace(self.jupyter_static_file_path[0], self.builder.outdir) #copy files to output dir  
                 print("Copying {} to {}".format(fl, out_fl))
                 copyfile(fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
