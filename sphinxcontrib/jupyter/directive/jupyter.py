@@ -37,17 +37,17 @@ class Jupyter(Directive):
 
 
 class JupyterDependency(Directive):
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = True
+    option_spec = {}
+    has_content = False
+    add_index = False
 
-     required_arguments = 1
-     optional_arguments = 0
-     final_argument_whitespace = True
-     option_spec = {}
-     has_content = False
-     add_index = False
+    def run(self):
+        # we create a new cell and add uri reference to specified file and we add it to the node tree
+        node = jupyter_node()
+        node['uri'] = directives.uri(self.arguments[0])
+        # we return the result
+        return [node]
 
-     def run(self):
-         # we create a new cell and add uri reference to specified file and we add it to the node tree
-         node = jupyter_node()
-         node['uri'] = directives.uri(self.arguments[0])
-         # we return the result
-         return [node]

@@ -6,6 +6,7 @@ from .translate_code import JupyterCodeTranslator
 from shutil import copyfile
 
 
+
 class JupyterTranslator(JupyterCodeTranslator, object):
     """ Jupyter Translator for Text and Code
     """
@@ -71,10 +72,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_document(self, node):
         """at end
         Almost the exact same implementation as that of the superclass.
-         Notes
-         -----
-         [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
-         [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
+
+        
+        Notes
+        -----
+        [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
+        [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
         """
         self.add_markdown_cell()
         if len(self.files) > 0:
