@@ -278,4 +278,4 @@ A code block with none specified as highlighter
 
    import numpy as np
 
-should be a markdown block with no 
+should be a markdown block with no highlighting
