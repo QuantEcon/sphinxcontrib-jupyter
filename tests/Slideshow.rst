@@ -1,3 +1,6 @@
+.. jupyter::
+    :metadata:
+    
 Tool bar activated
 ------------------
 

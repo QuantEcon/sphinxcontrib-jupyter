@@ -54,6 +54,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         # Slideshow option variable defined in the conf.py
         self.jupyter_slide = builder.config["jupyter_slide"] #True or false depending if we want to create slides or not
+        self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
         self.slide = "slide" #value by default
 
 
@@ -604,14 +605,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_jupyter_node(self, node):
         if 'cell-break' in node.attributes:
             self.add_markdown_cell()
+        if 'metadata' in node.attributes:
+            self.metadata_slide = True
         if 'slide-type' in node.attributes: 
-            # pass   
-            self.slide = node['slide-type']
+            self.slide = node['slide-type'] # replace the by default value 
         else:
             pass
 
     def depart_jupyter_node(self, node):
         if 'cell-break' in node.attributes:
+            pass 
+        if 'metadata' in node.attributes:
             pass
         if 'slide-type' in node.attributes: 
             pass
@@ -660,9 +664,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            if self.jupyter_slide:
+            if self.jupyter_slide and self.metadata_slide: #modify the slide metadata on each cell
                 new_md_cell.metadata["slideshow"] = slide_info
-                self.slide = "slide"
+                self.slide = "slide" # set as the by default value
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
