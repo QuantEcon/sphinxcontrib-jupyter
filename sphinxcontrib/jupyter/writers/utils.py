@@ -66,7 +66,7 @@ class JupyterOutputCellGenerators(Enum):
     CODE_OUTPUT = 3
 
     @staticmethod
-    def GetGeneratorFromClasses(class_list):
+    def GetGeneratorFromClasses(obj, node):
         """
         Infers the type of output cell to be generated from the class attributes in the original Sphinx cell.
 
@@ -78,11 +78,12 @@ class JupyterOutputCellGenerators(Enum):
             "solution" : False,
             "test" : False 
             }
+        class_list = node.attributes['classes']
 
         for item in class_list:
-            if item == "no-execute":
+            if item == "no-execute" and not obj.jupyter_ignore_no_execute:
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
-            elif item == "skip-test":
+            elif item == "skip-test" and not obj.jupyter_ignore_skip_test:
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT
