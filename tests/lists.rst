@@ -71,6 +71,7 @@ Mixed Lists
   * foo
 3. bla3
 
+
 Malformed Lists that seem to work in HTML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -112,3 +113,13 @@ Here is a computational algorithm:
 4. After computing a Ramsey allocation,  recover the flat tax rate on
    labor.
 
+Complex Lists with Code Blocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. foo, and then in your REPL run 
+
+    .. code-block:: julia 
+          
+            @assert x == 2 
+
+2. and another item in the list. Hopefully this list item can be continued in the next markdown block in the notebook
