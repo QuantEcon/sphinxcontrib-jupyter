@@ -61,6 +61,16 @@ Bullets
 
 * and here the parent list continues
 
+Mixed Lists
+~~~~~~~~~~~
+
+1. bla
+  * foo1
+  * foo 2
+2. bla2
+  * foo
+3. bla3
+
 Malformed Lists that seem to work in HTML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
