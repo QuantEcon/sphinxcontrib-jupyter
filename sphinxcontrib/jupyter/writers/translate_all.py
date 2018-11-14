@@ -610,8 +610,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.add_markdown_cell()
         except:
             pass
-
-        #Parse jupyter_dependency directive
+        #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
         try:
             self.files.append(node['uri'])
         except:
