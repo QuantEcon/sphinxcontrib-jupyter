@@ -2,7 +2,7 @@ Tool bar activated
 ------------------
 
 .. jupyter::
-    :metadata:
+    :slide: enable
 
 This is a collection of different types of cells where the toolbar: Slideshow has been activated
 
@@ -13,7 +13,6 @@ The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, 
 
 
 .. jupyter::
-    :cell-break:
     :slide-type: subslide
 
 .. code:: python3
@@ -46,7 +45,6 @@ The previous function was
 
 
 .. jupyter::
-    :cell-break:
     :slide-type: fragment
 
 We can also include the figures from some folder

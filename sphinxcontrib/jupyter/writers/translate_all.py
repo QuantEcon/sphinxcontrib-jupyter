@@ -619,7 +619,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         try:
             if 'cell-break' in node.attributes:
                 self.add_markdown_cell()
-            if 'metadata' in node.attributes:
+            if 'slide' in node.attributes:
                 self.metadata_slide = True
             if 'slide-type' in node.attributes: 
                 self.slide = node['slide-type'] # replace the by default value 
@@ -634,7 +634,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_jupyter_node(self, node):
         if 'cell-break' in node.attributes:
             pass 
-        if 'metadata' in node.attributes:
+        if 'slide' in node.attributes:
             pass
         if 'slide-type' in node.attributes: 
             pass
