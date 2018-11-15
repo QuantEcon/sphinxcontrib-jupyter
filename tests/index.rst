@@ -30,7 +30,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    only
    quote
    simple_notebook
-   slideshow
+   slides
    solutions
    tables
    tests

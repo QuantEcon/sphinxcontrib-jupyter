@@ -1,8 +1,8 @@
-.. jupyter::
-    :metadata:
-    
 Tool bar activated
 ------------------
+
+.. jupyter::
+    :metadata:
 
 This is a collection of different types of cells where the toolbar: Slideshow has been activated
 
