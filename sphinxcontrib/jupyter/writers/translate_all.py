@@ -4,7 +4,7 @@ import nbformat.v4
 from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
 from shutil import copyfile
-
+import os
 
 
 class JupyterTranslator(JupyterCodeTranslator, object):
@@ -73,11 +73,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
         """
         self.add_markdown_cell()
+        #Parse .. jupyter-dependency::
         if len(self.files) > 0:
             for fl in self.files:
-                out_fl = fl.replace(self.jupyter_static_file_path[0], self.builder.outdir) #copy files to output dir  
-                print("Copying {} to {}".format(fl, out_fl))
-                copyfile(fl, out_fl)
+                src_fl = os.path.join(self.builder.srcdir, fl)
+                out_fl = os.path.join(self.builder.outdir, os.path.basename(fl))   #copy file to same location as notebook (remove dir structure)
+                #Check if output directory exists
+                out_dir = os.path.dirname(out_fl)
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                print("Copying {} to {}".format(src_fl, out_fl))
+                copyfile(src_fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
 
     # =========
