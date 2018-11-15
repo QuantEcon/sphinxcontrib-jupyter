@@ -43,7 +43,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]
         self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
-        self.jupyter_slide = builder.config["jupyter_slide"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
         self.jupyter_images_urlpath = builder.config["jupyter_images_urlpath"]
 
@@ -131,7 +130,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             self.lang = self.default_lang
 
         # metadata for slides, this activates the option where each cell can be a slide
-        if self.jupyter_slide and self.metadata_slide:
+        if self.metadata_slide:
             self.output.metadata.celltoolbar = "Slideshow"
 
 
@@ -217,7 +216,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
 
             # add slide metadata on each cell, value by default: slide
-            if self.jupyter_slide and self.metadata_slide:   #value by default for all the notebooks, we change it for those we want
+            if self.metadata_slide:   #value by default for all the notebooks, we change it for those we want
                 new_code_cell.metadata["slideshow"] = { 'slide_type': self.slide}
                 self.slide = "slide"
             #Save Collapse Cell Option for HTML Parser

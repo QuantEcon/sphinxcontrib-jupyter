@@ -17,7 +17,6 @@ def setup(app):
     app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
-    app.add_config_value("jupyter_slide", True, "jupyter")  
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     
