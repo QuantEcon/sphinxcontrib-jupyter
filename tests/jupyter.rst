@@ -10,7 +10,6 @@ blocks in the notebook
 
 .. jupyter::
    :cell-break:
-   :slide-type: subslide
 
 This text should follow in a separate cell.
 
