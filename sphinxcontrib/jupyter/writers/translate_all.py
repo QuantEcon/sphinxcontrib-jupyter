@@ -619,7 +619,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if 'cell-break' in node.attributes:
                 self.add_markdown_cell()
             if 'slide' in node.attributes:
-                self.metadata_slide = True #this activates the slideshow metadata for the notebook
+                self.metadata_slide = node['slide'] #this activates the slideshow metadata for the notebook
             if 'slide-type' in node.attributes: 
                 self.slide = node['slide-type'] # replace the by default value 
         except:

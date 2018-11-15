@@ -1,5 +1,5 @@
-Tool bar activated
-------------------
+Slide option activated
+----------------------
 
 .. jupyter::
     :slide: enable
@@ -45,6 +45,7 @@ The previous function was
 
 
 .. jupyter::
+    :cell-break:
     :slide-type: fragment
 
 We can also include the figures from some folder
