@@ -24,6 +24,7 @@ def setup(app):
     app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
+
    
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")

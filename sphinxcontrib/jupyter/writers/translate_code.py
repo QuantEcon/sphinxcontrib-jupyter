@@ -46,6 +46,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_target_html = builder.config["jupyter_target_html"]
         self.jupyter_images_urlpath = builder.config["jupyter_images_urlpath"]
 
+        # set the value of the cell metadata["slideshow"] to slide as the default option
+        self.slide = "slide" 
+        self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
+
+
         # Header Block
         template_paths = builder.config["templates_path"]
         header_block_filename = builder.config["jupyter_header_block"]
@@ -123,6 +128,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
                 "Highlighting language is not given in .rst file. "
                 "Set kernel as default(python3)")
             self.lang = self.default_lang
+
+        # metadata for slides, this activates the option where each cell can be a slide
+        if self.metadata_slide:
+            self.output.metadata.celltoolbar = "Slideshow"
+
 
         # Update metadata
         if self.jupyter_kernels is not None:
@@ -203,8 +213,12 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         else: # Don't skip otherwise. 
             line_text = "".join(self.code_lines)
             formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-
             new_code_cell = self.output_cell_type.Generate(formatted_line_text, self)
+
+            # add slide metadata on each cell, value by default: slide
+            if self.metadata_slide:   #value by default for all the notebooks, we change it for those we want
+                new_code_cell.metadata["slideshow"] = { 'slide_type': self.slide}
+                self.slide = "slide"
             #Save Collapse Cell Option for HTML Parser
             if "collapse" in node["classes"]:
                 new_code_cell["metadata"]["html-class"] = 'collapse'

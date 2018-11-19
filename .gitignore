@@ -6,3 +6,4 @@ __pycache__
 tests/_build/
 tests/ipynb/*checkpoints
 *.pyc
+.DS_Store
