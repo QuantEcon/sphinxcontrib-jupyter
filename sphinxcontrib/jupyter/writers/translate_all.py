@@ -426,6 +426,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                        if self.jupyter_target_html_urlpath is not None:
+                            refuri = self.jupyter_target_html_urlpath + refuri
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
