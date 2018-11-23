@@ -1,6 +1,7 @@
 from .builders.jupyter import JupyterBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
+from .directive.jupyter import JupyterDependency
 from .transform import JupyterOnlyTransform
 
 def setup(app):
@@ -23,10 +24,13 @@ def setup(app):
     # Jupyter Directive
     app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
     app.add_directive("jupyter", JupyterDirective)
+    app.add_directive("jupyter-dependency", JupyterDependency)
    
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
     app.add_config_value("jupyter_target_html", False, "jupyter")
+    app.add_config_value("jupyter_images_urlpath", None, "jupyter")
+
 
     return {
         "version": "0.2.1",

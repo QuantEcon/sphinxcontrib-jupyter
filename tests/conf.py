@@ -182,7 +182,8 @@ jupyter_write_metadata = False
 # Location for _static folder
 # Include in *folders* the name of each one of the lecture folders
 # in this case given by "images", "simple_notebook" and "test_static"
-folders =  ["images", "simple_notebook", "test_static"]
+#folders =  ["images", "simple_notebook", "test_static"]
+folders = []
 
 # We will include the path to the subfolder _static to copy their elements
 # its first element is "_static" to have a global static folder
@@ -229,4 +230,8 @@ jupyter_drop_tests = True
 jupyter_lang_synonyms = ["ipython"]
 
 # Add static folders per lecture
-jupyter_static_folder = True
+jupyter_static_folder = False
+# Image Prefix (enable web storage references)
+# jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+
+

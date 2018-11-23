@@ -4,6 +4,8 @@ import nbformat.v4
 import os.path
 from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
+from shutil import copyfile
+import os
 
 
 class JupyterTranslator(JupyterCodeTranslator, object):
@@ -50,8 +52,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level = 0
         self.in_citation = False
 
+        self.images = []
+        self.files = []
         self.table_builder = None
-        self.jupyter_static_folder = True
+        self.jupyter_static_folder = False
 
     # specific visit and depart methods
     # ---------------------------------
@@ -63,10 +67,25 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_document(self, node):
         """at end
-
         Almost the exact same implementation as that of the superclass.
+        
+        Notes
+        -----
+        [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
+        [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
         """
         self.add_markdown_cell()
+        #Parse .. jupyter-dependency::
+        if len(self.files) > 0:
+            for fl in self.files:
+                src_fl = os.path.join(self.builder.srcdir, fl)
+                out_fl = os.path.join(self.builder.outdir, os.path.basename(fl))   #copy file to same location as notebook (remove dir structure)
+                #Check if output directory exists
+                out_dir = os.path.dirname(out_fl)
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                print("Copying {} to {}".format(src_fl, out_fl))
+                copyfile(src_fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
 
     # =========
@@ -136,6 +155,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         uri = node.attributes["uri"]
         if self.jupyter_static_folder:
             uri = os.path.join("_static/", os.path.basename(uri))
+        self.images.append(uri)             #TODO: list of image files
+        if self.jupyter_images_urlpath is not None:
+            for file_path in self.jupyter_static_file_path:
+                if file_path in uri:
+                    uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
+                    break  #don't need to check other matches
         attrs = node.attributes
         # Construct HTML image
         image = '<img src="{}" '.format(uri)
@@ -594,9 +619,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # =============
 
     def visit_jupyter_node(self, node):
-        if node['cell-break']:
-            self.add_markdown_cell()
-        else:
+        try:
+            if node['cell-break']:
+                self.add_markdown_cell()
+        except:
+            pass
+        #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
+        try:
+            self.files.append(node['uri'])
+        except:
             pass
 
     def depart_jupyter_node(self, node):
