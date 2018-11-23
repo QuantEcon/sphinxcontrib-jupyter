@@ -30,7 +30,12 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    notes
    only
    quote
+<<<<<<< HEAD
    simple_notebook/simple_notebook
+=======
+   simple_notebook
+   slides
+>>>>>>> 3d476f2e88c63bef4dcdf42561b1777ad43ab73a
    solutions
    tables
    tests

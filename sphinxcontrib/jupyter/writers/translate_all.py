@@ -57,6 +57,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.table_builder = None
         self.jupyter_static_folder = False
 
+        # Slideshow option
+        self.metadata_slide = False  #False is the value by default for all the notebooks
+        self.slide = "slide" #value by default
+
+
     # specific visit and depart methods
     # ---------------------------------
 
@@ -68,6 +73,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_document(self, node):
         """at end
         Almost the exact same implementation as that of the superclass.
+
         
         Notes
         -----
@@ -424,6 +430,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                        if self.jupyter_target_html_urlpath is not None:
+                            refuri = self.jupyter_target_html_urlpath + refuri
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
@@ -620,8 +628,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_jupyter_node(self, node):
         try:
-            if node['cell-break']:
+            if 'cell-break' in node.attributes:
                 self.add_markdown_cell()
+            if 'slide' in node.attributes:
+                self.metadata_slide = node['slide'] #this activates the slideshow metadata for the notebook
+            if 'slide-type' in node.attributes: 
+                self.slide = node['slide-type'] # replace the by default value 
         except:
             pass
         #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
@@ -631,7 +643,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             pass
 
     def depart_jupyter_node(self, node):
-        pass
+        if 'cell-break' in node.attributes:
+            pass 
+        if 'slide' in node.attributes:
+            pass
+        if 'slide-type' in node.attributes: 
+            pass
+
+        
 
     def visit_comment(self, node):
         raise nodes.SkipNode
@@ -664,14 +683,20 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def add_markdown_cell(self):
         """split a markdown cell here
 
+        * add the slideshow metadata
         * append `markdown_lines` to notebook
         * reset `markdown_lines`
         """
         line_text = "".join(self.markdown_lines)
         formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
+        slide_info = { 'slide_type': self.slide}
+
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
+            if self.metadata_slide: #modify the slide metadata on each cell
+                new_md_cell.metadata["slideshow"] = slide_info
+                self.slide = "slide" # set as the by default value
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
