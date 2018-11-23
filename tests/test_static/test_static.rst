@@ -20,6 +20,5 @@ files that were not included in *folders*
 
 Image 
 -----
-.. jupyter-dependency:: _static/hood.jpg
 
 .. image:: _static/hood.jpg

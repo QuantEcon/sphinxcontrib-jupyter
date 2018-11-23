@@ -55,7 +55,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.images = []
         self.files = []
         self.table_builder = None
-        self.jupyter_static_folder = False
 
         # Slideshow option
         self.metadata_slide = False  #False is the value by default for all the notebooks
@@ -159,8 +158,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
-        if self.jupyter_static_folder:
-            uri = os.path.join("_static/", os.path.basename(uri))
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_images_urlpath is not None:
             for file_path in self.jupyter_static_file_path:

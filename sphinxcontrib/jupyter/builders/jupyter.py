@@ -17,6 +17,9 @@ class JupyterBuilder(Builder):
     format = "ipynb"
     out_suffix = ".ipynb"
     allow_parallel = True
+    jupyter_static_file_path = ["_static"]
+    folders = []
+
 
     _writer_class = JupyterWriter
 
@@ -68,6 +71,18 @@ class JupyterBuilder(Builder):
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
 
+
+    def update_subfolders(self, outfilename):
+        path, name  = os.path.split(outfilename)
+        if path == self.outdir: #this means that there is no subfolder
+            pass
+        else:
+            self.folders.append(os.path.basename(path))
+        # We will include the path to the subfolder _static to copy their elements
+        for i in range(len(self.folders)):
+            self.jupyter_static_file_path.append(self.folders[i]+"/_static")
+
+
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
@@ -79,6 +94,9 @@ class JupyterBuilder(Builder):
         # mkdir if the directory does not exist
         ensuredir(os.path.dirname(outfilename))
 
+        #update subfolders (if there is any)
+        self.update_subfolders(outfilename)
+      
         try:
             with codecs.open(outfilename, "w", "utf-8") as f:
                 f.write(self.writer.output)
@@ -90,7 +108,7 @@ class JupyterBuilder(Builder):
         self.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
-        for static_path in self.config["jupyter_static_file_path"]:
+        for static_path in self.jupyter_static_file_path:
             entry = os.path.join(self.confdir, static_path)
             if not os.path.exists(entry):
                 self.warn(

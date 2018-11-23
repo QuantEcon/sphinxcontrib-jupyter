@@ -230,7 +230,7 @@ jupyter_drop_tests = True
 jupyter_lang_synonyms = ["ipython"]
 
 # Add static folders per lecture
-jupyter_static_folder = False
+jupyter_static_folder = True
 # Image Prefix (enable web storage references)
 # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
 
