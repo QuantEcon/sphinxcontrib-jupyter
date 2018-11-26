@@ -434,6 +434,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
+                    #markdown doesn't handle closing brackets very well so will replace with %28 and %29
+                    refid = refid.replace("(", "%28")
+                    refid = refid.replace(")", "%29")
                     refuri = "#{}".format(refid)
                 # error
                 else:
