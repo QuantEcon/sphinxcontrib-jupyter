@@ -214,12 +214,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
                              + "<td width=10%></td>\n"\
                              + "<td width=80%>\n"\
-                             + "<div style = 'font-size: 125%;' >"\
+                             + "<div style = 'font-size: 125%;' >\n"\
                              + formatted_text.rstrip("\n")\
-                             + "</div>"\
-                             + "\n</td>"\
+                             + "\n</div>\n"\
+                             + "</td>\n"\
                              + "<td width=10% style='text-align:center !important;'>\n"\
-                             + "</div>"
+                             + "</div>\n"
 
         self.markdown_lines.append(formatted_text)
 
