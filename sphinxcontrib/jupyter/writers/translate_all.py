@@ -443,6 +443,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     self.error("Invalid reference")
                     refuri = ""
 
+            refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
+            refuri = refuri.replace(")", "%29")
             self.markdown_lines.append("]({})".format(refuri))
 
         if self.in_toctree:
