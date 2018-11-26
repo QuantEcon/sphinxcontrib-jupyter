@@ -64,11 +64,31 @@ Bullets
 Mixed Lists
 ~~~~~~~~~~~
 
+Currently mixed lists require `4 spaces` of indentation 
+
 1. bla
+
+    * foo1
+    * foo 2
+  
+2. bla2
+
+    * foo
+
+3. bla3
+
+Using 2 spaces of indentation is returned as a block_quote and is an issue that needs to be fixed 
+for compliance with RST spec.
+
+1. bla
+
   * foo1
   * foo 2
+
 2. bla2
+
   * foo
+
 3. bla3
 
 
