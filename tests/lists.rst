@@ -116,10 +116,17 @@ Here is a computational algorithm:
 Complex Lists with Code Blocks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. foo, and then in your REPL run 
+* foo, and then in your REPL run 
 
     .. code-block:: julia 
           
             @assert x == 2 
 
-2. and another item in the list. Hopefully this list item can be continued in the next markdown block in the notebook
+* and another item in the list. Hopefully this list item can be continued in the next markdown block in the notebook
+
+    * and a sublist looks like this
+    * second elements
+
+**Note:** This doesn't work well with enumerated lists as the markdown engine will start a new
+list in the subsequent markdown cells (within Jupyter). So when you have mixed code blocks in lists
+then it is best to use unordered lists.
