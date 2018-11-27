@@ -211,25 +211,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         #check for labelled math
         if node["label"]:
-            formatted_text = "<table width=100%><tr style='background-color: #FFFFFF !important;'>\n"\
-                             + "<td width=10%></td>\n"\
-                             + "<td width=80%>\n"\
-                             + "<div style = 'font-size: 125%;' >\n"\
-                             + formatted_text.rstrip("\n")\
-                             + "\n</div>\n"\
-                             + "</td>\n"\
-                             + "<td width=10% style='text-align:center !important;'>\n"\
-                             + "</div>\n"
+            #Use \tags in the LaTeX environment
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
+            formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
 
         self.markdown_lines.append(formatted_text)
 
-        # Add the line number reference.
-        if node["ids"]:
-            referenceBuilder = "(" + str(node["number"]) + ")"
-            self.markdown_lines.append(referenceBuilder)
 
-        if node["label"]:
-            self.markdown_lines.append("\n</td></tr></table>\n\n")
 
     def depart_displaymath(self, node):
         if self.in_list:
