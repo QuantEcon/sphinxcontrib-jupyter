@@ -223,6 +223,11 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             #Save Collapse Cell Option for HTML Parser
             if "collapse" in node["classes"]:
                 new_code_cell["metadata"]["html-class"] = 'collapse'
+            #Save hide-output cell option for HTML Parser
+            if "hide-output" in node["classes"]:
+                new_code_cell["metadata"]["hide-output"] = True
+            else:
+                new_code_cell["metadata"]["hide-output"] = False
             #Code Output
             if self.output_cell_type is JupyterOutputCellGenerators.CODE_OUTPUT:
                 # Output blocks must  be added to code cells to make any sense.
