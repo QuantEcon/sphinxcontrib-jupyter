@@ -186,9 +186,8 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.solution = _parse_class["solution"]
         self.test = _parse_class["test"]
 
-        try:
-            self.nodelang = node.attributes["language"].strip()
-        except:
+        self.nodelang = node.attributes["language"].strip()
+        if self.nodelang == 'default':
             self.nodelang = self.lang
 
         # Translate the language name across from the Sphinx to the Jupyter namespace
