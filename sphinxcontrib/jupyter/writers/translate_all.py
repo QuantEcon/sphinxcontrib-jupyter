@@ -37,6 +37,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_caption = False
         self.in_toctree = False
         self.in_list = False
+        self.in_math = False
+        self.in_math_block = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -50,6 +52,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_reference = False
         self.list_level = 0
         self.in_citation = False
+        self.math_block_label = None
 
         self.images = []
         self.files = []
@@ -120,6 +123,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_Text(self, node):
         text = node.astext()
 
+        if self.in_math:
+            text = '$ {} $'.format(text.strip())
+        elif self.in_math_block and self.math_block_label:
+            text = "$$\n{0}{1}$${2}".format(
+                        text.strip(), self.math_block_label, self.sep_paras
+                    )
+            self.math_block_label = None
+        elif self.in_math_block:
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
+
         if self.in_code_block:
             self.code_lines.append(text)
         elif self.table_builder:
@@ -187,41 +200,30 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # math
     def visit_math(self, node):
         """inline math"""
-        math_text = node.attributes["latex"].strip()
-        formatted_text = "$ {} $".format(math_text)
+        self.in_math = True
 
-        if self.table_builder:
-            self.table_builder['line_pending'] += formatted_text
-        else:
-            self.markdown_lines.append(formatted_text)
+    def depart_math(self, node):
+        self.in_math = False
 
-    def visit_displaymath(self, node):
+    def visit_math_block(self, node):
         """directive math"""
-        math_text = node.attributes["latex"].strip()
+        self.in_math_block = True
 
         if self.in_list and node["label"]:
             self.markdown_lines.pop()  #remove entry \n from table builder
 
-        if self.list_level == 0:
-            formatted_text = "$$\n{0}\n$${1}".format(
-                math_text, self.sep_paras)
-        else:
-            formatted_text = "$$\n{0}\n$${1}".format(
-                math_text, self.sep_paras)
-
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
-            formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            #node["ids"] should always exist for labelled displaymath
+            self.math_block_label = referenceBuilder
 
-        self.markdown_lines.append(formatted_text)
-
-
-
-    def depart_displaymath(self, node):
+    def depart_math_block(self, node):
         if self.in_list:
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
+
+        self.in_math_block = False
 
     def visit_table(self, node):
         self.table_builder = dict()
