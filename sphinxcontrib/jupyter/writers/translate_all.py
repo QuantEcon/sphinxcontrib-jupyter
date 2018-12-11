@@ -200,13 +200,65 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # math
     def visit_math(self, node):
         """inline math"""
-        self.in_math = True
+
+        # With sphinx < 1.8, a math node has a 'latex' attribute, from which the
+        # formula can be obtained and added to the text.
+
+        # With sphinx >= 1.8, a math node has no 'latex' attribute, which mean
+        # that a flag has to be raised, so that the in visit_Text() we know that
+        # we are dealing with a formula.
+
+        try: # sphinx < 1.8
+            math_text = node.attributes["latex"].strip()
+        except KeyError:
+            # sphinx >= 1.8
+            self.in_math = True
+
+            # the flag is raised, the function can be exited.
+            return
+
+        formatted_text = "$ {} $".format(math_text)
+
+        if self.table_builder:
+            self.table_builder['line_pending'] += formatted_text
+        else:
+            self.markdown_lines.append(formatted_text)
 
     def depart_math(self, node):
         self.in_math = False
 
+    def visit_displaymath(self, node):
+        """directive math"""
+        # displaymath is called with sphinx < 1.8 only
+
+        math_text = node.attributes["latex"].strip()
+
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
+        if self.list_level == 0:
+            formatted_text = "$$\n{0}\n$${1}".format(
+                math_text, self.sep_paras)
+        else:
+            formatted_text = "$$\n{0}\n$${1}".format(
+                math_text, self.sep_paras)
+
+        #check for labelled math
+        if node["label"]:
+            #Use \tags in the LaTeX environment
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
+            formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
+
+        self.markdown_lines.append(formatted_text)
+
+    def depart_displaymath(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
+
     def visit_math_block(self, node):
         """directive math"""
+        # visit_math_block is called only with sphinx >= 1.8
+
         self.in_math_block = True
 
         if self.in_list and node["label"]:
