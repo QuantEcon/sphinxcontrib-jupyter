@@ -6,6 +6,10 @@ python:
   - 2.7
   - 3.6
 
+env:
+  - SPHINX_VERSION=1.7.9
+  - SPHINX_VERSION=1.8.2
+
 notifications:
   email: false
 
@@ -21,7 +25,7 @@ before_install:
   - conda update --yes conda
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=1.8.2 nbformat
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbformat
   - pip install nbdime
   - python setup.py install
 
