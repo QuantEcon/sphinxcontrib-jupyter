@@ -186,7 +186,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.solution = _parse_class["solution"]
         self.test = _parse_class["test"]
 
-        self.nodelang = node.attributes["language"].strip()
+        try:
+            self.nodelang = node.attributes["language"].strip()
+        except KeyError:
+            self.nodelang = self.lang
         if self.nodelang == 'default':
             self.nodelang = self.lang
 
