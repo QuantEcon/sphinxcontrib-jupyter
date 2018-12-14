@@ -114,8 +114,10 @@ How to use them is explained bellow
 cell-break
 ++++++++++
 
-.. jupyter::
-    :cell-break:
+.. code:: rst
+    
+    .. jupyter::
+        :cell-break:
 
 it is used to break a `markdown_cell` in two, this is done for example, when a paragraph 
 is too large to fit in one slide.
