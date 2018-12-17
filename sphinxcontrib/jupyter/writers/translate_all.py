@@ -171,7 +171,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_images_urlpath is not None:
+        if self.jupyter_images_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
                     uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
