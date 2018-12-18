@@ -37,6 +37,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_caption = False
         self.in_toctree = False
         self.in_list = False
+        self.in_math = False
+        self.in_math_block = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -50,6 +52,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_reference = False
         self.list_level = 0
         self.in_citation = False
+        self.math_block_label = None
 
         self.images = []
         self.files = []
@@ -120,6 +123,16 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_Text(self, node):
         text = node.astext()
 
+        if self.in_math:
+            text = '$ {} $'.format(text.strip())
+        elif self.in_math_block and self.math_block_label:
+            text = "$$\n{0}{1}$${2}".format(
+                        text.strip(), self.math_block_label, self.sep_paras
+                    )
+            self.math_block_label = None
+        elif self.in_math_block:
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
+
         if self.in_code_block:
             self.code_lines.append(text)
         elif self.table_builder:
@@ -158,7 +171,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_images_urlpath is not None:
+        if self.jupyter_images_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
                     uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
@@ -187,7 +200,23 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # math
     def visit_math(self, node):
         """inline math"""
-        math_text = node.attributes["latex"].strip()
+
+        # With sphinx < 1.8, a math node has a 'latex' attribute, from which the
+        # formula can be obtained and added to the text.
+
+        # With sphinx >= 1.8, a math node has no 'latex' attribute, which mean
+        # that a flag has to be raised, so that the in visit_Text() we know that
+        # we are dealing with a formula.
+
+        try: # sphinx < 1.8
+            math_text = node.attributes["latex"].strip()
+        except KeyError:
+            # sphinx >= 1.8
+            self.in_math = True
+
+            # the flag is raised, the function can be exited.
+            return
+
         formatted_text = "$ {} $".format(math_text)
 
         if self.table_builder:
@@ -195,8 +224,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         else:
             self.markdown_lines.append(formatted_text)
 
+    def depart_math(self, node):
+        self.in_math = False
+
     def visit_displaymath(self, node):
         """directive math"""
+        # displaymath is called with sphinx < 1.8 only
+
         math_text = node.attributes["latex"].strip()
 
         if self.in_list and node["label"]:
@@ -217,11 +251,31 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         self.markdown_lines.append(formatted_text)
 
-
-
     def depart_displaymath(self, node):
         if self.in_list:
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
+
+    def visit_math_block(self, node):
+        """directive math"""
+        # visit_math_block is called only with sphinx >= 1.8
+
+        self.in_math_block = True
+
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
+        #check for labelled math
+        if node["label"]:
+            #Use \tags in the LaTeX environment
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            #node["ids"] should always exist for labelled displaymath
+            self.math_block_label = referenceBuilder
+
+    def depart_math_block(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
+
+        self.in_math_block = False
 
     def visit_table(self, node):
         self.table_builder = dict()
