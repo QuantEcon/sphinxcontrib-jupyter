@@ -25,7 +25,7 @@ This sphinx extension can be used to build a collection of
 scientific publishing and hasn't been well tested outside of this
 domain. Please provide feedback as an issue to this repository.
 
-**Requires:** Sphinx >= 1.7.2 (for running tests).
+**Requires:** Sphinx >= 1.7.2 (for running tests). 
 
 Installation
 ------------
@@ -128,28 +128,31 @@ slide
 If the user wants to create a notebook where the cells are converted into
 slides the folowing code needs to be included at the top of the .rst file.
 
-.. jupyter::
-    :slide: {{enable/disable}}
+.. code:: rst
 
-`:slide: enable` activates the slideshow metadata into the jupyter notebook, 
-setting as a default value that each *cell* is a *slide*. 
+    .. jupyter::
+        :slide: {{enable/disable}}
+
+``:slide: enable`` activates the slideshow metadata into the jupyter notebook, 
+setting as a default value that each **cell** is a **slide**. 
 The directive detects automatically the different cells 
-(going from a `markdown_cell` to a `code_cell` for example), 
+(going from a ``markdown_cell`` to a ``code_cell`` for example), 
 but also new cells are created when a subtitle is detected. If the user wants to force
-a new cell, the option `cell-break` can be added.
+a new cell, the option ``cell-break`` can be added.
 
 
 
 slide-type
 ++++++++++
 
-As explained before, the default value for each cell would be `slide`. If the user wants
-to change the upcoming cell to something different (subslide, fragment, notes, skip)
+The default value for each cell would be ``slide``. If the user wants
+to change the upcoming cell to something different (``subslide``, ``fragment``, ``notes``, ``skip``)
 the following code must be included
 
+.. code:: rst
 
-.. jupyter::
-    :slide-type: subslide
+    .. jupyter::
+        :slide-type: subslide
 
 
 
