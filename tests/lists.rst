@@ -61,6 +61,37 @@ Bullets
 
 * and here the parent list continues
 
+Mixed Lists
+~~~~~~~~~~~
+
+Currently mixed lists require `4 spaces` of indentation 
+
+1. bla
+
+    * foo1
+    * foo 2
+  
+2. bla2
+
+    * foo
+
+3. bla3
+
+Using 2 spaces of indentation is returned as a block_quote and is an issue that needs to be fixed 
+for compliance with RST spec.
+
+1. bla
+
+  * foo1
+  * foo 2
+
+2. bla2
+
+  * foo
+
+3. bla3
+
+
 Malformed Lists that seem to work in HTML
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -102,3 +133,20 @@ Here is a computational algorithm:
 4. After computing a Ramsey allocation,  recover the flat tax rate on
    labor.
 
+Complex Lists with Code Blocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* foo, and then in your REPL run 
+
+    .. code-block:: julia 
+          
+            @assert x == 2 
+
+* and another item in the list. Hopefully this list item can be continued in the next markdown block in the notebook
+
+    * and a sublist looks like this
+    * second elements
+
+**Note:** This doesn't work well with enumerated lists as the markdown engine will start a new
+list in the subsequent markdown cells (within Jupyter). So when you have mixed code blocks in lists
+then it is best to use unordered lists.
