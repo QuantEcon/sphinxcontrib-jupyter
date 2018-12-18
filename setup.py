@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = 'v0.3'
+VERSION = 'v0.3.0'
 
 long_desc = '''
 This package contains the Jupyter Sphinx extension.
