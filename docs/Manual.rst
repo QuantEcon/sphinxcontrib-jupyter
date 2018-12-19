@@ -8,25 +8,9 @@
 
 
 
-sphinxcontrib.jupyter
-=====================
-
-A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
-Generating Jupyter Notebooks
-
-.. |status-docs| image:: https://readthedocs.org/projects/sphinxcontrib-jupyter/badge/?version=latest
-   :target: http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
-
-.. |status-travis| image:: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter.svg?branch=master
-    :target: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter
-
-+---------------+-----------------+
-| |status-docs| | |status-travis| |
-+---------------+-----------------+
 
 Summary
--------
+=======
 
 This sphinx extension can be used to build a collection of
 `Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects.
@@ -38,7 +22,7 @@ domain. Please provide feedback as an issue to this repository.
 **Requires:** Sphinx >= 1.7.2 (for running tests). 
 
 Installation
-------------
+============
 
 .. code:: bash
 
@@ -51,7 +35,7 @@ to get the latest version it is best to install directly by getting a copy of th
    python setup.py install
 
 Usage
------
+=====
 
 Update project ``conf.py`` file to include the jupyter extension
 and the desired **Configuration** settings (see configuration_ section below):
@@ -176,7 +160,7 @@ into the notebook as a block quote with a **Note** title.
 .. _configuration:
 
 Configuration
--------------
+=============
 
 The following additions must be made to ``conf.py`` file.
 
@@ -246,16 +230,57 @@ The following additions must be made to ``conf.py`` file.
 
 
 
-TODO
-----
+Examples
+========
 
-1. remove need for Jupyter headers from configuration
-2. include support for adding output to In cells to give a precompiled look to generated notebook
-3. `Issues list <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues>`__
+Most of the functionalities have been tested `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
+But we include in this section some of the main example.
 
+code-blocks
+-----------
+The following code 
+
+.. code:: rst
+    
+    Code blocks
+    -----------
+
+    This is a collection to test various code-blocks
+
+    This is a **.. code::** directive
+
+    .. code:: python
+
+        this = 'is a code block'
+        x = 1
+        no = 'really!'
+        p = argwhere(x == 2)
+
+    This is another **.. code::** directive
+
+    .. code:: python
+
+        from pylab import linspace
+        t = linspace(0, 1)
+        x = t**2
+
+    This is a **::** directive
+
+    ::
+
+        from pylab import *
+        x = logspace(0, 1)
+        y = x**2
+        figure()
+        plot(x, y)
+        show()
+
+will look as follows
+
+![code-block.rst](img/code-block.png)
 
 Credits
--------
+=======
 
 This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
@@ -274,7 +299,7 @@ If you find this extension useful please let us know at
 contact@quantecon.org
 
 LICENSE
--------
+=======
 
 Copyright © 2018 QuantEcon Development Team: BSD-3 All rights reserved.
 
