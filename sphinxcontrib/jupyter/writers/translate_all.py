@@ -754,7 +754,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def add_extension_to_inline_link(cls, uri, ext):
         if "." not in uri:
             uri, id_ = cls.split_uri_id(uri)
-            return "{}{}#{}".format(uri, ext, id_)
+            if len(id_) == 0:
+                return "{}{}".format(uri, ext)
+            else:
+                return "{}{}#{}".format(uri, ext, id_)
 
         return uri
 
