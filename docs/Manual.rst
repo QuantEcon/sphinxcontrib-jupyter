@@ -1,6 +1,5 @@
 .. contents::
 
-.. section-numbering::
 
 .. raw:: pdf
 
@@ -56,29 +55,82 @@ Usage in RST Files
 A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
 which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
 
-To generate an ``In`` style executable block you can use
+
+The following specifies the relationship between default Sphinx directives
+and how they will be interpreted by this Jupyter extension.
+
+To generate an ``In`` style executable block you can use:
 
 .. code:: rst
 
-    .. code-block:: python
+    .. code-block:: {{ language }}
+
+or,
 
 .. code:: rst
 
-    .. literalinclude::  
+    .. literalinclude::  {{ path_to_file }}
 
-To include code in the notebook that is not meant for execution can be
-included using ``:class: no-execute``. This is useful when writing code
+A ``literalinclude`` will make use of the default language in Sphinx 
+to highlight the block, otherwise a language can be specified such as,
+
+.. code:: rst
+
+    .. literalinclude::  {{ path_to_file }}
+        :language: julia
+
+To generate a notebook that looks pre-computed you can specify output
+using the ``:class: output`` option.
+
+.. code:: rst
+
+    .. code-block:: {{ language }}
+        :class: output
+
+To include code in the notebook that is not meant for execution you can use
+the ``:class: no-execute``. This is useful when writing code
 that is meant to throw errors, for example.
 
 .. code:: rst
 
-    .. code-block:: python
+    .. code-block:: {{ language }}
         :class: no-execute
 
 this will generate a highlighted markdown cell of the contents of the
 code-block. An alias for this is ``:class: skip-test``. This is used
 in the context of a test environment that is using the collection of 
 notebooks to test a collection of code snippets.
+
+.. todo:: 
+
+    It might be nice to add screenshots to demonstrate the correlation between 
+    the blocks above and the representation in the notebook.
+
+Output blocks may be constructed and it will be paired directly with the 
+previous ``In`` type code block. This can be used to construct notebooks that
+look like they have already been pre-executed.
+
+.. code:: rst
+
+    .. code-block:: {{ language }}
+        :class: output
+
+.. todo::
+
+    Discuss this feature. It may be better to generate and then execute the
+    notebook to get notebooks that are pre-formatted with output figures etc.
+    This would ensure output stays consistent with the code that generates it.
+
+Math
+~~~~
+
+
+Equations are transferred into the notebook environment and wrapped in 
+``$`` for inline or ``$$`` for display formulae. 
+
+Equation numbering is respected on the individual notebook level and is 
+implemented using html links in each notebook.
+
 
 Exercise Solutions
 ~~~~~~~~~~~~~~~~~~
@@ -155,7 +207,9 @@ Other Supported Directives
 
 1. ``.. note::`` - the raw contents of this directive is included 
 into the notebook as a block quote with a **Note** title.
-1. ``.. only::`` - this will skip any only content that is not jupyter 
+
+2. ``.. only::`` - this will skip any only content that is not jupyter 
+
 
 .. _configuration:
 
@@ -224,9 +278,7 @@ The following additions must be made to ``conf.py`` file.
     # Add Ipython as Synonym for tests
     jupyter_lang_synonyms = ["ipython"]
 
-    # Image Prefix (enable web storage references)
-    # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
-
+    
 
 
 
@@ -384,7 +436,7 @@ The following code in the .rst file
     blocks in the notebook
 
     .. jupyter::
-    :cell-break:
+        :cell-break:
 
     This text should follow in a separate cell.
 
@@ -569,12 +621,10 @@ The following code in the .rst file
 
     .. jupyter::
         :cell-break:
+        :slide-type: subslide
 
     The idea is that eventually we will assign a type (*slide*, *subslide*, *skip*, *note*) for each one. We used our **jupyter** directive  to break the markdown cell into two different cells.
 
-
-    .. jupyter::
-        :slide-type: subslide
 
     .. code:: python3
 
@@ -802,6 +852,8 @@ Many thanks to the contributors of this project.
 * `@mmcky <https://github.com/mmcky>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
 * `@NickSifniotis <https://github.com/NickSifniotis>`__
+* `@FelipeMaldonado <https://github.com/FelipeMaldonado>`__
+
 
 Projects using Extension
 ------------------------

@@ -18,9 +18,9 @@ the task of version control.
    :maxdepth: 1
    :caption: Contents:
 
-   installation
-   usage
-   sphinx-setup
+   
+   manual
+
 
 
 Credits
