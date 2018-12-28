@@ -2,7 +2,15 @@ from .builders.jupyter import JupyterBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
+from .directive.exercise import ExerciseDirective, exercise_node
 from .transform import JupyterOnlyTransform
+
+from docutils.writers.html5_polyglot import HTMLTranslator as HTML
+
+def _noop(*args, **kwargs):
+    pass
+
+
 
 def setup(app):
     # Jupyter Builder and Options
@@ -19,13 +27,19 @@ def setup(app):
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
-    
+
     # Jupyter Directive
-    app.add_node(jupyter_node)              #include in html=(visit_jupyter_node, depart_jupyter_node)
+    app.add_node(jupyter_node, html=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
-   
+    # exercise directive
+    app.add_directive("exercise", ExerciseDirective)
+    app.add_node(
+        exercise_node,
+        html=(HTML.visit_admonition, HTML.depart_admonition)
+    )
+
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
     app.add_config_value("jupyter_target_html", False, "jupyter")
