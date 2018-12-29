@@ -1,5 +1,5 @@
 import os.path
-import os 
+import os
 import nbformat.v4
 from xml.etree.ElementTree import ElementTree
 from enum import Enum
@@ -73,10 +73,10 @@ class JupyterOutputCellGenerators(Enum):
         Note that there is no guarantee as to the ordering or priority of output classes; a cell with the
         attribute ":class: no-execute output" is not considered to be well-defined.
         """
-        res = { 
+        res = {
             "type" : JupyterOutputCellGenerators.CODE,
             "solution" : False,
-            "test" : False 
+            "test" : False
             }
         class_list = node.attributes['classes']
 
@@ -90,9 +90,9 @@ class JupyterOutputCellGenerators(Enum):
             # Check for Solution
             elif item == "solution":
                 res["solution"] = True
-            # Check for Test. 
+            # Check for Test.
             elif item == "test":
-                res["test"] = True 
+                res["test"] = True
 
         return res
 
@@ -120,7 +120,7 @@ class JupyterOutputCellGenerators(Enum):
 
 
 def get_source_file_name(filepath, srcdir):
-    delimiter = os.sep 
+    delimiter = os.sep
     file_path_list = filepath.split(delimiter)
     srcdir_path_list = srcdir.split(delimiter)
 
@@ -129,5 +129,11 @@ def get_source_file_name(filepath, srcdir):
             raise ValueError("File path does not exist in the source directory")
 
     file_name_list = file_path_list[len(srcdir_path_list) - 1:]
-    return "/".join(file_name_list) # Does this also need to be changed? 
+    return "/".join(file_name_list) # Does this also need to be changed?
 
+
+def _str_to_lines(x):
+    if isinstance(x, str):
+        return list(map(lambda y: y.strip() + "\n", x.splitlines()))
+
+    return x

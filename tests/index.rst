@@ -16,6 +16,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    dependency
    download
    equation_labels
+   exercises
    footnotes
    ignore
    images
@@ -35,7 +36,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    tables
    tests
 
-   
+
 Indices and tables
 ==================
 
