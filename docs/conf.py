@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'sphinxcontrib-jupyter'
-copyright = '2017, QuantEcon Development Team'
+copyright = '2019, QuantEcon Development Team'
 author = 'QuantEcon Development Team'
 
 # The version info for the project you're documenting, acts as replacement for

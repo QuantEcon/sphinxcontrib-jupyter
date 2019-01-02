@@ -1,13 +1,13 @@
-.. _usage:
+RST Conversion and Usage
+========================
 
-Usage
-=====
+.. note::
 
-This specifies the relationship between default Sphinx directives
+    A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
+    which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
+
+The following specifies the relationship between default Sphinx directives
 and how they will be interpreted by this Jupyter extension.
-
-Usage in RST Files
-------------------
 
 To generate an ``In`` style executable block you can use:
 
@@ -74,8 +74,88 @@ look like they have already been pre-executed.
 Math
 ----
 
+
 Equations are transferred into the notebook environment and wrapped in 
-``$`` for inline or `$$`` for display formulae. 
+``$`` for inline or ``$$`` for display formulae. 
 
 Equation numbering is respected on the individual notebook level and is 
 implemented using html links in each notebook.
+
+
+Exercise Solutions
+------------------
+
+The extension has support for ``:class: solution`` on code-blocks. This
+allows for the compilation of two sets of notebooks, one containing solutions
+and one without.
+
+
+Test Blocks
+-----------
+
+Other class options for code-blocks include `test` to indicate the 
+code block contains a test which can be used for adding test logic
+for automatic testing of notebooks. This is by default set to `False`
+in the configuration and all test blocks are dropped.
+
+
+
+Jupyter Directive and Slides
+----------------------------
+
+The ``jupyter`` directive accepts three different arguments ``cell-break``, ``slide`` and ``slide-type``
+How to use them is explained bellow
+
+
+cell-break
+~~~~~~~~~~
+
+.. code:: rst
+    
+    .. jupyter::
+        :cell-break:
+
+it is used to break a `markdown_cell` in two, this is done for example, when a paragraph 
+is too large to fit in one slide.
+
+slide
+~~~~~
+
+If the user wants to create a notebook where the cells are converted into
+slides the folowing code needs to be included at the top of the .rst file.
+
+.. code:: rst
+
+    .. jupyter::
+        :slide: {{enable/disable}}
+
+``:slide: enable`` activates the slideshow metadata into the jupyter notebook, 
+setting as a default value that each **cell** is a **slide**. 
+The directive detects automatically the different cells 
+(going from a ``markdown_cell`` to a ``code_cell`` for example), 
+but also new cells are created when a subtitle is detected. If the user wants to force
+a new cell, the option ``cell-break`` can be added.
+
+
+
+slide-type
+~~~~~~~~~~
+
+The default value for each cell would be ``slide``. If the user wants
+to change the upcoming cell to something different (``subslide``, ``fragment``, ``notes``, ``skip``)
+the following code must be included
+
+.. code:: rst
+
+    .. jupyter::
+        :slide-type: subslide
+
+
+
+Other Supported Directives
+--------------------------
+
+1. ``.. note::`` - the raw contents of this directive is included 
+into the notebook as a block quote with a **Note** title.
+
+2. ``.. only::`` - this will skip any only content that is not jupyter

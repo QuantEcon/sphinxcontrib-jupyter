@@ -25,7 +25,7 @@ This sphinx extension can be used to build a collection of
 scientific publishing and hasn't been well tested outside of this
 domain. Please provide feedback as an issue to this repository.
 
-**Requires:** Sphinx >= 1.7.2 (for running tests).
+**Requires:** Sphinx >= 1.7.2 (for running tests). 
 
 Installation
 ------------
@@ -102,6 +102,60 @@ code block contains a test which can be used for adding test logic
 for automatic testing of notebooks. This is by default set to `False`
 in the configuration and all test blocks are dropped.
 
+
+
+Jupyter Directive and Slides
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``jupyter`` directive accepts three different arguments ``cell-break``, ``slide`` and ``slide-type``
+How to use them is explained bellow
+
+
+cell-break
+++++++++++
+
+.. code:: rst
+    
+    .. jupyter::
+        :cell-break:
+
+it is used to break a `markdown_cell` in two, this is done for example, when a paragraph 
+is too large to fit in one slide.
+
+slide
++++++
+
+If the user wants to create a notebook where the cells are converted into
+slides the folowing code needs to be included at the top of the .rst file.
+
+.. code:: rst
+
+    .. jupyter::
+        :slide: {{enable/disable}}
+
+``:slide: enable`` activates the slideshow metadata into the jupyter notebook, 
+setting as a default value that each **cell** is a **slide**. 
+The directive detects automatically the different cells 
+(going from a ``markdown_cell`` to a ``code_cell`` for example), 
+but also new cells are created when a subtitle is detected. If the user wants to force
+a new cell, the option ``cell-break`` can be added.
+
+
+
+slide-type
+++++++++++
+
+The default value for each cell would be ``slide``. If the user wants
+to change the upcoming cell to something different (``subslide``, ``fragment``, ``notes``, ``skip``)
+the following code must be included
+
+.. code:: rst
+
+    .. jupyter::
+        :slide-type: subslide
+
+
+
 Other Supported Directives
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -166,6 +220,21 @@ The following additions must be made to ``conf.py`` file.
 
     # Prepend a Welcome Message to Each Notebook
     jupyter_welcome_block = "welcome.rst"
+
+    # Solutions Configuration
+    jupyter_drop_solutions = True
+
+    # Tests configurations 
+    jupyter_drop_tests = True
+
+    # Add Ipython as Synonym for tests
+    jupyter_lang_synonyms = ["ipython"]
+
+    # Image Prefix (enable web storage references)
+    # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+
+
+
 
 TODO
 ----
