@@ -23,7 +23,6 @@ the task of version control.
    installation
    sphinx-config
    usage
-   extension-config
    examples
 
 

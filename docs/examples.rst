@@ -1,12 +1,12 @@
 Examples
 ========
 
-Most of the functionalities have been tested `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
-but we include in this section some of the main examples.
+Most of the functionalities are tested `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
+but the following provides some examples of the main conversions between RST and the Jupyter notebook domain.
 
 code-blocks
 -----------
-The following code in the .rst file 
+The following code in the **.rst** file 
 
 .. code:: rst
     
@@ -268,8 +268,8 @@ will look as follows in the jupyter notebook
 .. image:: img/math.png
 
 
-quote
------
+block-quote
+-----------
 
 The following code in the .rst file 
 
