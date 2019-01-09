@@ -63,3 +63,8 @@ The extension supports the conversion of **simple** rst tables.
 +------------+------------+-----------+ 
 | body row 2 | column 2   | column 3  | 
 +------------+------------+-----------+ 
+
+Special Characters
+------------------
+
+Here is some text with $1.00 in it and another $2.00
