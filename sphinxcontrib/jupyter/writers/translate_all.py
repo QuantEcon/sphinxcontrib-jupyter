@@ -125,6 +125,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_Text(self, node):
         text = node.astext()
 
+        #Escape Special markdown chars
+        text = text.replace("$", "\$")
+
         if self.in_math:
             text = '$ {} $'.format(text.strip())
         elif self.in_math_block and self.math_block_label:
