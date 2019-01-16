@@ -4,6 +4,7 @@ import nbformat.v4
 import os.path
 from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
+from .utils import JupyterOutputCellGenerators
 from shutil import copyfile
 import os
 
@@ -40,6 +41,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_list = False
         self.in_math = False
         self.in_math_block = False
+        self.in_exercise = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -76,7 +78,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """at end
         Almost the exact same implementation as that of the superclass.
 
-        
+
         Notes
         -----
         [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
@@ -105,7 +107,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_only(self, node):
         pass
-    
+
     def depart_only(self, node):
         pass
 
@@ -126,6 +128,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     #=================
     def visit_Text(self, node):
         text = node.astext()
+
+        #Escape Special markdown chars
+        text = text.replace("$", "\$")
 
         if self.in_math:
             text = '$ {} $'.format(text.strip())
@@ -169,8 +174,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         -----
         1. Should this use .has_attrs()?
         2. the scale, height and width properties are not combined in this
-        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image 
-        
+        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
+
         """
         return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
@@ -637,7 +642,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_label(self, node):
         if self.in_citation:
             self.markdown_lines.append("\] ")
- 
+
     # ===============================================
     #  code blocks are implemented in the superclass
     # ===============================================
@@ -651,7 +656,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.block_quote_type = "epigraph"
         self.markdown_lines.append("> ")
 
-    def depart_block_quote(self, node): 
+    def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
             self.block_quote_type = "block-quote"
         self.markdown_lines.append("\n")
@@ -659,8 +664,21 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
-        if self.in_code_block:
+        mkdown = self.output_cell_type == JupyterOutputCellGenerators.MARKDOWN
+        if self.in_code_block and not (self.in_exercise and mkdown):
             self.add_markdown_cell()
+
+    def depart_literal_block(self, node):
+        JupyterCodeTranslator.depart_literal_block(self, node)
+        # TODO: this is a pretty ugly hack...
+        if self.in_exercise:
+            if self.output["cells"][-1].cell_type != "markdown":
+                return
+            # Inserted markdown cell for this code snipppet. Let's
+            # pop that cell off the back of the cell list, and add the
+            # inserted lines to our list of markdown_lines
+            src = self.output["cells"].pop().source
+            self.markdown_lines += ["\n\n", src]
 
     def visit_note(self, node):
         self.in_note = True
@@ -668,6 +686,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_note(self, node):
         self.in_note = False
+
+    def visit_exercise_node(self, node):
+        self.in_exercise = True
+        cfu = "cfu" in node.attributes.get("classes", ["assignment"])
+        text = "Check for understanding" if cfu else "Exercise"
+        self.markdown_lines.extend("<blockquote>")  # do this on own line
+        self.markdown_lines.append("\n\n**{}**\n\n".format(text))
+
+    def depart_exercise_node(self, node):
+        self.markdown_lines.extend(["\n", "</blockquote>", "\n\n"])
+        self.in_exercise = False
+        self.add_markdown_cell()
 
     def depart_raw(self, node):
         self.markdown_lines.append("\n\n")
@@ -681,9 +711,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if 'cell-break' in node.attributes:
                 self.add_markdown_cell()
             if 'slide' in node.attributes:
-                self.metadata_slide = node['slide'] #this activates the slideshow metadata for the notebook
-            if 'slide-type' in node.attributes: 
-                self.slide = node['slide-type'] # replace the by default value 
+                self.metadata_slide = node['slide'] # this activates the slideshow metadata for the notebook
+            if 'slide-type' in node.attributes:
+                self.slide = node['slide-type'] # replace the by default value
         except:
             pass
         #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
@@ -694,13 +724,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_jupyter_node(self, node):
         if 'cell-break' in node.attributes:
-            pass 
+            pass
         if 'slide' in node.attributes:
             pass
-        if 'slide-type' in node.attributes: 
+        if 'slide-type' in node.attributes:
             pass
 
-        
+
 
     def visit_comment(self, node):
         raise nodes.SkipNode
@@ -737,18 +767,24 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         * append `markdown_lines` to notebook
         * reset `markdown_lines`
         """
+        mkdown = self.output_cell_type == JupyterOutputCellGenerators.MARKDOWN
+        need_code_cell = self.in_code_block and not mkdown
+
+        if self.in_exercise and need_code_cell:
+                self.markdown_lines.extend(["\n", "</blockquote>"])
         line_text = "".join(self.markdown_lines)
         formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-        slide_info = { 'slide_type': self.slide}
-
+        slide_info = {'slide_type': self.slide}
 
         if len(formatted_line_text.strip()) > 0:
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            if self.metadata_slide: #modify the slide metadata on each cell
+            if self.metadata_slide:  # modify the slide metadata on each cell
                 new_md_cell.metadata["slideshow"] = slide_info
-                self.slide = "slide" # set as the by default value
+                self.slide = "slide"  # set as the by default value
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
+            if self.in_exercise and need_code_cell:
+                self.markdown_lines.extend(["<blockquote>", "\n"])
 
     def copy_images(self):
         if len(self.images) > 0:
@@ -769,7 +805,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def add_extension_to_inline_link(cls, uri, ext):
         if "." not in uri:
             uri, id_ = cls.split_uri_id(uri)
-            return "{}{}#{}".format(uri, ext, id_)
+            if len(id_) == 0:
+                return "{}{}".format(uri, ext)
+            else:
+                return "{}{}#{}".format(uri, ext, id_)
 
         return uri
-

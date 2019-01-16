@@ -89,21 +89,20 @@ class JupyterBuilder(Builder):
         except (IOError, OSError) as err:
             self.warn("error writing file %s: %s" % (outfilename, err))
 
-    # def copy_static_files(self):
-    #     # copy all static files
-    #     self.info(bold("copying static files... "), nonl=True)
-    #     ensuredir(os.path.join(self.outdir, '_static'))
-    #     # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
-    #     for static_path in self.jupyter_static_file_path:
-    #         entry = os.path.join(self.confdir, static_path)
-    #         if not os.path.exists(entry):
-    #             self.warn(
-    #                 "jupyter_static_path entry {} does not exist"
-    #                 .format(entry))
-    #         else:
-    #             copy_asset(entry, os.path.join(self.outdir, static_path))
-    #     self.info("done")
+    def copy_static_files(self):
+        # copy all static files
+        self.info(bold("copying static files... "), nonl=True)
+        ensuredir(os.path.join(self.outdir, '_static'))
+        # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
+        for static_path in self.jupyter_static_file_path:
+            entry = os.path.join(self.confdir, static_path)
+            if not os.path.exists(entry):
+                self.warn(
+                    "jupyter_static_path entry {} does not exist"
+                    .format(entry))
+            else:
+                copy_asset(entry, os.path.join(self.outdir, static_path))
+        self.info("done")
 
     def finish(self):
-        #self.finish_tasks.add_task(self.copy_static_files)
-        pass
+        self.finish_tasks.add_task(self.copy_static_files)
