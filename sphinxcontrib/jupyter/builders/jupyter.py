@@ -71,18 +71,6 @@ class JupyterBuilder(Builder):
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
 
-
-    def update_subfolders(self, outfilename):
-        path, name  = os.path.split(outfilename)
-        if path == self.outdir: #this means that there is no subfolder
-            pass
-        else:
-            self.folders.append(os.path.basename(path))
-        # We will include the path to the subfolder _static to copy their elements
-        for i in range(len(self.folders)):
-            self.jupyter_static_file_path.append(self.folders[i]+"/_static")
-
-
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
@@ -94,8 +82,6 @@ class JupyterBuilder(Builder):
         # mkdir if the directory does not exist
         ensuredir(os.path.dirname(outfilename))
 
-        #update subfolders (if there is any)
-        self.update_subfolders(outfilename)
       
         try:
             with codecs.open(outfilename, "w", "utf-8") as f:
@@ -103,21 +89,21 @@ class JupyterBuilder(Builder):
         except (IOError, OSError) as err:
             self.warn("error writing file %s: %s" % (outfilename, err))
 
-    def copy_static_files(self):
-        # copy all static files
-        self.info(bold("copying static files... "), nonl=True)
-        ensuredir(os.path.join(self.outdir, '_static'))
-        # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
-        for static_path in self.jupyter_static_file_path:
-            entry = os.path.join(self.confdir, static_path)
-            if not os.path.exists(entry):
-                self.warn(
-                    "jupyter_static_path entry {} does not exist"
-                    .format(entry))
-            else:
-                copy_asset(entry, os.path.join(self.outdir, static_path))
-        self.info("done")
+    # def copy_static_files(self):
+    #     # copy all static files
+    #     self.info(bold("copying static files... "), nonl=True)
+    #     ensuredir(os.path.join(self.outdir, '_static'))
+    #     # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
+    #     for static_path in self.jupyter_static_file_path:
+    #         entry = os.path.join(self.confdir, static_path)
+    #         if not os.path.exists(entry):
+    #             self.warn(
+    #                 "jupyter_static_path entry {} does not exist"
+    #                 .format(entry))
+    #         else:
+    #             copy_asset(entry, os.path.join(self.outdir, static_path))
+    #     self.info("done")
 
     def finish(self):
-        self.finish_tasks.add_task(self.copy_static_files)
- 
+        #self.finish_tasks.add_task(self.copy_static_files)
+        pass

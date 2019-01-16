@@ -94,6 +94,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     os.makedirs(out_dir)
                 print("Copying {} to {}".format(src_fl, out_fl))
                 copyfile(src_fl, out_fl)
+        
+        self.copy_images()
+                        
         JupyterCodeTranslator.depart_document(self, node)
 
     # =========
@@ -746,6 +749,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.slide = "slide" # set as the by default value
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
+
+    def copy_images(self):
+        if len(self.images) > 0:
+            for im in self.images:
+                src_im = os.path.join(self.builder.srcdir, im)
+                out_im = os.path.join(self.builder.outdir, im)
+                out_dirim = os.path.dirname(out_im)
+                if not os.path.exists(out_dirim):
+                    os.makedirs(out_dirim)
+                copyfile(src_im, out_im)
+
 
     @classmethod
     def split_uri_id(cls, uri):
