@@ -32,6 +32,7 @@ class Jupyter(Directive):
         if 'slide-type' in self.options:
             #node.parent.append(nodes.literal(self.content.data))
             node['slide-type'] = self.options['slide-type']
+            node['cell-break'] = True #otherwise, the metadata is included in the current cell
         
     
  

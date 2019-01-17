@@ -186,6 +186,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
                     break  #don't need to check other matches
         attrs = node.attributes
+        #check if the images are called in a subfolder
+        uri = self.path_length(uri)
         # Construct HTML image
         image = '<img src="{}" '.format(uri)
         if "alt" in attrs.keys():
@@ -795,6 +797,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if not os.path.exists(out_dirim):
                     os.makedirs(out_dirim)
                 copyfile(src_im, out_im)
+
+    def path_length(self, path):
+        if len(path.split(os.sep)) <= 2:
+            return path
+        else:
+            rel = ''
+            for i, item in  enumerate(path.split(os.sep)):
+                if i >0:
+                    rel = os.path.join(rel, item)
+            return rel
+
 
 
     @classmethod

@@ -13,4 +13,5 @@ respective static files, but also preserving a global _static
 Image 
 -----
 
-.. image:: _static/hood.jpg
+.. image:: images/hood.jpg
+
