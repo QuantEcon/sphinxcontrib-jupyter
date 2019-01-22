@@ -7,6 +7,8 @@ from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
+from ..writers.execute_nb import ExecuteNotebookWriter
+from dask.distributed import Client
 
 
 class JupyterBuilder(Builder):
@@ -19,6 +21,9 @@ class JupyterBuilder(Builder):
     allow_parallel = True
 
     _writer_class = JupyterWriter
+    _execute_notebook_class = ExecuteNotebookWriter
+
+    futures = []
 
     def init(self):
         # Check default language is defined in the jupyter kernels
@@ -43,6 +48,8 @@ class JupyterBuilder(Builder):
                 else:
                     # Fail on unrecognised command.
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
+        # start a dask client to process the notebooks efficiently
+        self.client = Client()
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -74,7 +81,11 @@ class JupyterBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
+
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
+        future = self.client.submit(self._execute_notebook_class.execute_notebook(self, self.writer.output, docname))
+        futures.append(future)
+        import pdb; pdb.set_trace();
 
         # mkdir if the directory does not exist
         ensuredir(os.path.dirname(outfilename))

@@ -40,6 +40,6 @@ setup(
     platforms='any',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['docutils', 'nbformat', 'sphinx'],
+    install_requires=['docutils', 'nbformat', 'sphinx', 'dask'],
     namespace_packages=['sphinxcontrib'],
 )
