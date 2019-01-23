@@ -8,8 +8,7 @@ from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
-from dask.distributed import Client
-from dask.distributed import as_completed
+from dask.distributed import Client, LocalCluster, as_completed
 
 class JupyterBuilder(Builder):
     """
@@ -50,7 +49,8 @@ class JupyterBuilder(Builder):
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
 
         # start a dask client to process the notebooks efficiently
-        self.client = Client()
+        self.cluster = LocalCluster()
+        self.client = Client(self.cluster.scheduler.address)
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -114,3 +114,9 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
+        print(self.cluster.scheduler.processing)
+        # execute the notebook
+        error_results = self._execute_notebook_class.save_executed_notebook(self)
+
+        # generate the JSON reports file
+        self._execute_notebook_class.produce_code_execution_report(self, error_results)
