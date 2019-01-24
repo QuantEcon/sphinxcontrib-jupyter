@@ -99,7 +99,10 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
+        self.info(bold("copying static files to executed folder..."), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
+        ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
+
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -110,11 +113,13 @@ class JupyterBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
+                copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.info("done")
+
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-        print(self.cluster.scheduler.processing)
+
         # execute the notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
 

@@ -1,6 +1,7 @@
 docs/_build/
 build/
 dist/
+dask-worker-space/
 __pycache__
 *.egg-info/
 tests/_build/
