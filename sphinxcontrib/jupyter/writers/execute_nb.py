@@ -6,19 +6,16 @@ import json
 from nbconvert.preprocessors import ExecutePreprocessor
 
 from dask.distributed import as_completed
-from sphinx.util import logging
 
 JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
 JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
 
 class ExecuteNotebookWriter():
+    
     """
     Executes jupyter notebook written in python or julia
     """
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-
 
     def execute_notebook(self, f, filename):
         execute_nb_config = self.config["jupyter_execute_nb"]
@@ -45,15 +42,19 @@ class ExecuteNotebookWriter():
 
         future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": self.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
         self.futures.append(future)
-        print(self.cluster.scheduler.processing)
 
         
     def save_executed_notebook(self):
         error_results = []
 
+        self.dask_log['scheduler'] = str(self.cluster.scheduler)
+        self.dask_log['workers'] = str(self.cluster.scheduler.workers)
+        self.dask_log['futures'] = []
         # this for loop gathers results in the background
         for future, nb in as_completed(self.futures, with_results=True):
             error_result = []
+        
+            self.dask_log['futures'].append(str(future))
             # store the exceptions in an error result array
             if future.status == 'error':
                 error_result.append(future.exception())
@@ -152,5 +153,18 @@ class ExecuteNotebookWriter():
                 json.dump(json_data, json_file)
         except IOError:
             self.logger.warn("Unable to save lecture status JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
-            
+
+    def produce_dask_processing_report(self, fln= "dask-reports.json"):
+        """
+            produces a report of dask execution
+        """
+        ensuredir(JUPYTER_REPORTS)
+        json_filename = JUPYTER_REPORTS + fln
+
+        try:
+            with open(json_filename, "w") as json_file:
+                json.dump(self.dask_log, json_file)
+                print(json_filename)
+        except IOError:
+            self.logger.warn("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 

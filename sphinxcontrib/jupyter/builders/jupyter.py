@@ -9,6 +9,7 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from dask.distributed import Client, LocalCluster, as_completed
+from sphinx.util import logging
 
 class JupyterBuilder(Builder):
     """
@@ -21,6 +22,8 @@ class JupyterBuilder(Builder):
 
     _writer_class = JupyterWriter
     _execute_notebook_class = ExecuteNotebookWriter
+    logger = logging.getLogger(__name__)
+    dask_log = dict()
 
     futures = []
 
@@ -99,7 +102,7 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
-        self.info(bold("copying static files to executed folder..."), nonl=True)
+        self.info(bold("copying static files to executed folder... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
@@ -120,8 +123,10 @@ class JupyterBuilder(Builder):
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
 
-        # execute the notebook
+        # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
 
-        # generate the JSON reports file
+        # produces a JSON file of dask execution
+        self._execute_notebook_class.produce_dask_processing_report(self)
+        # generate the JSON code execution reports file
         self._execute_notebook_class.produce_code_execution_report(self, error_results)
