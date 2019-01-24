@@ -129,4 +129,8 @@ class JupyterBuilder(Builder):
         # produces a JSON file of dask execution
         self._execute_notebook_class.produce_dask_processing_report(self)
         # generate the JSON code execution reports file
-        self._execute_notebook_class.produce_code_execution_report(self, error_results)
+        error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
+
+        #generate coverage if config value set
+        if self.config['jupyter_execute_nb']['coverage']:
+            self._execute_notebook_class.create_coverage_report(self, error_results)

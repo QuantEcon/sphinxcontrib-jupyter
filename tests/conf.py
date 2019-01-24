@@ -182,6 +182,10 @@ jupyter_write_metadata = False
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
 
+# Location of template folder for coverage reports
+jupyter_template_coverage_file_path = "templates/error_report_template.html"
+
+
 # Configure Jupyter Kernels
 jupyter_kernels = {
     "python3": {

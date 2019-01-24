@@ -28,9 +28,8 @@ def setup(app):
     execute_nb_obj = {
         "no-text" : True,
         "timeout" : 600,
-        "languages" : ['py', 'jl'],
         "text_reports" : True,
-        "coverage" : False
+        "coverage" : False,
     }
 
     # Jupyter Builder and Options
@@ -48,7 +47,8 @@ def setup(app):
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
-    
+    app.add_config_value("jupyter_template_coverage_file_path","", "jupyter")
+
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)

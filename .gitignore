@@ -1,5 +1,6 @@
 docs/_build/
 build/
+_build_coverage/
 dist/
 dask-worker-space/
 __pycache__
