@@ -45,6 +45,7 @@ class ExecuteNotebookWriter():
 
         future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": self.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
         self.futures.append(future)
+        print(self.cluster.scheduler.processing)
 
         
     def save_executed_notebook(self):
@@ -145,6 +146,7 @@ class ExecuteNotebookWriter():
             json_data['results'].append(item)
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
+        print(json_filename)
         try:
             with open(json_filename, "w") as json_file:
                 json.dump(json_data, json_file)
