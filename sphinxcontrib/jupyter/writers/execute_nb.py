@@ -4,13 +4,13 @@ import os.path
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
+
 from dask.distributed import as_completed
 from sphinx.util import logging
 
 JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
 JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
-
 
 class ExecuteNotebookWriter():
     """
@@ -19,10 +19,12 @@ class ExecuteNotebookWriter():
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+
     def execute_notebook(self, f, filename):
         execute_nb_config = self.config["jupyter_execute_nb"]
         coverage = execute_nb_config["coverage"]
         timeout = execute_nb_config["timeout"]
+        filename = filename
 
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
@@ -30,22 +32,22 @@ class ExecuteNotebookWriter():
 
         # - Parse Directories - #
         if coverage:
-            executed_notebook_dir = JUPYTER_COVERAGE.format(language)
+            self.executed_notebook_dir = JUPYTER_COVERAGE.format(language)
         else:
-            executed_notebook_dir = JUPYTER_EXECUTED.format(language)
-        ensuredir(executed_notebook_dir)
+            self.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
+        ensuredir(self.executed_notebook_dir)
 
         if coverage:
             ep = ExecutePreprocessor(timeout=timeout)
         else:
             ep = ExecutePreprocessor(timeout=timeout, allow_errors=True)
-        
         starting_time = time.time()
 
-        # Passing each notebook to a futures call
-        future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": executed_notebook_dir, "filename": filename,"executed_notebook_dir": executed_notebook_dir, "start_time" : starting_time}})  #Execute in target directory
+        future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": self.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
         self.futures.append(future)
+        print(self.cluster.scheduler.processing)
 
+        
     def save_executed_notebook(self):
         error_results = []
 
@@ -66,7 +68,7 @@ class ExecuteNotebookWriter():
 
 
             notebook_name = "{}.ipynb".format(filename)
-            executed_notebook_path = os.path.join(passed_metadata['executed_notebook_dir'], notebook_name)
+            executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
             #Parse Executed notebook to remove hide-output blocks
             for cell in executed_nb['cells']:
                 if cell['cell_type'] == "code":
@@ -83,7 +85,7 @@ class ExecuteNotebookWriter():
             results['errors']   = error_result
             results['language'] = language_info
             error_results.append(results)
-    
+
         return error_results
 
 
@@ -144,6 +146,7 @@ class ExecuteNotebookWriter():
             json_data['results'].append(item)
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
+        print(json_filename)
         try:
             with open(json_filename, "w") as json_file:
                 json.dump(json_data, json_file)
