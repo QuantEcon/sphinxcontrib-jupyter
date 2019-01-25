@@ -794,5 +794,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 return "{}{}".format(uri, ext)
             else:
                 return "{}{}#{}".format(uri, ext, id_)
+        #adjust relative references
+        elif "../" in uri:
+            uri = uri.replace("../", "")
+            uri, id_ = cls.split_uri_id(uri)
+            if len(id_) == 0:
+                return "{}{}".format(uri, ext)
+            else:
+                return "{}{}#{}".format(uri, ext, id_)
 
         return uri
