@@ -10,6 +10,7 @@ from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from dask.distributed import Client, LocalCluster, as_completed
 from sphinx.util import logging
+import pdb
 
 class JupyterBuilder(Builder):
     """
@@ -52,8 +53,7 @@ class JupyterBuilder(Builder):
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
 
         # start a dask client to process the notebooks efficiently
-        self.cluster = LocalCluster()
-        self.client = Client(self.cluster.scheduler.address)
+        self.client = Client()
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -85,7 +85,6 @@ class JupyterBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
-
         #execute the notebook
         self._execute_notebook_class.execute_notebook(self, self.writer.output, docname)
 
@@ -122,15 +121,15 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
 
-        # produces a JSON file of dask execution
+        ## produces a JSON file of dask execution
         self._execute_notebook_class.produce_dask_processing_report(self)
-        # generate the JSON code execution reports file
+        
+        # # generate the JSON code execution reports file
         error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
 
-        #generate coverage if config value set
+        ##generate coverage if config value set
         if self.config['jupyter_execute_nb']['coverage']:
             self._execute_notebook_class.create_coverage_report(self, error_results)

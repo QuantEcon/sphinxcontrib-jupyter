@@ -4,7 +4,6 @@ import os.path
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
-import tornado
 
 from dask.distributed import as_completed
 
@@ -13,6 +12,7 @@ JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
 JUPYTER_ERROR = "_build_coverage/reports/{}"
 JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
+
 
 class ExecuteNotebookWriter():
     
@@ -38,9 +38,9 @@ class ExecuteNotebookWriter():
         ensuredir(self.executed_notebook_dir)
 
         if coverage:
-            ep = ExecutePreprocessor(timeout=timeout, allow_errors=True)
+            ep = ExecutePreprocessor(timeout=timeout)
         else:
-            ep = ExecutePreprocessor(timeout=timeout, allow_errors=True)
+            ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
         starting_time = time.time()
 
         future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": self.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
@@ -50,18 +50,17 @@ class ExecuteNotebookWriter():
     def save_executed_notebook(self):
         error_results = []
 
-        self.dask_log['scheduler'] = str(self.cluster.scheduler)
-        self.dask_log['workers'] = str(self.cluster.scheduler.workers)
+        self.dask_log['scheduler_info'] = self.client.scheduler_info()
         self.dask_log['futures'] = []
 
         # this for loop gathers results in the background
         for future, nb in as_completed(self.futures, with_results=True):
             error_result = []
-        
             self.dask_log['futures'].append(str(future))
             # store the exceptions in an error result array
             if future.status == 'error':
                 error_result.append(future.exception())
+                future.close()
                 continue
 
             # using indices since nb is a tuple
@@ -90,7 +89,7 @@ class ExecuteNotebookWriter():
             results['errors']   = error_result
             results['language'] = language_info
             error_results.append(results)
-
+        
         return error_results
 
 
