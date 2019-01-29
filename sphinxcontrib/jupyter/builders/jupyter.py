@@ -8,7 +8,7 @@ from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
-from dask.distributed import Client, LocalCluster, as_completed
+from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
 
@@ -101,7 +101,7 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
-        self.info(bold("copying static files to executed folder... "), nonl=True)
+        self.info(bold("copying static files to executed folder... \n"), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
@@ -121,6 +121,12 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
+
+        # watch progress of the execution of futures
+
+        self.info(bold("distributed dask scheduler progressbar for notebook execution ..."))
+        progress(self.futures)
+
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
 
