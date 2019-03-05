@@ -1,4 +1,5 @@
 from .builders.jupyter import JupyterBuilder
+from .builders.html import HtmlBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -34,6 +35,7 @@ def setup(app):
 
     # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
+    app.add_builder(HtmlBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", None, "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")
@@ -48,6 +50,8 @@ def setup(app):
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
     app.add_config_value("jupyter_template_coverage_file_path","", "jupyter")
+    app.add_config_value("jupyter_generate_html", False, "jupyter")
+    app.add_config_value("jupyter_html_template","", "jupyter")
 
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop))

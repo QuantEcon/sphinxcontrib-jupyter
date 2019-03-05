@@ -4,6 +4,7 @@ import os.path
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
+from ..writers.convert import convertToHtmlWriter
 
 from dask.distributed import as_completed
 
@@ -52,6 +53,7 @@ class ExecuteNotebookWriter():
 
         self.dask_log['scheduler_info'] = self.client.scheduler_info()
         self.dask_log['futures'] = []
+        self._convert_class = convertToHtmlWriter(self)
 
         # this for loop gathers results in the background
         for future, nb in as_completed(self.futures, with_results=True):
@@ -81,7 +83,8 @@ class ExecuteNotebookWriter():
             #Write Executed Notebook as File
             with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
                 nbformat.write(executed_nb, f)
-            
+            # # generate html if needed
+            self._convert_class.convert(executed_nb, filename)
             # storing error info if any execution throws an error
             results = dict()
             results['runtime']  = total_time
