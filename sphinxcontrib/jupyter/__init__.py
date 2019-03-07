@@ -1,5 +1,4 @@
 from .builders.jupyter import JupyterBuilder
-from .builders.html import HtmlBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -35,7 +34,6 @@ def setup(app):
 
     # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
-    app.add_builder(HtmlBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", None, "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")

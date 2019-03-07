@@ -84,7 +84,8 @@ class ExecuteNotebookWriter():
             with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
                 nbformat.write(executed_nb, f)
             # # generate html if needed
-            self._convert_class.convert(executed_nb, filename)
+            if (self.config['jupyter_generate_html']):
+                self._convert_class.convert(executed_nb, filename, language_info)
             # storing error info if any execution throws an error
             results = dict()
             results['runtime']  = total_time
