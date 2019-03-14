@@ -36,8 +36,6 @@ class ExecuteNotebookWriter():
             subdirectory = filename[0:index]
             filename = filename[index + 1:]
 
-        print(subdirectory)
-        print(filename)
         # - Parse Directories - #
         if coverage:
             if subdirectory != '':
@@ -50,8 +48,7 @@ class ExecuteNotebookWriter():
             else:
                 self.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
         ensuredir(self.executed_notebook_dir)
-        print(self.executed_notebook_dir, "afterwards")
-        print(filename)
+
         if coverage:
             ep = ExecutePreprocessor(timeout=timeout)
         else:
@@ -81,7 +78,7 @@ class ExecuteNotebookWriter():
             # using indices since nb is a tuple
             passed_metadata = nb[1]['metadata'] 
             executed_nb = nb[0]
-            language_info = executed_nb['metadata']['language_info']
+            language_info = executed_nb['metadata']['kernelspec']
             total_time = time.time() - passed_metadata['start_time']
             filename = passed_metadata['filename']
 
@@ -138,7 +135,6 @@ class ExecuteNotebookWriter():
             runtime = int(notebook_errors['runtime'] * 10)
             name = notebook_errors['filename']
             language = notebook_errors['language']['name']
-            lang_extn = notebook_errors['language']['file_extension']
 
             seconds = (runtime % 600) / 10
             minutes = int(runtime / 600)
@@ -148,7 +144,6 @@ class ExecuteNotebookWriter():
                 'filename': name,
                 'runtime': nicer_runtime,
                 'num_errors': len(notebook_errors['errors']),
-                'extension': lang_extn,
                 'language': language
             }
 
@@ -165,7 +160,6 @@ class ExecuteNotebookWriter():
             json_data['results'].append(item)
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
-        print(json_filename)
         try:
             with open(json_filename, "w") as json_file:
                 json.dump(json_data, json_file)
@@ -182,7 +176,6 @@ class ExecuteNotebookWriter():
         try:
             with open(json_filename, "w") as json_file:
                 json.dump(self.dask_log, json_file)
-                print(json_filename)
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 
