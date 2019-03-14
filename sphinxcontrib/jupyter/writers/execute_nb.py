@@ -25,18 +25,33 @@ class ExecuteNotebookWriter():
         coverage = execute_nb_config["coverage"]
         timeout = execute_nb_config["timeout"]
         filename = filename
-
+        subdirectory = ''
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
-        language = nb.metadata.kernelspec.display_name
+        language = nb.metadata.kernelspec.language
 
+        # check if there are subdirectories
+        index = filename.rfind('/')
+        if index > 0:
+            subdirectory = filename[0:index]
+            filename = filename[index + 1:]
+
+        print(subdirectory)
+        print(filename)
         # - Parse Directories - #
         if coverage:
-            self.executed_notebook_dir = JUPYTER_COVERAGE.format(language)
+            if subdirectory != '':
+                self.executed_notebook_dir = JUPYTER_COVERAGE.format(language) + "/" + subdirectory
+            else:
+                self.executed_notebook_dir = JUPYTER_COVERAGE.format(language)
         else:
-            self.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
+            if subdirectory != '':
+                self.executed_notebook_dir = JUPYTER_EXECUTED.format(language) + "/" + subdirectory
+            else:
+                self.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
         ensuredir(self.executed_notebook_dir)
-
+        print(self.executed_notebook_dir, "afterwards")
+        print(filename)
         if coverage:
             ep = ExecutePreprocessor(timeout=timeout)
         else:
