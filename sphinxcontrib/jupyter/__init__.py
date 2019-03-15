@@ -19,10 +19,8 @@ def visit_exercise_node(self, node):
     name = "exercise_cfu" if iscfu else "exercise"
     return HTML.visit_admonition(self, node, name)
 
-
 def depart_exercise_node(self, node):
     return HTML.depart_admonition(self, node)
-
 
 def setup(app):
     execute_nb_obj = {
@@ -52,7 +50,7 @@ def setup(app):
     app.add_config_value("jupyter_html_template","", "jupyter")
 
     # Jupyter Directive
-    app.add_node(jupyter_node, html=(_noop, _noop))
+    app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
