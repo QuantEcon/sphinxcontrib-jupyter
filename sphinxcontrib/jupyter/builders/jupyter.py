@@ -52,8 +52,9 @@ class JupyterBuilder(Builder):
                     # Fail on unrecognised command.
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
 
-        # start a dask client to process the notebooks efficiently
-        self.client = Client()
+        # start a dask client to process the notebooks efficiently. 
+        # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
+        self.client = Client(processes=False)
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -124,7 +125,7 @@ class JupyterBuilder(Builder):
 
         # watch progress of the execution of futures
 
-        self.info(bold("distributed dask scheduler progressbar for notebook execution ..."))
+        self.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
         progress(self.futures)
 
         # save executed notebook
