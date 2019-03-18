@@ -2,14 +2,14 @@
 
 {% set nb_title = nb.metadata.get('title', '') %}
 {% set nb_filename = nb.metadata.get('filename', '') %}
-{% set nb_language = nb.metadata.kernelspec.get('display_name', '') %}
+{% set nb_language = nb.metadata.kernelspec.get('language', '') %}
 
 {% if nb_filename.endswith('.rst') %}
 {% set nb_filename = nb_filename[:-4] + '.html' %}
 {% endif %}
-{% if nb_language == 'Python' %}
+{% if nb_language == 'python3' %}
 {% set nb_lang = 'py' %}
-{% elif nb_language == 'Julia' %}
+{% elif nb_language == 'julia' %}
 {% set nb_lang = 'jl' %}
 {% endif %}
 
