@@ -10,8 +10,10 @@ from dask.distributed import as_completed
 JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
 JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
-JUPYTER_ERROR = "_build_coverage/reports/{}"
-JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
+JUPYTER_ERROR = "_build/jupyter/reports/{}"
+#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
+#JUPYTER_ERROR = "_build_coverage/reports/{}"
+#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
 
 
 class ExecuteNotebookWriter():
@@ -29,7 +31,10 @@ class ExecuteNotebookWriter():
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
         language = nb.metadata.kernelspec.language
-
+        if (language.lower().find('python') != -1):
+            language = 'python'
+        elif (language.lower().find('julia') != -1):
+            language = 'julia'
         # check if there are subdirectories
         index = filename.rfind('/')
         if index > 0:
@@ -93,7 +98,7 @@ class ExecuteNotebookWriter():
             #Write Executed Notebook as File
             with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
                 nbformat.write(executed_nb, f)
-            
+
             # storing error info if any execution throws an error
             results = dict()
             results['runtime']  = total_time
