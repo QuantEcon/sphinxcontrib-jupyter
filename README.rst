@@ -27,6 +27,10 @@ domain. Please provide feedback as an issue to this repository.
 
 **Requires:** Sphinx >= 1.7.2 (for running tests). 
 
+Demo
+----
+   * https://lectures.quantecon.org/ - series of lectures on quantitative economic modeling
+
 Installation
 ------------
 
