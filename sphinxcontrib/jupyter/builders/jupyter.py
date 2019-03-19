@@ -86,7 +86,8 @@ class JupyterBuilder(Builder):
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
         #execute the notebook
-        self._execute_notebook_class.execute_notebook(self, self.writer.output, docname)
+        if (self.config["jupyter_execute_notebooks"]):
+            self._execute_notebook_class.execute_notebook(self, self.writer.output, docname)
 
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
         # mkdir if the directory does not exist
@@ -101,9 +102,10 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
-        self.info(bold("copying static files to executed folder... \n"), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
-        ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
+        if (self.config["jupyter_execute_notebooks"]):
+            self.info(bold("copying static files to executed folder... \n"), nonl=True)
+            ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
@@ -115,27 +117,29 @@ class JupyterBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
-                copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
+                if (self.config["jupyter_execute_notebooks"]):
+                    copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.info("done")
 
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
 
-        # watch progress of the execution of futures
+        if (self.config["jupyter_execute_notebooks"]):
+            # watch progress of the execution of futures
 
-        self.info(bold("distributed dask scheduler progressbar for notebook execution ..."))
-        progress(self.futures)
+            self.info(bold("distributed dask scheduler progressbar for notebook execution ..."))
+            progress(self.futures)
 
-        # save executed notebook
-        error_results = self._execute_notebook_class.save_executed_notebook(self)
+            # save executed notebook
+            error_results = self._execute_notebook_class.save_executed_notebook(self)
 
-        ## produces a JSON file of dask execution
-        self._execute_notebook_class.produce_dask_processing_report(self)
-        
-        # # generate the JSON code execution reports file
-        error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
+            ## produces a JSON file of dask execution
+            self._execute_notebook_class.produce_dask_processing_report(self)
+            
+            # # generate the JSON code execution reports file
+            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
 
-        ##generate coverage if config value set
-        if self.config['jupyter_execute_nb']['coverage']:
-            self._execute_notebook_class.create_coverage_report(self, error_results)
+            ##generate coverage if config value set
+            if self.config['jupyter_execute_nb']['coverage']:
+                self._execute_notebook_class.create_coverage_report(self, error_results)

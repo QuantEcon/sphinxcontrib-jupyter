@@ -46,6 +46,7 @@ def setup(app):
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
     app.add_config_value("jupyter_template_coverage_file_path","", "jupyter")
+    app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
 
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
