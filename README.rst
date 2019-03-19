@@ -233,6 +233,9 @@ The following additions must be made to ``conf.py`` file.
     # Image Prefix (enable web storage references)
     # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
 
+    #allow execution of notebooks
+    jupyter_execute_notebooks = True 
+
     # Location of template folder for coverage reports
     jupyter_template_coverage_file_path = "/path_to_coverage_template.html"
 
