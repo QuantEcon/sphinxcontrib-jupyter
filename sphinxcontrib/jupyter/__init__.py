@@ -49,6 +49,7 @@ def setup(app):
     app.add_config_value("jupyter_generate_html", False, "jupyter")
     app.add_config_value("jupyter_html_template","", "jupyter")
     app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
+    app.add_config_value("jupyter_dependency_lists", {}, "jupyter")
 
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))

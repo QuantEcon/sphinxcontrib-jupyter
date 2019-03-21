@@ -86,6 +86,7 @@ class JupyterBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
+
         #execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
             self._execute_notebook_class.execute_notebook(self, self.writer.output, docname)
@@ -128,7 +129,6 @@ class JupyterBuilder(Builder):
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
-
             self.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
             progress(self.futures)
 
