@@ -28,7 +28,6 @@ class convertToHtmlWriter():
         #Convert to HTML
         if (language.language.find('python') != -1):
             relative_path = path.replace(SOURCE_PY,'')
-            print(relative_path, "filename-----")
             build_path = BUILD_PY + "/" + relative_path
             download_path = DOWNLOAD_PY + relative_path
             ensuredir(build_path)

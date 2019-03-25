@@ -23,7 +23,7 @@ class ExecuteNotebookWriter():
     Executes jupyter notebook written in python or julia
     """
 
-    def execute_notebook(self, f, filename):
+    def execute_notebook(self, f, filename, futures):
         execute_nb_config = self.config["jupyter_execute_nb"]
         coverage = execute_nb_config["coverage"]
         timeout = execute_nb_config["timeout"]
@@ -62,7 +62,7 @@ class ExecuteNotebookWriter():
         starting_time = time.time()
 
         future = self.client.submit(ep.preprocess, nb, {"metadata": {"path": self.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
-        self.futures.append(future)
+        futures.append(future)
 
         
     def save_executed_notebook(self):
@@ -81,15 +81,32 @@ class ExecuteNotebookWriter():
                 error_result.append(future.exception())
                 future.close()
                 continue
-
+            
             # using indices since nb is a tuple
             passed_metadata = nb[1]['metadata'] 
+            filename = passed_metadata['filename']
             executed_nb = nb[0]
             language_info = executed_nb['metadata']['kernelspec']
             total_time = time.time() - passed_metadata['start_time']
-            filename = passed_metadata['filename']
-
-
+             # adding in executed notebooks list
+            self.executed_notebooks.append(filename)
+            for nb, arr in self.dependency_lists.items():
+                print(self.dependency_lists, "dependecny list")
+                print(self.executed_notebooks)
+                print(arr)
+                executed = 0
+                for elem in arr:
+                    if elem in self.executed_notebooks:
+                        executed += 1
+                if (executed == len(arr)):
+                    key_to_delete = nb
+                    notebook = self.delayed_notebooks.get(nb)
+                    print(nb, "delayed one")
+                    self._execute_notebook_class.execute_notebook(self, notebook, nb, self.delayed_futures)
+            print('-------------------')
+            if (key_to_delete):
+                del self.dependency_lists[str(key_to_delete)]
+                key_to_delete = False
             notebook_name = "{}.ipynb".format(filename)
             executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
             #Parse Executed notebook to remove hide-output blocks
@@ -110,9 +127,44 @@ class ExecuteNotebookWriter():
             results['errors']   = error_result
             results['language'] = language_info
             error_results.append(results)
-        
-        return error_results
 
+        for future, nb in as_completed(self.delayed_futures, with_results=True):
+            error_result = []
+            self.dask_log['futures'].append(str(future))
+            # store the exceptions in an error result array
+            if future.status == 'error':
+                error_result.append(future.exception())
+                future.close()
+                continue
+            
+            # using indices since nb is a tuple
+            passed_metadata = nb[1]['metadata'] 
+            filename = passed_metadata['filename']
+            executed_nb = nb[0]
+            language_info = executed_nb['metadata']['kernelspec']
+            total_time = time.time() - passed_metadata['start_time']
+            print(filename)
+            notebook_name = "{}.ipynb".format(filename)
+            executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
+            #Parse Executed notebook to remove hide-output blocks
+            for cell in executed_nb['cells']:
+                if cell['cell_type'] == "code":
+                    if cell['metadata']['hide-output']:
+                        cell['outputs'] = []
+            #Write Executed Notebook as File
+            with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
+                nbformat.write(executed_nb, f)
+            # # generate html if needed
+            if (self.config['jupyter_generate_html']):
+                self._convert_class.convert(executed_nb, passed_metadata['path'], filename, language_info)
+            # storing error info if any execution throws an error
+            results = dict()
+            results['runtime']  = total_time
+            results['filename'] = filename
+            results['errors']   = error_result
+            results['language'] = language_info
+            error_results.append(results)
+        return error_results
 
     def produce_code_execution_report(self, error_results, fln = "code-execution-results.json"):
         """

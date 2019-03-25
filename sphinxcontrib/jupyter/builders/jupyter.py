@@ -55,6 +55,12 @@ class JupyterBuilder(Builder):
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
         self.client = Client(processes=False)
+        self.dependency_lists = self.config["jupyter_dependency_lists"]
+        self.executed_notebooks = []
+        self.delayed_notebooks = dict()
+        self.futures = []
+        self.delayed_futures = []
+
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -86,10 +92,13 @@ class JupyterBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
-
         #execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
-            self._execute_notebook_class.execute_notebook(self, self.writer.output, docname)
+            strDocname = str(docname)
+            if strDocname in self.dependency_lists.keys():
+                self.delayed_notebooks.update({strDocname: self.writer.output})
+            else:        
+                self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
 
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
         # mkdir if the directory does not exist
