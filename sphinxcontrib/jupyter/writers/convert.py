@@ -36,7 +36,6 @@ class convertToHtmlWriter():
             download_nb = download_path + "/" + "{}.ipynb".format(filename)
         elif (language.language.find('julia') != -1):
             relative_path = path.replace(SOURCE_JL,'')
-            print(relative_path, "relative_path")
             build_path = BUILD_JL + "/" +  relative_path
             download_path = DOWNLOAD_JL + relative_path 
             ensuredir(build_path)

@@ -89,6 +89,8 @@ class ExecuteNotebookWriter():
                     if elem in self.executed_notebooks:
                         executed += 1
                 if (executed == len(arr)):
+                    print(arr, "arr")
+                    print(filename)
                     key_to_delete = nb
                     notebook = self.delayed_notebooks.get(nb)
                     self._execute_notebook_class.execute_notebook(self, notebook, nb, self.delayed_futures)
