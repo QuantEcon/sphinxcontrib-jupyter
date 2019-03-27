@@ -28,7 +28,10 @@ class convertToHtmlWriter():
         #Convert to HTML
         if (language.language.find('python') != -1):
             relative_path = path.replace(SOURCE_PY,'')
-            build_path = BUILD_PY + "/" + relative_path
+            if relative_path:
+                relative_path = relative_path[1:]
+                nb.metadata['filename_with_path'] = relative_path + filename
+            build_path = BUILD_PY + relative_path
             download_path = DOWNLOAD_PY + relative_path
             ensuredir(build_path)
             ensuredir(download_path)
@@ -36,14 +39,16 @@ class convertToHtmlWriter():
             download_nb = download_path + "/" + "{}.ipynb".format(filename)
         elif (language.language.find('julia') != -1):
             relative_path = path.replace(SOURCE_JL,'')
-            build_path = BUILD_JL + "/" +  relative_path
+            if relative_path:
+                relative_path = relative_path[1:]
+                nb.metadata['filename_with_path'] = relative_path + filename
+            build_path = BUILD_JL +  relative_path
             download_path = DOWNLOAD_JL + relative_path 
             ensuredir(build_path)
             ensuredir(download_path)
             fl_html = build_path + "/" + "{}.html".format(filename)
             download_nb = download_path + "/" + "{}.ipynb".format(filename)
         #print("{} -> {}".format(fl_nb, fl_html))
-
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
