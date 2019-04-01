@@ -25,7 +25,7 @@ before_install:
   - conda update --yes conda
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbformat dask distributed
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat dask distributed 
   - pip install nbdime
   - python setup.py install
 

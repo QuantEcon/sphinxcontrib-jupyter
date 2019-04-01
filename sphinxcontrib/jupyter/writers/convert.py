@@ -2,6 +2,7 @@ import nbformat
 from nbconvert import HTMLExporter
 import glob
 import os
+from io import open
 from sphinx.util.osutil import ensuredir
 
 SOURCE_PY = "_build/jupyter/executed/python"
