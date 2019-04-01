@@ -7,6 +7,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
+from io import open
 import sys
 
 JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
@@ -113,7 +114,7 @@ class ExecuteNotebookWriter():
                 if cell['metadata']['hide-output']:
                     cell['outputs'] = []
         #Write Executed Notebook as File
-        with open(executed_notebook_path, "wt") as f:
+        with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
             nbformat.write(executed_nb, f)
         # # generate html if needed
         if (builderSelf.config['jupyter_generate_html']):
