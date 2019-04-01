@@ -7,9 +7,8 @@
 {% set nb_filename_with_path = nb.metadata.kernelspec.get('filename_with_path','') %}
 {% set indexPage = nb_filename.startswith('index') %}
 
-{% if nb_filename_with_path.endswith('.rst') %}
-	% set nb_filename_with_path = nb_filename[:-4] %}
-	{% set nb_filename_with_path = nb_filename[:-4] %}
+{% if nb_filename.endswith('.rst') %}
+{% set nb_filename = nb_filename[:-4] %}
 {% endif %}
 {% if nb_language == 'python3' %}
 {% set nb_lang = 'py' %}

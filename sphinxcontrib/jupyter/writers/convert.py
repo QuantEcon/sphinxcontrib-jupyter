@@ -31,7 +31,6 @@ class convertToHtmlWriter():
             relative_path = path.replace(SOURCE_PY,'')
             if relative_path:
                 relative_path = relative_path[1:]
-                nb.metadata['filename_with_path'] = relative_path + filename
             build_path = BUILD_PY + relative_path
             download_path = DOWNLOAD_PY + relative_path
             ensuredir(build_path)
@@ -42,7 +41,6 @@ class convertToHtmlWriter():
             relative_path = path.replace(SOURCE_JL,'')
             if relative_path:
                 relative_path = relative_path[1:]
-                nb.metadata['filename_with_path'] = relative_path + filename
             build_path = BUILD_JL +  relative_path
             download_path = DOWNLOAD_JL + relative_path 
             ensuredir(build_path)
