@@ -62,11 +62,9 @@ class ExecuteNotebookWriter():
         else:
             if (sys.version_info > (3, 0)):
                 # Python 3 code in this block
-                print("Python 3 hopefully")
                 ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
             else:
                 # Python 2 code in this block
-                print("Python 2 hopefully")
                 ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
         starting_time = time.time()
 
@@ -150,7 +148,7 @@ class ExecuteNotebookWriter():
         json_filename = JUPYTER_REPORTS + fln
 
         if os.path.isfile(json_filename):
-            with open(json_filename) as json_file:
+            with open(json_filename, encoding="UTF-8") as json_file:
                 json_data = json.load(json_file)
 
                 temp_dictionary = dict()
@@ -198,7 +196,7 @@ class ExecuteNotebookWriter():
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
         try:
-            with open(json_filename, "w") as json_file:
+            with open(json_filename, "w", encoding="UTF-8") as json_file:
                 json.dump(json_data, json_file)
         except IOError:
             self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
@@ -211,7 +209,7 @@ class ExecuteNotebookWriter():
         json_filename = JUPYTER_REPORTS + fln
 
         try:
-            with open(json_filename, "w") as json_file:
+            with open(json_filename, "w", encoding="UTF-8") as json_file:
                 json.dump(builderSelf.dask_log, json_file)
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
@@ -251,7 +249,7 @@ class ExecuteNotebookWriter():
         if not os.path.isfile(error_report_template_file):
             print("Unable to generate error report - template not found.")
         else:
-            with open(error_report_template_file) as inputFile:
+            with open(error_report_template_file, encoding="UTF-8") as inputFile:
                 error_report_template = inputFile.readlines()
 
         lang_summary = ""
@@ -359,7 +357,7 @@ class ExecuteNotebookWriter():
             # Save the error report.
             filename = "errors-" + time.strftime("%d%m%Y") + ".html"
             full_error_report_filename = os.path.normpath(error_dir + "/" + filename)
-            with open(full_error_report_filename, "w") as error_output_file:
+            with open(full_error_report_filename, "w", encoding="UTF-8") as error_output_file:
                 for line in error_report_template:
                     for keyName in variables:
                         target_string = "{" + keyName + "}"
