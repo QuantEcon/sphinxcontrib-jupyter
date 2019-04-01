@@ -196,12 +196,17 @@ class ExecuteNotebookWriter():
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
         try:
+<<<<<<< HEAD
             if (sys.version_info > (3, 0)):
                 with open(json_filename, "w") as json_file:
                     json.dump(json_data, json_file)
             else:
                 with open(json_filename, "w") as json_file:
                     json.dump(unicode(json_data), json_file)
+=======
+            with open(json_filename, "w") as json_file:
+                json.dump(json_data, json_file, ensure_ascii=False)
+>>>>>>> 23fa4fef724c24392d00a5046f2b3bc083807a3c
         except IOError:
             self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 
@@ -213,12 +218,17 @@ class ExecuteNotebookWriter():
         json_filename = JUPYTER_REPORTS + fln
 
         try:
+<<<<<<< HEAD
             if (sys.version_info > (3, 0)):
                 with open(json_filename, "w") as json_file:
                     json.dump(builderSelf.dask_log, json_file)
             else:
                 with open(json_filename, "w") as json_file:
                     json.dump(unicode(builderSelf.dask_log), json_file)
+=======
+            with open(json_filename, "w") as json_file:
+                json.dump(builderSelf.dask_log, json_file, ensure_ascii=False)
+>>>>>>> 23fa4fef724c24392d00a5046f2b3bc083807a3c
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 
