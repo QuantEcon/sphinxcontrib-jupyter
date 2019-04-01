@@ -196,8 +196,8 @@ class ExecuteNotebookWriter():
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
         try:
-            with open(json_filename, "w", encoding="UTF-8") as json_file:
-                json.dump(json_data, json_file)
+            with open(json_filename, "w") as json_file:
+                json.dump(json_data, json_file, ensure_ascii=False)
         except IOError:
             self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 
@@ -209,8 +209,8 @@ class ExecuteNotebookWriter():
         json_filename = JUPYTER_REPORTS + fln
 
         try:
-            with open(json_filename, "w", encoding="UTF-8") as json_file:
-                json.dump(builderSelf.dask_log, json_file)
+            with open(json_filename, "w") as json_file:
+                json.dump(builderSelf.dask_log, json_file, ensure_ascii=False)
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
 
