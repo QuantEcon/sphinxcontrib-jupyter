@@ -9,7 +9,6 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from dask.distributed import Client, progress
-from sphinx.util import logging
 import pdb
 
 class JupyterBuilder(Builder):
@@ -22,8 +21,7 @@ class JupyterBuilder(Builder):
     allow_parallel = True
 
     _writer_class = JupyterWriter
-    _execute_notebook_class = ExecuteNotebookWriter
-    logger = logging.getLogger(__name__)
+    _execute_notebook_class = ExecuteNotebookWriter()
     dask_log = dict()
 
     futures = []
