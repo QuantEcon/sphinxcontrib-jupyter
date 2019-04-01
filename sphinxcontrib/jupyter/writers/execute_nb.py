@@ -7,6 +7,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
+import sys
 
 JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
 JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
@@ -58,7 +59,14 @@ class ExecuteNotebookWriter():
         if coverage:
             ep = ExecutePreprocessor(timeout=timeout)
         else:
-            ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
+            if (sys.version_info > (3, 0)):
+                # Python 3 code in this block
+                print("Python 3 hopefully")
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
+            else:
+                # Python 2 code in this block
+                print("Python 2 hopefully")
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
         starting_time = time.time()
 
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
