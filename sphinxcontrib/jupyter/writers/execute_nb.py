@@ -30,6 +30,8 @@ class ExecuteNotebookWriter():
         timeout = execute_nb_config["timeout"]
         filename = filename
         subdirectory = ''
+        full_path = filename
+
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
         language = nb.metadata.kernelspec.language
@@ -37,6 +39,7 @@ class ExecuteNotebookWriter():
             language = 'python'
         elif (language.lower().find('julia') != -1):
             language = 'julia'
+
         # check if there are subdirectories
         index = filename.rfind('/')
         if index > 0:
@@ -67,7 +70,7 @@ class ExecuteNotebookWriter():
                 ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
         starting_time = time.time()
 
-        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "start_time" : starting_time}})
+        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
         futures.append(future)
 
     def check_execution_completion(self, builderSelf, future, nb, error_results, futures_name):
