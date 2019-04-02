@@ -4,7 +4,7 @@
 {% set nb_filename = nb.metadata.get('filename', '') %}
 {% set nb_kernel = nb.metadata.kernelspec.get('display_name', '') %}
 {% set nb_language = nb.metadata.kernelspec.get('language', '') %}
-{% set nb_filename_with_path = nb.metadata.kernelspec.get('filename_with_path','') %}
+{% set nb_filename_with_path = nb.metadata.get('filename_with_path','') %}
 {% set indexPage = nb_filename.startswith('index') %}
 
 {% if nb_filename.endswith('.rst') %}
