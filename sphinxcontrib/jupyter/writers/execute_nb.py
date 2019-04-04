@@ -87,6 +87,7 @@ class ExecuteNotebookWriter():
         filename = passed_metadata['filename']
         executed_nb = nb[0]
         language_info = executed_nb['metadata']['kernelspec']
+        executed_nb['metadata']['filename_with_path'] = passed_metadata['filename_with_path']
         total_time = time.time() - passed_metadata['start_time']
         if (futures_name.startswith('delayed') != -1):
             # adding in executed notebooks list
