@@ -7,7 +7,9 @@ from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
-
+from ..writers.execute_nb import ExecuteNotebookWriter
+from dask.distributed import Client, progress
+import pdb
 
 class JupyterBuilder(Builder):
     """
@@ -19,6 +21,10 @@ class JupyterBuilder(Builder):
     allow_parallel = True
 
     _writer_class = JupyterWriter
+    _execute_notebook_class = ExecuteNotebookWriter()
+    dask_log = dict()
+
+    futures = []
 
     def init(self):
         # Check default language is defined in the jupyter kernels
@@ -43,6 +49,16 @@ class JupyterBuilder(Builder):
                 else:
                     # Fail on unrecognised command.
                     self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
+
+        # start a dask client to process the notebooks efficiently. 
+        # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
+        self.client = Client(processes=False)
+        self.dependency_lists = self.config["jupyter_dependency_lists"]
+        self.executed_notebooks = []
+        self.delayed_notebooks = dict()
+        self.futures = []
+        self.delayed_futures = []
+
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -74,8 +90,15 @@ class JupyterBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         self.writer.write(doctree, destination)
-        outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
+        #execute the notebook
+        if (self.config["jupyter_execute_notebooks"]):
+            strDocname = str(docname)
+            if strDocname in self.dependency_lists.keys():
+                self.delayed_notebooks.update({strDocname: self.writer.output})
+            else:        
+                self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
 
+        outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
         # mkdir if the directory does not exist
         ensuredir(os.path.dirname(outfilename))
 
@@ -89,6 +112,10 @@ class JupyterBuilder(Builder):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
+        if (self.config["jupyter_execute_notebooks"]):
+            self.info(bold("copying static files to executed folder... \n"), nonl=True)
+            ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
+
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -99,7 +126,28 @@ class JupyterBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
+                if (self.config["jupyter_execute_notebooks"]):
+                    copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.info("done")
+
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
+
+        if (self.config["jupyter_execute_notebooks"]):
+            # watch progress of the execution of futures
+            self.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
+            progress(self.futures)
+
+            # save executed notebook
+            error_results = self._execute_notebook_class.save_executed_notebook(self)
+
+            ## produces a JSON file of dask execution
+            self._execute_notebook_class.produce_dask_processing_report(self)
+            
+            # # generate the JSON code execution reports file
+            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
+
+            ##generate coverage if config value set
+            if self.config['jupyter_execute_nb']['coverage']:
+                self._execute_notebook_class.create_coverage_report(self, error_results)

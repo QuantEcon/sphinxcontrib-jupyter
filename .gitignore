@@ -1,9 +1,12 @@
 docs/_build/
 build/
+_build_coverage/
 dist/
+dask-worker-space/
 __pycache__
 *.egg-info/
 tests/_build/
 tests/ipynb/*checkpoints
 *.pyc
 .DS_Store
+.vscode/
