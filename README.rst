@@ -18,14 +18,18 @@ Generating Jupyter Notebooks
 Summary
 -------
 
-This sphinx extension can be used to build a collection of
-`Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects.
+This sphinx extension can be used to build, execute a collection of
+`Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects and convert them to html.
 
 **Note:** It has mainly been written to support the use case of
 scientific publishing and hasn't been well tested outside of this
 domain. Please provide feedback as an issue to this repository.
 
 **Requires:** Sphinx >= 1.7.2 (for running tests). 
+
+Demo
+----
+   * https://lectures.quantecon.org/ - series of lectures on quantitative economic modeling
 
 Installation
 ------------
@@ -233,7 +237,17 @@ The following additions must be made to ``conf.py`` file.
     # Image Prefix (enable web storage references)
     # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
 
+    #allow execution of notebooks
+    jupyter_execute_notebooks = True 
 
+    # Location of template folder for coverage reports
+    jupyter_template_coverage_file_path = "/path_to_coverage_template.html"
+
+    # generate html from IPYNB files
+    jupyter_generate_html = True
+    
+    # html template specific to your website needs
+    jupyter_html_template = "/path_to_html_template.tpl"
 
 
 TODO

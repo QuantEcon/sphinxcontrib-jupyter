@@ -4,6 +4,7 @@ import os.path
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
+from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
@@ -31,7 +32,6 @@ class ExecuteNotebookWriter():
         filename = filename
         subdirectory = ''
         full_path = filename
-
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
         language = nb.metadata.kernelspec.language
@@ -39,7 +39,6 @@ class ExecuteNotebookWriter():
             language = 'python'
         elif (language.lower().find('julia') != -1):
             language = 'julia'
-
         # check if there are subdirectories
         index = filename.rfind('/')
         if index > 0:
@@ -62,14 +61,16 @@ class ExecuteNotebookWriter():
         if coverage:
             ep = ExecutePreprocessor(timeout=timeout)
         else:
-            if (sys.version_info > (3, 0)):
-                # Python 3 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
-            else:
-                # Python 2 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
+            if language == 'python':
+                if (sys.version_info > (3, 0)):
+                    # Python 3 code in this block
+                    ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
+                else:
+                    # Python 2 code in this block
+                    ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
+            elif language == 'julia':
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
         starting_time = time.time()
-
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
         futures.append(future)
 
@@ -115,6 +116,9 @@ class ExecuteNotebookWriter():
         #Write Executed Notebook as File
         with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
             nbformat.write(executed_nb, f)
+        # # generate html if needed
+        if (builderSelf.config['jupyter_generate_html']):
+            builderSelf._convert_class.convert(executed_nb, passed_metadata['path'], filename, language_info)
         # storing error info if any execution throws an error
         results = dict()
         results['runtime']  = total_time
@@ -128,6 +132,7 @@ class ExecuteNotebookWriter():
 
         builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
         builderSelf.dask_log['futures'] = []
+        builderSelf._convert_class = convertToHtmlWriter(builderSelf)
         # this for loop gathers results in the background
         for future, nb in as_completed(builderSelf.futures, with_results=True):
             builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, 'futures')

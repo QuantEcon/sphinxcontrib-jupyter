@@ -2,10 +2,13 @@
 
 {% set nb_title = nb.metadata.get('title', '') %}
 {% set nb_filename = nb.metadata.get('filename', '') %}
+{% set nb_kernel = nb.metadata.kernelspec.get('display_name', '') %}
 {% set nb_language = nb.metadata.kernelspec.get('language', '') %}
+{% set nb_filename_with_path = nb.metadata.get('filename_with_path','') %}
+{% set indexPage = nb_filename.startswith('index') %}
 
 {% if nb_filename.endswith('.rst') %}
-{% set nb_filename = nb_filename[:-4] + '.html' %}
+{% set nb_filename = nb_filename[:-4] %}
 {% endif %}
 {% if nb_language == 'python3' %}
 {% set nb_lang = 'py' %}
@@ -31,31 +34,35 @@
 		<meta name="twitter:image" content="https://lectures.quantecon.org/_static/img/qeco-logo.png">
 		<meta property="og:title" content="{{nb_title}}" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://lectures.quantecon.org/{{nb_lang}}/{{nb_filename}}" />
+		<meta property="og:url" content="https://lectures.quantecon.org/{{nb_lang}}/{{nb_filename_with_path}}.html" />
 		<meta property="og:image" content="https://lectures.quantecon.org/_static/img/qeco-logo.png" />
 		<meta property="og:description" content="This website presents a series of lectures on quantitative economic modeling, designed and written by Thomas J. Sargent and John Stachurski." />
 		<meta property="og:site_name" content="Quantitative Economics" />
 
         <link rel="stylesheet" href="/_static/css/basic.css">
-        <link rel="stylesheet" href="/_static/css/qe.css">
-        <link rel="stylesheet" href="/_static/css/qe-menubar.css">
+        <link rel="stylesheet" href="/_static/css/qe.css?v=2.16">
+        <link rel="stylesheet" href="https://assets.quantecon.org/css/qe-menubar.css">
         <link rel="icon" href="/_static/img/favicon.ico" type="image/x-icon" />
 
         <link href="https://fonts.googleapis.com/css?family=Droid+Serif|Source+Sans+Pro:400,700" rel="stylesheet">
 
     </head>
 
-
-    <body class="{{nb_lang}}">
+{% if nb_lang == 'py' %}
+    <body class="py">
+{% elif nb_lang == 'jl' %}
+    <body class="jl">
+{% endif %}
 
         <div class="qe-menubar">
         
-            <p class="qe-menubar-logo"><a href="https://quantecon.org/" title="quantecon.org"><img src="/_static/img/qe-menubar-logo.svg" alt="QuantEcon"></a></p>
+            <p class="qe-menubar-logo"><a href="https://quantecon.org/" title="quantecon.org"><img src="https://assets.quantecon.org/img/qe-menubar-logo.svg" alt="QuantEcon"></a></p>
         
             <ul class="qe-menubar-nav">
                 <li><a href="https://lectures.quantecon.org/" title="Lectures"><span>Lectures</span></a></li>
                 <li><a href="https://quantecon.org/quantecon-py" title="QuantEcon.py"><span>QuantEcon.py</span></a></li>
                 <li><a href="https://quantecon.org/quantecon-jl" title="QuantEcon.jl"><span>QuantEcon.jl</span></a></li>
+                <li><a href="https://quantecon.org/notebooks" title="QuantEcon Notebook Library"><span>NB Library</span></a></li>
                 <li><a href="http://notes.quantecon.org/" title="QE Notes"><span>QE Notes</span></a></li>
                 <li><a href="http://cheatsheets.quantecon.org/" title="Cheatsheets"><span>Cheatsheets</span></a></li>
                 <li><a href="http://blog.quantecon.org/" title="Blog"><span>Blog</span></a></li>
@@ -75,11 +82,18 @@
 
 		        	<div class="branding">
 
-			        	<p class="site-title"><a href="https://lectures.quantecon.org"><span>Lectures in</span> Quantitative Economics</a></p>
+{% if nb_lang == 'py' %}
+			        	<p class="site-title"><a href="https://lectures.quantecon.org">Quantitative Economics with Python</a></p>
+{% elif nb_lang == 'jl' %}
+			        	<p class="site-title"><a href="https://lectures.quantecon.org">Quantitative Economics with Julia</a></p>
+{% endif %}
 
 			        	<p class="visuallyhidden"><a href="#skip">Skip to content</a></p>
 
 			        	<ul class="site-authors">
+{% if nb_lang == 'jl' %}
+							<li><a href="http://jesseperla.com/">Jesse Perla</a></li>
+{% endif %}
 			        		<li><a href="http://www.tomsargent.com/">Thomas J. Sargent</a></li>
 			        		<li><a href="http://johnstachurski.net/">John Stachurski</a></li>
 			        	</ul>
@@ -114,20 +128,11 @@
 
 			<div class="main">
 
-			<div style="padding: 0.5rem 2rem;font-size: 0.9rem;background: #e1eade;border-bottom: 1px solid #ddd;">
-
-			<strong style="color: #46ab26;border-bottom: 1px solid;margin: 0 0 0.5rem 0;display: inline-block;
-			">Update: New build system</strong><br>
-			QuantEcon is migrating to a new build system - please report any errors to <a href="mailto:contact@quantecon.org">contact@quantecon.org</a>
-			<br>
-
-			</div>
-
 				<div class="breadcrumbs clearfix">
 					<ul>
 						<li><a href="https://quantecon.org/">Org</a> •</li>
 						<li><a href="https://lectures.quantecon.org">Lectures</a> &raquo;</li>
-						<li><a href="https://lectures.quantecon.org/{{nb_lang}}/">{{nb_language}} </a> &raquo;</li>
+						<li><a href="https://lectures.quantecon.org/{{nb_lang}}/">{{nb_kernel}} </a> &raquo;</li>
 				      	<li>{{nb_title}}</li>
 					</ul>
 				</div>
@@ -138,6 +143,49 @@
 					<div id="skip"></div>
 
 				    <div class="document">
+
+{% if nb_lang == 'py' and not indexPage %}
+
+						<ul class="badges">
+							<li><a href="https://colab.research.google.com/github/QuantEcon/lecture-py-notebooks/blob/master/{{nb_filename_with_path}}.ipynb"><img src="/_static/img/jupyter-notebook-run-FDD935.svg" id="notebook_run_badge"></a></li>
+							<li><a href="/_downloads/ipynb/py/{{nb_filename_with_path}}.ipynb"><img src="/_static/img/jupyter-notebook-download-blue.svg" id="notebook_download_badge"></a></li>
+							<li><a href="/_downloads/pdf/py/{{nb_filename_with_path}}.pdf"><img src="/_static/img/pdf-download-blue.svg" id="pdf_download_badge"></a></li>
+							<li><a href="/status.html"><img src="https://img.shields.io/badge/Execution%20test-not%20available-lightgrey.svg" id="executability_status_badge"></a></li>
+						</ul>
+
+						<div class="how-to">
+							<a href="#" class="toggle"><span class="icon icon-angle-double-down"></span>How to read this lecture...</a>
+							<div class="how-to-content">
+								<p>Code should execute sequentially if run in a Jupyter notebook</p>
+								<ul>
+									<li>See the <a href="/py/getting_started.html">set up page</a> to install Jupyter, Python and all necessary libraries</li>
+									<li>Please direct feedback to <a href="mailto:contact@quantecon.org">contact@quantecon.org</a> or the <a href="http://discourse.quantecon.org/">discourse forum</a></li>
+								</ul>
+							</div>
+						</div>
+
+{% elif nb_lang == 'jl' and not indexPage %}
+
+						<ul class="badges">
+							<li><a href="/_downloads/ipynb/jl/{{nb_filename_with_path}}.ipynb"><img src="/_static/img/jupyter-notebook-download-blue.svg" id="notebook_download_badge"></a></li>
+							<li><a href="/_downloads/pdf/jl/{{nb_filename_with_path}}.pdf"><img src="/_static/img/pdf-download-blue.svg" id="pdf_download_badge"></a></li>
+							<li><a href="/status.html"><img src="https://img.shields.io/badge/Execution%20test-not%20available-lightgrey.svg" id="executability_status_badge"></a></li>
+						</ul>
+						
+						<div class="how-to">
+							<a href="#" class="toggle"><span class="icon icon-angle-double-down"></span>How to read this lecture...</a>
+							<div class="how-to-content">
+								<p>Code should execute sequentially if run in a Jupyter notebook</p>
+								<ul>
+									<li>See the <a href="/jl/getting_started.html">set up page</a> to install Jupyter, Julia (1.0+) and all necessary libraries</li>
+									<li>Please direct feedback to <a href="mailto:contact@quantecon.org">contact@quantecon.org</a> or the <a href="http://discourse.quantecon.org/">discourse forum</a></li>
+									<li>For some notebooks, enable content with "Trust" on the command tab of Jupyter lab</li>
+									<li>If using QuantEcon lectures for the first time on a computer, execute <tt>] add InstantiateFromURL</tt> inside of a notebook or the REPL</li>
+								</ul>
+							</div>
+						</div>
+
+{% endif %}
 
 {%- endblock header-%}
 
@@ -427,9 +475,9 @@ var element = $('#{{ div_id }}');
         <div class="page-tools">
 	        <ul>
 		        <li class="top"><a href="#top" title="Back to top"><span class="icon icon-chevron-up"></span></a></li>
-		        <li><a href="http://twitter.com/intent/tweet?url=https%3A%2F%2Flectures.quantecon.org%2F{{nb_lang}}/{{nb_filename}}&via=QuantEcon&text=Covariance Stationary Processes" title="Share on Twitter" target="_blank"><span class="icon icon-twitter"></span></a></li>
-		        <li><a href="https://www.linkedin.com/shareArticle?mini=true&url=https://lectures.quentecon.org%2F{{nb_lang}}/{{nb_filename}}&title=Covariance Stationary Processes&summary=This%20website%20presents%20a%20series%20of%20lectures%20on%20quantitative%20economic%20modeling,%20designed%20and%20written%20by%20Thomas%20J.%20Sargent%20and%20John%20Stachurski.&source=QuantEcon" title="Share on LinkedIn" target="_blank"><span class="icon icon-linkedin"></span></a></li>
-		        <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//lectures.quantecon.org%2F{{nb_lang}}/{{nb_filename}}" title="Share on Facebook" target="_blank"><span class="icon icon-facebook"></span></a></li>
+		        <li><a href="http://twitter.com/intent/tweet?url=https%3A%2F%2Flectures.quantecon.org%2F{{nb_lang}}%2F{{nb_filename_with_path}}.html&via=QuantEcon&text=Covariance Stationary Processes" title="Share on Twitter" target="_blank"><span class="icon icon-twitter"></span></a></li>
+		        <li><a href="https://www.linkedin.com/shareArticle?mini=true&url=https://lectures.quentecon.org%2F{{nb_lang}}%2F{{nb_filename_with_path}}.html&title=Covariance Stationary Processes&summary=This%20website%20presents%20a%20series%20of%20lectures%20on%20quantitative%20economic%20modeling,%20designed%20and%20written%20by%20Thomas%20J.%20Sargent%20and%20John%20Stachurski.&source=QuantEcon" title="Share on LinkedIn" target="_blank"><span class="icon icon-linkedin"></span></a></li>
+		        <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//lectures.quantecon.org%2F{{nb_lang}}%2F{{nb_filename_with_path}}.html" title="Share on Facebook" target="_blank"><span class="icon icon-facebook"></span></a></li>
 		        <li><span class="title">Share page</span></li>
 	        </ul>
         </div>
@@ -439,7 +487,7 @@ var element = $('#{{ div_id }}');
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
         <script src="/_static/js/plugins.js"></script>
-        <script src="/_static/js/qe.js?v=1.5"></script>
+        <script src="/_static/js/qe.js?v=2.4"></script>
 
 	    <script>
 	      var DOCUMENTATION_OPTIONS = {

@@ -46,6 +46,8 @@ def setup(app):
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
     app.add_config_value("jupyter_template_coverage_file_path","", "jupyter")
+    app.add_config_value("jupyter_generate_html", False, "jupyter")
+    app.add_config_value("jupyter_html_template","", "jupyter")
     app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter")
 
