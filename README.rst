@@ -19,7 +19,7 @@ Summary
 -------
 
 This sphinx extension can be used to build, execute a collection of
-`Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects and convert them to html.
+`Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects and convert them to html. Execution of notebooks and creation of html files can be turned on/off by configuration variables mentioned later in the doc.
 
 **Note:** It has mainly been written to support the use case of
 scientific publishing and hasn't been well tested outside of this
@@ -249,6 +249,16 @@ The following additions must be made to ``conf.py`` file.
     # html template specific to your website needs
     jupyter_html_template = "/path_to_html_template.tpl"
 
+Dependency of notebooks on other notebooks for execution can also be added to the configuration file above in the form of a dictionary. The key/value pairs will contain the names of the notebook files.
+An example to illustrate this is as follows :-
+
+.. code:: python
+
+   # add your dependency lists here
+   jupyter_dependency_lists = {
+      'python_advanced_features' : ['python_essentials','python_oop'],
+      'discrete_dp' : ['dp_essentials'],
+   }
 
 TODO
 ----
