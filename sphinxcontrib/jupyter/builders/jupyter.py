@@ -9,6 +9,7 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from dask.distributed import Client, progress
+from sphinx.util import logging
 import pdb
 
 class JupyterBuilder(Builder):
@@ -58,6 +59,7 @@ class JupyterBuilder(Builder):
         self.delayed_notebooks = dict()
         self.futures = []
         self.delayed_futures = []
+        self.logger = logging.getLogger(__name__)
 
 
     def get_outdated_docs(self):
@@ -106,14 +108,14 @@ class JupyterBuilder(Builder):
             with codecs.open(outfilename, "w", "utf-8") as f:
                 f.write(self.writer.output)
         except (IOError, OSError) as err:
-            self.warn("error writing file %s: %s" % (outfilename, err))
+            self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def copy_static_files(self):
         # copy all static files
         self.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         if (self.config["jupyter_execute_notebooks"]):
-            self.info(bold("copying static files to executed folder... \n"), nonl=True)
+            self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
             ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
 
@@ -121,14 +123,14 @@ class JupyterBuilder(Builder):
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
             if not os.path.exists(entry):
-                self.warn(
+                self.logger.warning(
                     "jupyter_static_path entry {} does not exist"
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
                 if (self.config["jupyter_execute_notebooks"]):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
-        self.info("done")
+        self.logger.info("done")
 
 
     def finish(self):
@@ -136,7 +138,7 @@ class JupyterBuilder(Builder):
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
-            self.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
+            self.logger.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
             progress(self.futures)
 
             # save executed notebook
