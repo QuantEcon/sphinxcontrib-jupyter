@@ -112,7 +112,7 @@ class JupyterBuilder(Builder):
 
     def copy_static_files(self):
         # copy all static files
-        self.info(bold("copying static files... "), nonl=True)
+        self.logger.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         if (self.config["jupyter_execute_notebooks"]):
             self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
