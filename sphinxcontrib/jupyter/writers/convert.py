@@ -18,6 +18,8 @@ class convertToHtmlWriter():
     Convert IPYNB to HTML using nbconvert and QuantEcon Template
     """
     def __init__(self, parentSelf):
+        for path in [BUILD_PY, DOWNLOAD_PY, BUILD_JL, DOWNLOAD_JL]:
+            ensuredir(path)
         self.html_exporter = HTMLExporter()
         self.html_exporter.template_file = parentSelf.config["jupyter_html_template"]
 
@@ -26,11 +28,10 @@ class convertToHtmlWriter():
         fl_html = ''
         #Convert to HTML
         if (language.language.find('python') != -1):
-            for path in [BUILD_PY, DOWNLOAD_PY]:
-                ensuredir(path)
             relative_path = path.replace(SOURCE_PY,'')
             if relative_path:
                 relative_path = relative_path[1:]
+
             build_path = BUILD_PY + relative_path
             download_path = DOWNLOAD_PY + relative_path
             ensuredir(build_path)
@@ -38,8 +39,6 @@ class convertToHtmlWriter():
             fl_html = build_path + "/" + "{}.html".format(filename)
             download_nb = download_path + "/" + "{}.ipynb".format(filename)
         elif (language.language.find('julia') != -1):
-            for path in [BUILD_JL, DOWNLOAD_JL]:
-                ensuredir(path)
             relative_path = path.replace(SOURCE_JL,'')
             if relative_path:
                 relative_path = relative_path[1:]
