@@ -10,8 +10,8 @@ from dask.distributed import as_completed
 from io import open
 import sys
 
-JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
-JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
+JUPYTER_EXECUTED = "_build/jupyter/executed"
+JUPYTER_COVERAGE = "_build/jupyter/coverage"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
 JUPYTER_ERROR = "_build/jupyter/reports/{}"
 #JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
@@ -48,14 +48,14 @@ class ExecuteNotebookWriter():
         # - Parse Directories - #
         if coverage:
             if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE.format(language) + "/" + subdirectory
+                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE + "/" + subdirectory
             else:
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE.format(language)
+                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE
         else:
             if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED.format(language) + "/" + subdirectory
+                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED + "/" + subdirectory
             else:
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
+                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED
         ensuredir(builderSelf.executed_notebook_dir)
 
         if coverage:
