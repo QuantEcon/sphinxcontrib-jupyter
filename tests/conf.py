@@ -185,6 +185,9 @@ jupyter_static_file_path = ["_static"]
 #allow execution of notebooks
 jupyter_execute_notebooks = True
 
+#make website
+jupyter_make_site = True
+
 # Location of template folder for coverage reports
 jupyter_template_coverage_file_path = "templates/error_report_template.html"
 

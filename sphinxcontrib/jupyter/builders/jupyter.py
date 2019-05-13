@@ -8,6 +8,7 @@ from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
+from ..writers.make_site import MakeSiteWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
@@ -23,6 +24,7 @@ class JupyterBuilder(Builder):
 
     _writer_class = JupyterWriter
     _execute_notebook_class = ExecuteNotebookWriter()
+    _make_site_class = MakeSiteWriter()
     dask_log = dict()
 
     futures = []
@@ -153,3 +155,7 @@ class JupyterBuilder(Builder):
             ##generate coverage if config value set
             if self.config['jupyter_execute_nb']['coverage']:
                 self._execute_notebook_class.create_coverage_report(self, error_results)
+
+            ### create a website folder
+            if self.config['jupyter_make_site']:
+                self._make_site_class.build_website()
