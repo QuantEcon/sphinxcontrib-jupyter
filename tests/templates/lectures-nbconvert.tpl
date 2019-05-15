@@ -40,8 +40,8 @@
 		<meta property="og:description" content="This website presents a series of lectures on quantitative economic modeling, designed and written by Thomas J. Sargent and John Stachurski." />
 		<meta property="og:site_name" content="Quantitative Economics" />
 
-        <link rel="stylesheet" href="/_static/css/basic.css">
-        <link rel="stylesheet" href="/_static/css/qe.css?v=2.16">
+        <link rel="stylesheet" href="/_static/css/basic.css?v=1.1">
+        <link rel="stylesheet" href="/_static/css/qe.css?v=2.18">
         <link rel="stylesheet" href="https://assets.quantecon.org/css/qe-menubar.css">
         <link rel="icon" href="/_static/img/favicon.ico" type="image/x-icon" />
 

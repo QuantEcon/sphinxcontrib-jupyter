@@ -186,7 +186,7 @@ jupyter_static_file_path = ["_static"]
 jupyter_execute_notebooks = True
 
 #path to download notebooks from 
-jupyter_download_nb_urlpath = "https://lectures.quantecon.org/jl/"
+jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
 
 #allow downloading of notebooks
 jupyter_download_nb = True
