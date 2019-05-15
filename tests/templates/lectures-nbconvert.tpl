@@ -168,8 +168,8 @@
 {% elif nb_lang == 'jl' and not indexPage %}
 
 						<ul class="badges">
-							<li><a href="{{download_nb_path}}_downloads/ipynb/jl/{{nb_filename_with_path}}.ipynb"><img src="/_static/img/jupyter-notebook-download-blue.svg" id="notebook_download_badge"></a></li>
-							<li><a href="{{download_nb_path}}_downloads/pdf/jl/{{nb_filename_with_path}}.pdf"><img src="/_static/img/pdf-download-blue.svg" id="pdf_download_badge"></a></li>
+							<li><a href="{{download_nb_path}}/_downloads/ipynb/jl/{{nb_filename_with_path}}.ipynb"><img src="/_static/img/jupyter-notebook-download-blue.svg" id="notebook_download_badge"></a></li>
+							<li><a href="{{download_nb_path}}/_downloads/pdf/jl/{{nb_filename_with_path}}.pdf"><img src="/_static/img/pdf-download-blue.svg" id="pdf_download_badge"></a></li>
 							<li><a href="/status.html"><img src="https://img.shields.io/badge/Execution%20test-not%20available-lightgrey.svg" id="executability_status_badge"></a></li>
 						</ul>
 						
