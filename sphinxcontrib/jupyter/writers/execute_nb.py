@@ -116,9 +116,10 @@ class ExecuteNotebookWriter():
         #Write Executed Notebook as File
         with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
             nbformat.write(executed_nb, f)
-        # # generate html if needed
+        
+        ## generate html if needed
         if (builderSelf.config['jupyter_generate_html']):
-            builderSelf._convert_class.convert(executed_nb, passed_metadata['path'], filename, language_info)
+            builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
         # storing error info if any execution throws an error
         results = dict()
         results['runtime']  = total_time

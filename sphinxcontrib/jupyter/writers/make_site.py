@@ -39,7 +39,8 @@ class MakeSiteWriter():
             self.logger.warning("Source frontend folder not present. Consider creating a source.frontend folder for html helpers")
 
         ## copies the report of execution results
-        shutil.copy2("_build/jupyter/reports/code-execution-results.json", "_build_website/_static/")
+        if os.path.exists("_build/jupyter/reports/code-execution-results.json"):
+            shutil.copy2("_build/jupyter/reports/code-execution-results.json", "_build_website/_static/")
 
 
 

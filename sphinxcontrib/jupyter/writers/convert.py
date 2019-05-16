@@ -4,7 +4,6 @@ import os
 from io import open
 from sphinx.util.osutil import ensuredir
 
-SOURCE = "_build/jupyter/executed"
 BUILD = "_build/jupyter/html"
 DOWNLOAD = BUILD + "/_downloads/"
 
@@ -17,14 +16,18 @@ class convertToHtmlWriter():
         for path in [BUILD, DOWNLOAD]:
             ensuredir(path)
         self.html_exporter = HTMLExporter()
-        self.html_exporter.template_file = parentSelf.config["jupyter_html_template"]
+        if (parentSelf):
+            self.html_exporter.template_file = parentSelf.config["jupyter_html_template"]
+        else:
+            self.html_exporter.template_file = self.config["jupyter_html_template"]
 
-    def convert(self, nb, path, filename, language):
+    def convert(self, nb, filename, language, base_path, path=None):
         fl_nb = ''
         fl_html = ''
+        relative_path = ''
         #Convert to HTML
-        relative_path = path.replace(SOURCE,'')
-        if relative_path:
+        if path:
+            relative_path = path.replace(base_path,'')
             relative_path = relative_path[1:]
         build_path = BUILD +  relative_path
         download_path = DOWNLOAD + relative_path 
@@ -38,7 +41,7 @@ class convertToHtmlWriter():
 
         #print("{} -> {}".format(fl_nb, download_nb))
 
-        nb['cells'] = nb['cells'][1:]                #skip first code-cell as preamble
+        nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble
 
         #Write Executed Notebook as File
         with open(download_nb, "wt", encoding="UTF-8") as f:
