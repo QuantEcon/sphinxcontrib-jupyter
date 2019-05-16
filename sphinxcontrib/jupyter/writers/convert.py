@@ -1,6 +1,5 @@
 import nbformat
 from nbconvert import HTMLExporter
-import glob
 import os
 from io import open
 from sphinx.util.osutil import ensuredir

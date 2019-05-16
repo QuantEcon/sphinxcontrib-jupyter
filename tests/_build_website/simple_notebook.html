@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Simple Notebook Example &ndash; Quantitative Economics</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Quantitative Economics">
+		<meta name="keywords" content="QuantEcon, Quantitative Economics, Economics, Sloan, Alfred P. Sloan Foundation, Tom J. Sargent, John Stachurski">
+		<meta name="description" content="This website presents a series of lectures on quantitative economic modeling, designed and written by Thomas J. Sargent and John Stachurski.">
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:site" content="@quantecon">
+		<meta name="twitter:title" content="Simple Notebook Example">
+		<meta name="twitter:description" content="This website presents a series of lectures on quantitative economic modeling, designed and written by Thomas J. Sargent and John Stachurski.">
+		<meta name="twitter:creator" content="@quantecon">
+		<meta name="twitter:image" content="https://lectures.quantecon.org/_static/img/qeco-logo.png">
+		<meta property="og:title" content="Simple Notebook Example" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://lectures.quantecon.org/py/simple_notebook.html" />
+		<meta property="og:image" content="https://lectures.quantecon.org/_static/img/qeco-logo.png" />
+		<meta property="og:description" content="This website presents a series of lectures on quantitative economic modeling, designed and written by Thomas J. Sargent and John Stachurski." />
+		<meta property="og:site_name" content="Quantitative Economics" />
+
+        <link rel="stylesheet" href="/_static/css/basic.css">
+        <link rel="stylesheet" href="/_static/css/qe.css?v=2.16">
+        <link rel="stylesheet" href="https://assets.quantecon.org/css/qe-menubar.css">
+        <link rel="icon" href="/_static/img/favicon.ico" type="image/x-icon" />
+
+        <link href="https://fonts.googleapis.com/css?family=Droid+Serif|Source+Sans+Pro:400,700" rel="stylesheet">
+
+    </head>
+
+
+    <body class="py">
+
+
+        <div class="qe-menubar">
+        
+            <p class="qe-menubar-logo"><a href="https://quantecon.org/" title="quantecon.org"><img src="https://assets.quantecon.org/img/qe-menubar-logo.svg" alt="QuantEcon"></a></p>
+        
+            <ul class="qe-menubar-nav">
+                <li><a href="https://lectures.quantecon.org/" title="Lectures"><span>Lectures</span></a></li>
+                <li><a href="https://quantecon.org/quantecon-py" title="QuantEcon.py"><span>QuantEcon.py</span></a></li>
+                <li><a href="https://quantecon.org/quantecon-jl" title="QuantEcon.jl"><span>QuantEcon.jl</span></a></li>
+                <li><a href="https://quantecon.org/notebooks" title="QuantEcon Notebook Library"><span>NB Library</span></a></li>
+                <li><a href="http://notes.quantecon.org/" title="QE Notes"><span>QE Notes</span></a></li>
+                <li><a href="http://cheatsheets.quantecon.org/" title="Cheatsheets"><span>Cheatsheets</span></a></li>
+                <li><a href="http://blog.quantecon.org/" title="Blog"><span>Blog</span></a></li>
+                <li><a href="http://discourse.quantecon.org/" title="Forum"><span>Forum</span></a></li>
+                <li><a href="http://store.quantecon.org/" title="Store"><span class="show-for-sr">Store</span></a></li>
+                <li><a href="https://github.com/QuantEcon/" title="Repository"><span class="show-for-sr">Repository</span></a></li>
+                <li><a href="https://twitter.com/quantecon" title="Twitter"><span class="show-for-sr">Twitter</span></a></li>
+            </ul>
+            
+        </div>
+
+        <div class="wrapper">
+
+	        <header class="header">
+
+				<div class="container">
+
+		        	<div class="branding">
+
+
+			        	<p class="site-title"><a href="https://lectures.quantecon.org">Quantitative Economics with Python</a></p>
+
+
+			        	<p class="visuallyhidden"><a href="#skip">Skip to content</a></p>
+
+			        	<ul class="site-authors">
+
+			        		<li><a href="http://www.tomsargent.com/">Thomas J. Sargent</a></li>
+			        		<li><a href="http://johnstachurski.net/">John Stachurski</a></li>
+			        	</ul>
+
+		        	</div>
+
+		        	<nav class="main-nav">
+
+			        	<ul>
+		        			<li class="section-home"><a href="/">Home</a></li>
+		        			<li class="section-py"><a href="/py/">Python</a></li>
+		        			<li class="section-jl"><a href="/jl/">Julia</a></li>
+							<li><a href="#pdf-options" name="pdf-options" rel="leanModal">PDF</a></li>
+			        	</ul>
+
+					</nav>
+
+		        	<div class="pdf-options" id="pdf-options">
+		        		<a class="modal_close" href="#"><span class="icon icon-cross"></span></a>
+		        		<h2>Download PDF</h2>
+					<p>We are working to support a site-wide PDF but it is not yet available. You can download PDFs for individual lectures through the download badge on each lecture page.</p>
+		        	</div>
+
+		        	<div class="header-search"><gcse:searchbox-only></gcse:searchbox-only></div>
+
+		        	<p id="combined_percentage" class="combined-coverage"><a href="/status.html"></a></p>
+
+				</div>
+
+	        </header>
+
+
+			<div class="main">
+
+				<div class="breadcrumbs clearfix">
+					<ul>
+						<li><a href="https://quantecon.org/">Org</a> •</li>
+						<li><a href="https://lectures.quantecon.org">Lectures</a> &raquo;</li>
+						<li><a href="https://lectures.quantecon.org/py/">Python </a> &raquo;</li>
+				      	<li>Simple Notebook Example</li>
+					</ul>
+				</div>
+
+
+				<div class="content">
+
+					<div id="skip"></div>
+
+				    <div class="document">
+
+
+
+						<ul class="badges">
+							<li><a href="https://colab.research.google.com/github/QuantEcon/lecture-py-notebooks/blob/master/simple_notebook.ipynb"><img src="/_static/img/jupyter-notebook-run-FDD935.svg" id="notebook_run_badge"></a></li>
+							<li><a href="/_downloads/ipynb/py/simple_notebook.ipynb"><img src="/_static/img/jupyter-notebook-download-blue.svg" id="notebook_download_badge"></a></li>
+							<li><a href="/_downloads/pdf/py/simple_notebook.pdf"><img src="/_static/img/pdf-download-blue.svg" id="pdf_download_badge"></a></li>
+							<li><a href="/status.html"><img src="https://img.shields.io/badge/Execution%20test-not%20available-lightgrey.svg" id="executability_status_badge"></a></li>
+						</ul>
+
+						<div class="how-to">
+							<a href="#" class="toggle"><span class="icon icon-angle-double-down"></span>How to read this lecture...</a>
+							<div class="how-to-content">
+								<p>Code should execute sequentially if run in a Jupyter notebook</p>
+								<ul>
+									<li>See the <a href="/py/getting_started.html">set up page</a> to install Jupyter, Python and all necessary libraries</li>
+									<li>Please direct feedback to <a href="mailto:contact@quantecon.org">contact@quantecon.org</a> or the <a href="http://discourse.quantecon.org/">discourse forum</a></li>
+								</ul>
+							</div>
+						</div>
+
+
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Simple-Notebook-Example">Simple Notebook Example<a class="anchor-link" href="#Simple-Notebook-Example">&#182;</a></h1><p>This provides a notebook that demonstrates the different
+features available in the <a href="https://github.com/QuantEcon/sphinxcontrib-jupyter">sphinxcontrib.jupyter</a>
+extension.</p>
+<p>Text will appear as a markdown cell in the notebook split by code-blocks.</p>
+<p>To add a code block you can use <code>code-block</code> directives such as:</p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">==================</span>
+<span class="sd">A simple Fill plot</span>
+<span class="sd">==================</span>
+
+<span class="sd">This example showcases the most basic fill plot a user can do with matplotlib.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Figures can be include using the <strong>figure</strong> directive</p>
+<p><img src="_static/fill_demo1.png" style=""></p>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Math">Math<a class="anchor-link" href="#Math">&#182;</a></h2><p>Math will flow through to the Jupyter notebook and will be rendered in place by mathjax</p>
+$$
+\mathbb P\{z = v \mid x \}
+= \begin{cases}
+    f_0(v) &amp; \mbox{if } x = x_0, \\
+    f_1(v) &amp; \mbox{if } x = x_1
+\end{cases}
+$$
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Tables">Tables<a class="anchor-link" href="#Tables">&#182;</a></h2><p>The extension supports the conversion of <strong>simple</strong> rst tables.</p>
+<table>
+<thead><tr>
+<th style="text-align:center">Header 1</th>
+<th style="text-align:center">Header 2</th>
+<th style="text-align:center">Header 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">body row 1</td>
+<td style="text-align:center">column 2</td>
+<td style="text-align:center">column 3</td>
+</tr>
+<tr>
+<td style="text-align:center">body row 2</td>
+<td style="text-align:center">column 2</td>
+<td style="text-align:center">column 3</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+
+<div class="{} cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Special-Characters">Special Characters<a class="anchor-link" href="#Special-Characters">&#182;</a></h2><p>Here is some text with \$1.00 in it and another \$2.00</p>
+
+</div>
+</div>
+</div>
+ 
+
+
+
+
+				    </div>
+
+				</div>
+
+				<!-- topic-pager footer nav -->
+
+			</div>
+
+			<footer class="footer">
+
+				<div class="container">
+
+					<p><a rel="license" href="http://creativecommons.org/licenses/by-nd/4.0/"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by-nd/4.0/80x15.png" /></a></p>
+
+					<p>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nd/4.0/">Creative Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
+
+					<p>&copy; Copyright 2017, Thomas J. Sargent and John Stachurski. Created using <a href="http://www.sphinx-doc.org/">Sphinx</a>, hosted with <a href="https://aws.amazon.com/">AWS</a>.</p>
+
+				</div>
+
+			</footer>
+
+        </div>
+
+        <div class="page-tools">
+	        <ul>
+		        <li class="top"><a href="#top" title="Back to top"><span class="icon icon-chevron-up"></span></a></li>
+		        <li><a href="http://twitter.com/intent/tweet?url=https%3A%2F%2Flectures.quantecon.org%2Fpy%2Fsimple_notebook.html&via=QuantEcon&text=Covariance Stationary Processes" title="Share on Twitter" target="_blank"><span class="icon icon-twitter"></span></a></li>
+		        <li><a href="https://www.linkedin.com/shareArticle?mini=true&url=https://lectures.quentecon.org%2Fpy%2Fsimple_notebook.html&title=Covariance Stationary Processes&summary=This%20website%20presents%20a%20series%20of%20lectures%20on%20quantitative%20economic%20modeling,%20designed%20and%20written%20by%20Thomas%20J.%20Sargent%20and%20John%20Stachurski.&source=QuantEcon" title="Share on LinkedIn" target="_blank"><span class="icon icon-linkedin"></span></a></li>
+		        <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3A//lectures.quantecon.org%2Fpy%2Fsimple_notebook.html" title="Share on Facebook" target="_blank"><span class="icon icon-facebook"></span></a></li>
+		        <li><span class="title">Share page</span></li>
+	        </ul>
+        </div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="/_static/js/vendor/jquery-1.11.0.min.js"><\/script>')</script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+        <script src="/_static/js/plugins.js"></script>
+        <script src="/_static/js/qe.js?v=2.4"></script>
+
+	    <script>
+	      var DOCUMENTATION_OPTIONS = {
+	        URL_ROOT:    '',
+	        VERSION:     '2018-Aug-8',
+	        COLLAPSE_INDEX: false,
+	        FILE_SUFFIX: '.html',
+	        HAS_SOURCE:  true
+	      };
+	    </script>
+
+		<script>
+		  (function() {
+		    var cx = '006559439261123061640:rgnmeebflcy';
+		    var gcse = document.createElement('script');
+		    gcse.type = 'text/javascript';
+		    gcse.async = true;
+		    gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+		    var s = document.getElementsByTagName('script')[0];
+		    s.parentNode.insertBefore(gcse, s);
+		  })();
+		</script>
+
+		<script>
+		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+		  ga('create', 'UA-54984338-1', 'auto');
+		  ga('send', 'pageview');
+		</script>
+
+    </body>
+</html>
