@@ -185,6 +185,12 @@ jupyter_static_file_path = ["_static"]
 #allow execution of notebooks
 jupyter_execute_notebooks = True
 
+#path to download notebooks from 
+jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
+
+#allow downloading of notebooks
+jupyter_download_nb = True
+
 # Location of template folder for coverage reports
 jupyter_template_coverage_file_path = "templates/error_report_template.html"
 
