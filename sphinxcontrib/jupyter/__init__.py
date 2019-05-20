@@ -66,7 +66,8 @@ def setup(app):
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
     app.add_config_value("jupyter_target_html", False, "jupyter")
-    app.add_config_value("jupyter_target_html_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_download_nb",False, "jupyter")
+    app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_urlpath", False, "jupyter")
 
     return {
