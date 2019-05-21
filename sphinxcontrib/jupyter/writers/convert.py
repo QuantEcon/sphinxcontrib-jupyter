@@ -18,7 +18,7 @@ class convertToHtmlWriter():
     Convert IPYNB to HTML using nbconvert and QuantEcon Template
     """
     def __init__(self, parentSelf):
-        for path in [BUILD_PY, DOWNLOAD_PY, BUILD_JL, DOWNLOAD_JL]:
+        for path in [BUILD_PY, BUILD_JL]:
             ensuredir(path)
         self.html_exporter = HTMLExporter()
         self.html_exporter.template_file = parentSelf.config["jupyter_html_template"]
