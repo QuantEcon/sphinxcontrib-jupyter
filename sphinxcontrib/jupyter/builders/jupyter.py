@@ -26,12 +26,15 @@ class JupyterBuilder(Builder):
     dask_log = dict()
 
     futures = []
+    threads_per_worker = None
+    n_workers = 2
+    logger = logging.getLogger(__name__)
 
     def init(self):
         # Check default language is defined in the jupyter kernels
         def_lng = self.config["jupyter_default_lang"]
         if  def_lng not in self.config["jupyter_kernels"]:
-            self.warn(
+            self.logger.warning(
                 "Default language defined in conf.py ({}) is not "
                 "defined in the jupyter_kernels in conf.py. "
                 "Set default language to python3"
@@ -49,17 +52,28 @@ class JupyterBuilder(Builder):
                     self.config["jupyter_conversion_mode"] = "code"
                 else:
                     # Fail on unrecognised command.
-                    self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
+                    self.logger.warning("Unrecognise command line parameter " + instruction + ", ignoring.")
+
+        #threads per worker for dask distributed processing
+        try:
+            self.threads_per_worker = self.config["jupyter_threads_per_worker"]
+        except:
+            self.logger.info("jupyter_threads_per_worker variable is not defined") 
+
+        #number of workers for dask distributed processing
+        try:
+            self.n_workers = self.config["jupyter_number_workers"] 
+        except:
+            self.logger.info("jupyter_number_workers variable is not defined")
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        self.client = Client(processes=False)
+        self.client = Client(processes=False, n_workers = self.n_workers, threads_per_worker = self.threads_per_worker)
         self.dependency_lists = self.config["jupyter_dependency_lists"]
         self.executed_notebooks = []
         self.delayed_notebooks = dict()
         self.futures = []
         self.delayed_futures = []
-        self.logger = logging.getLogger(__name__)
 
 
     def get_outdated_docs(self):
