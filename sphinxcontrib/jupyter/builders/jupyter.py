@@ -58,13 +58,14 @@ class JupyterBuilder(Builder):
         try:
             self.threads_per_worker = self.config["jupyter_threads_per_worker"]
         except:
-            self.logger.info("jupyter_threads_per_worker variable is not defined") 
+            #self.logger.warning("jupyter_threads_per_worker variable is not defined") 
+            pass
 
         #number of workers for dask distributed processing
         try:
             self.n_workers = self.config["jupyter_number_workers"] 
         except:
-            self.logger.info("jupyter_number_workers variable is not defined")
+            pass
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
