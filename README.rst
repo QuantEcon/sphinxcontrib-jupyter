@@ -248,6 +248,12 @@ The following additions must be made to ``conf.py`` file.
     
     # html template specific to your website needs
     jupyter_html_template = "/path_to_html_template.tpl"
+    
+    #path to download notebooks from 
+    jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
+
+    #allow downloading of notebooks
+    jupyter_download_nb = True
 
 Dependency of notebooks on other notebooks for execution can also be added to the configuration file above in the form of a dictionary. The key/value pairs will contain the names of the notebook files.
 An example to illustrate this is as follows :-
