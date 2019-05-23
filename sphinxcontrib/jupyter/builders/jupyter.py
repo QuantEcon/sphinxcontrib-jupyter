@@ -89,8 +89,27 @@ class JupyterBuilder(Builder):
         # replace tuples in attribute values with lists
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
+
+        ### print an output for downloading notebooks as well with proper links if variable is set
+        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"] is True:
+
+            outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
+            ensuredir(os.path.dirname(outfilename))
+
+            self.writer._set_urlpath(self.config["jupyter_download_nb_urlpath"])
+            self.writer.write(doctree, destination)
+
+            try:
+                with codecs.open(outfilename, "w", "utf-8") as f:
+                    f.write(self.writer.output)
+            except (IOError, OSError) as err:
+                self.warn("error writing file %s: %s" % (outfilename, err))
+
+        ### output notebooks for executing
+        self.writer._set_urlpath(None)
         self.writer.write(doctree, destination)
-        #execute the notebook
+
+        ### execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
             strDocname = str(docname)
             if strDocname in self.dependency_lists.keys():
@@ -98,8 +117,8 @@ class JupyterBuilder(Builder):
             else:        
                 self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
 
+        ### mkdir if the directory does not exist
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
-        # mkdir if the directory does not exist
         ensuredir(os.path.dirname(outfilename))
 
         try:
