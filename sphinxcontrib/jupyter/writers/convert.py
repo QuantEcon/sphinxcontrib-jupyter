@@ -30,11 +30,15 @@ class convertToHtmlWriter():
             relative_path = path.replace(base_path,'')
             relative_path = relative_path[1:]
         build_path = BUILD +  relative_path
-        download_path = DOWNLOAD + relative_path 
         ensuredir(build_path)
-        ensuredir(download_path)
         fl_html = build_path + "/" + "{}.html".format(filename)
-        download_nb = download_path + "/" + "{}.ipynb".format(filename)
+
+        ## allow files to download if metadata is set
+        if (nb['metadata']['download_nb'] == True):
+            download_path = DOWNLOAD + relative_path
+            ensuredir(download_path)
+            download_nb = download_path + "/" + "{}.ipynb".format(filename)
+
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
@@ -44,5 +48,6 @@ class convertToHtmlWriter():
         nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble
 
         #Write Executed Notebook as File
-        with open(download_nb, "wt", encoding="UTF-8") as f:
-                nbformat.write(nb, f)
+        if (nb['metadata']['download_nb'] == True):
+            with open(download_nb, "wt", encoding="UTF-8") as f:
+                    nbformat.write(nb, f)

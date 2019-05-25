@@ -89,6 +89,9 @@ class ExecuteNotebookWriter():
         executed_nb = nb[0]
         language_info = executed_nb['metadata']['kernelspec']
         executed_nb['metadata']['filename_with_path'] = passed_metadata['filename_with_path']
+        executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
+        if (builderSelf.config['jupyter_download_nb']):
+            executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
         total_time = time.time() - passed_metadata['start_time']
         if (futures_name.startswith('delayed') != -1):
             # adding in executed notebooks list
