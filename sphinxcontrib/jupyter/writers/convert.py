@@ -5,7 +5,6 @@ from io import open
 from sphinx.util.osutil import ensuredir
 
 BUILD = "_build/jupyter/html"
-DOWNLOAD = BUILD + "/_downloads/"
 
 class convertToHtmlWriter():
     
@@ -33,11 +32,6 @@ class convertToHtmlWriter():
         ensuredir(build_path)
         fl_html = build_path + "/" + "{}.html".format(filename)
 
-        ## allow files to download if metadata is set
-        if (nb['metadata']['download_nb'] == True):
-            download_path = DOWNLOAD + relative_path
-            ensuredir(download_path)
-            download_nb = download_path + "/" + "{}.ipynb".format(filename)
 
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
@@ -47,7 +41,7 @@ class convertToHtmlWriter():
 
         nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble
 
-        #Write Executed Notebook as File
-        if (nb['metadata']['download_nb'] == True):
-            with open(download_nb, "wt", encoding="UTF-8") as f:
-                    nbformat.write(nb, f)
+        # #Write Executed Notebook as File
+        # if (nb['metadata']['download_nb'] == True):
+        #     with open(download_nb, "wt", encoding="UTF-8") as f:
+        #             nbformat.write(nb, f)
