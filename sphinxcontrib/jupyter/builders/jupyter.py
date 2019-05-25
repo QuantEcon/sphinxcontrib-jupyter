@@ -95,7 +95,6 @@ class JupyterBuilder(Builder):
 
             outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
-            self.info(bold("starting conversion for downloads folder"))
             self.writer._set_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer.write(doctree, destination)
 
@@ -106,7 +105,6 @@ class JupyterBuilder(Builder):
                 self.warn("error writing file %s: %s" % (outfilename, err))
 
         ### output notebooks for executing
-        self.info(bold("starting conversion for execution"))
         self.writer._set_urlpath(None)
         self.writer.write(doctree, destination)
 
