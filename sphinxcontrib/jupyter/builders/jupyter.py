@@ -9,6 +9,7 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from dask.distributed import Client, progress
+from sphinx.util import logging
 import pdb
 
 class JupyterBuilder(Builder):
@@ -25,12 +26,15 @@ class JupyterBuilder(Builder):
     dask_log = dict()
 
     futures = []
+    threads_per_worker = None
+    n_workers = 2
+    logger = logging.getLogger(__name__)
 
     def init(self):
         # Check default language is defined in the jupyter kernels
         def_lng = self.config["jupyter_default_lang"]
         if  def_lng not in self.config["jupyter_kernels"]:
-            self.warn(
+            self.logger.warning(
                 "Default language defined in conf.py ({}) is not "
                 "defined in the jupyter_kernels in conf.py. "
                 "Set default language to python3"
@@ -48,11 +52,24 @@ class JupyterBuilder(Builder):
                     self.config["jupyter_conversion_mode"] = "code"
                 else:
                     # Fail on unrecognised command.
-                    self.warn("Unrecognise command line parameter " + instruction + ", ignoring.")
+                    self.logger.warning("Unrecognise command line parameter " + instruction + ", ignoring.")
+
+        #threads per worker for dask distributed processing
+        try:
+            self.threads_per_worker = self.config["jupyter_threads_per_worker"]
+        except:
+            #self.logger.warning("jupyter_threads_per_worker variable is not defined") 
+            pass
+
+        #number of workers for dask distributed processing
+        try:
+            self.n_workers = self.config["jupyter_number_workers"] 
+        except:
+            pass
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        self.client = Client(processes=False)
+        self.client = Client(processes=False, n_workers = self.n_workers, threads_per_worker = self.threads_per_worker)
         self.dependency_lists = self.config["jupyter_dependency_lists"]
         self.executed_notebooks = []
         self.delayed_notebooks = dict()
@@ -106,14 +123,14 @@ class JupyterBuilder(Builder):
             with codecs.open(outfilename, "w", "utf-8") as f:
                 f.write(self.writer.output)
         except (IOError, OSError) as err:
-            self.warn("error writing file %s: %s" % (outfilename, err))
+            self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def copy_static_files(self):
         # copy all static files
-        self.info(bold("copying static files... "), nonl=True)
+        self.logger.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         if (self.config["jupyter_execute_notebooks"]):
-            self.info(bold("copying static files to executed folder... \n"), nonl=True)
+            self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
             ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
 
@@ -121,14 +138,14 @@ class JupyterBuilder(Builder):
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
             if not os.path.exists(entry):
-                self.warn(
+                self.logger.warning(
                     "jupyter_static_path entry {} does not exist"
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
                 if (self.config["jupyter_execute_notebooks"]):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
-        self.info("done")
+        self.logger.info("done")
 
 
     def finish(self):
@@ -136,7 +153,7 @@ class JupyterBuilder(Builder):
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
-            self.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
+            self.logger.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
             progress(self.futures)
 
             # save executed notebook
