@@ -4,7 +4,7 @@ import os
 from io import open
 from sphinx.util.osutil import ensuredir
 
-BUILD = "_build/jupyter/html"
+BUILD = "_build/jupyter/html/"
 
 class convertToHtmlWriter():
     
@@ -31,13 +31,11 @@ class convertToHtmlWriter():
         build_path = BUILD +  relative_path
         ensuredir(build_path)
         fl_html = build_path + "/" + "{}.html".format(filename)
-
+        print(fl_html, "build_path")
 
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
-
-        #print("{} -> {}".format(fl_nb, download_nb))
 
         nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble
 

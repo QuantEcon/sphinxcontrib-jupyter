@@ -14,9 +14,6 @@ JUPYTER_EXECUTED = "_build/jupyter/executed"
 JUPYTER_COVERAGE = "_build/jupyter/coverage"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
 JUPYTER_ERROR = "_build/jupyter/reports/{}"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
-#JUPYTER_ERROR = "_build_coverage/reports/{}"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
 
 
 class ExecuteNotebookWriter():

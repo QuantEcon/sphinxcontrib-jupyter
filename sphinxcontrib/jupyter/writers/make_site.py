@@ -6,9 +6,6 @@ from sphinx.util import logging
 
 JUPYTER_WEBSITE = "_build_website/"
 DOWNLOADS_PATH = "_build_website/_downloads/ipynb/"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
-#JUPYTER_ERROR = "_build_coverage/reports/{}"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
 
 class MakeSiteWriter():
     """
