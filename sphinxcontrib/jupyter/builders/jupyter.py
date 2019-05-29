@@ -185,4 +185,4 @@ class JupyterBuilder(Builder):
 
         ### create a website folder
         if self.config['jupyter_make_site']:
-            self._make_site_class.build_website()
+            self._make_site_class.build_website(self)
