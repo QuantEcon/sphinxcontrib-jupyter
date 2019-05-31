@@ -26,8 +26,8 @@ class JupyterBuilder(Builder):
     dask_log = dict()
 
     futures = []
-    threads_per_worker = None
-    n_workers = 2
+    threads_per_worker = 2
+    n_workers = None
     logger = logging.getLogger(__name__)
 
     def init(self):
