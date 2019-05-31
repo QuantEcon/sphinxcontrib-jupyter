@@ -202,6 +202,10 @@ jupyter_generate_html = True
 
 jupyter_html_template = "theme/templates/lectures-nbconvert.tpl"
 
+jupyter_number_workers = 1
+
+jupyter_threads_per_worker = 1
+
 jupyter_dependency_lists = {
     'code_blocks' : ['code_synonyms','ignore'],
     'exercises' : ['footnotes'],
