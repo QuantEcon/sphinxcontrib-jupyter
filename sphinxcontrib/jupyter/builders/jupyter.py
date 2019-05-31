@@ -59,17 +59,13 @@ class JupyterBuilder(Builder):
                     self.logger.warning("Unrecognise command line parameter " + instruction + ", ignoring.")
 
         #threads per worker for dask distributed processing
-        try:
+        if self.config["jupyter_threads_per_worker"] != None:
             self.threads_per_worker = self.config["jupyter_threads_per_worker"]
-        except:
-            #self.logger.warning("jupyter_threads_per_worker variable is not defined") 
-            pass
 
         #number of workers for dask distributed processing
-        try:
-            self.n_workers = self.config["jupyter_number_workers"] 
-        except:
-            pass
+        if self.config["jupyter_number_workers"] != None:
+            self.n_workers = self.config["jupyter_number_workers"]
+        
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
@@ -196,7 +192,7 @@ class JupyterBuilder(Builder):
             error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
 
             ##generate coverage if config value set
-            if self.config['jupyter_execute_nb']['coverage']:
+            if self.config['jupyter_execute_nb']['coverage'] is True:
                 self._execute_notebook_class.create_coverage_report(self, error_results)
 
         ### create a website folder
