@@ -54,12 +54,12 @@ class JupyterBuilder(Builder):
                     # Fail on unrecognised command.
                     self.logger.warning("Unrecognise command line parameter " + instruction + ", ignoring.")
 
-       #threads per worker for dask distributed processing
-        if self.config["jupyter_threads_per_worker"] != None:
+        #threads per worker for dask distributed processing
+        if "jupyter_threads_per_worker" in self.config:
             self.threads_per_worker = self.config["jupyter_threads_per_worker"]
 
         #number of workers for dask distributed processing
-        if self.config["jupyter_number_workers"] != None:
+        if "jupyter_number_workers" in self.config:
             self.n_workers = self.config["jupyter_number_workers"]
 
         # start a dask client to process the notebooks efficiently. 
