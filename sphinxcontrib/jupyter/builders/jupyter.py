@@ -26,8 +26,8 @@ class JupyterBuilder(Builder):
     dask_log = dict()
 
     futures = []
-    threads_per_worker = 2
-    n_workers = None
+    threads_per_worker = 1
+    n_workers = 1
     logger = logging.getLogger(__name__)
 
     def init(self):
@@ -66,10 +66,10 @@ class JupyterBuilder(Builder):
             self.n_workers = self.config["jupyter_number_workers"] 
         except:
             pass
-
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        self.client = Client(processes=False, n_workers = self.n_workers, threads_per_worker = self.threads_per_worker)
+        self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
+        self.client.restart()
         self.dependency_lists = self.config["jupyter_dependency_lists"]
         self.executed_notebooks = []
         self.delayed_notebooks = dict()
