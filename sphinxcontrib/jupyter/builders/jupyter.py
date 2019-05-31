@@ -54,18 +54,14 @@ class JupyterBuilder(Builder):
                     # Fail on unrecognised command.
                     self.logger.warning("Unrecognise command line parameter " + instruction + ", ignoring.")
 
-        #threads per worker for dask distributed processing
-        try:
+       #threads per worker for dask distributed processing
+        if self.config["jupyter_threads_per_worker"] != None:
             self.threads_per_worker = self.config["jupyter_threads_per_worker"]
-        except:
-            #self.logger.warning("jupyter_threads_per_worker variable is not defined") 
-            pass
 
         #number of workers for dask distributed processing
-        try:
-            self.n_workers = self.config["jupyter_number_workers"] 
-        except:
-            pass
+        if self.config["jupyter_number_workers"] != None:
+            self.n_workers = self.config["jupyter_number_workers"]
+
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
