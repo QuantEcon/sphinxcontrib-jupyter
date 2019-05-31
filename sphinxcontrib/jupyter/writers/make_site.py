@@ -19,7 +19,7 @@ class MakeSiteWriter():
             shutil.rmtree("_build_website")
 
         ## copies the html and downloads folder
-        shutil.copytree("_build/jupyter/html/","_build_website/", symlinks=True)
+        shutil.copytree("_build/jupyter/html/", JUPYTER_WEBSITE, symlinks=True)
 
         ## copies all the static files
         shutil.copytree("_build/jupyter/_static/","_build_website/_static/", symlinks=True)
