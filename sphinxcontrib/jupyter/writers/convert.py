@@ -29,6 +29,7 @@ class convertToHtmlWriter():
             relative_path = path.replace(SOURCE_PY,'')
             if relative_path:
                 relative_path = relative_path[1:]
+
             build_path = BUILD_PY + relative_path
 
             ## allow files to download if metadata is set
