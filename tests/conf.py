@@ -185,6 +185,9 @@ jupyter_static_file_path = ["_static"]
 #allow execution of notebooks
 jupyter_execute_notebooks = True
 
+#make website
+jupyter_make_site = True
+
 #path to download notebooks from 
 jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
 
@@ -192,11 +195,12 @@ jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
 jupyter_download_nb = True
 
 # Location of template folder for coverage reports
-jupyter_template_coverage_file_path = "templates/error_report_template.html"
+jupyter_template_coverage_file_path = "theme/templates/error_report_template.html"
 
 # generate html from IPYNB files
 jupyter_generate_html = True
-jupyter_html_template = "templates/lectures-nbconvert.tpl"
+
+jupyter_html_template = "theme/templates/lectures-nbconvert.tpl"
 
 jupyter_number_workers = 1
 

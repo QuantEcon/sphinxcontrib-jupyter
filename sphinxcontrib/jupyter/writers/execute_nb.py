@@ -10,13 +10,10 @@ from dask.distributed import as_completed
 from io import open
 import sys
 
-JUPYTER_EXECUTED = "_build/jupyter/executed/{}"
-JUPYTER_COVERAGE = "_build/jupyter/coverage/{}"
+JUPYTER_EXECUTED = "_build/jupyter/executed"
+JUPYTER_COVERAGE = "_build/jupyter/coverage"
 JUPYTER_REPORTS = "_build/jupyter/reports/"
 JUPYTER_ERROR = "_build/jupyter/reports/{}"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
-#JUPYTER_ERROR = "_build_coverage/reports/{}"
-#JUPYTER_COVERAGE = "_build_coverage/{}/jupyter"
 
 
 class ExecuteNotebookWriter():
@@ -48,14 +45,14 @@ class ExecuteNotebookWriter():
         # - Parse Directories - #
         if coverage:
             if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE.format(language) + "/" + subdirectory
+                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE + "/" + subdirectory
             else:
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE.format(language)
+                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE
         else:
             if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED.format(language) + "/" + subdirectory
+                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED + "/" + subdirectory
             else:
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED.format(language)
+                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED
         ensuredir(builderSelf.executed_notebook_dir)
 
         if coverage:
@@ -119,9 +116,10 @@ class ExecuteNotebookWriter():
         #Write Executed Notebook as File
         with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
             nbformat.write(executed_nb, f)
-        # # generate html if needed
+        
+        ## generate html if needed
         if (builderSelf.config['jupyter_generate_html']):
-            builderSelf._convert_class.convert(executed_nb, passed_metadata['path'], filename, language_info)
+            builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
         # storing error info if any execution throws an error
         results = dict()
         results['runtime']  = total_time

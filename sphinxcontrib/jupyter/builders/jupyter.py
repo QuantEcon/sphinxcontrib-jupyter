@@ -2,12 +2,15 @@ import codecs
 import os.path
 import docutils.io
 
+import nbformat
 from sphinx.util.osutil import ensuredir, os_path
 from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
+from ..writers.make_site import MakeSiteWriter
+from ..writers.convert import convertToHtmlWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
@@ -23,6 +26,7 @@ class JupyterBuilder(Builder):
 
     _writer_class = JupyterWriter
     _execute_notebook_class = ExecuteNotebookWriter()
+    _make_site_class = MakeSiteWriter()
     dask_log = dict()
 
     futures = []
@@ -128,6 +132,13 @@ class JupyterBuilder(Builder):
                 self.delayed_notebooks.update({strDocname: self.writer.output})
             else:        
                 self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
+        else:
+            #do not execute
+            if (self.config['jupyter_generate_html']):
+                nb = nbformat.reads(self.writer.output, as_version=4)
+                language_info = nb.metadata.kernelspec.language
+                self._convert_class = convertToHtmlWriter(self)
+                self._convert_class.convert(nb, docname, language_info, "_build/jupyter")
 
         ### mkdir if the directory does not exist
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
@@ -180,5 +191,9 @@ class JupyterBuilder(Builder):
             error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
 
             ##generate coverage if config value set
-            if self.config['jupyter_execute_nb']['coverage']:
+            if self.config['jupyter_execute_nb']['coverage'] is True:
                 self._execute_notebook_class.create_coverage_report(self, error_results)
+
+        ### create a website folder
+        if "jupyter_make_site" in self.config and self.config['jupyter_make_site'] is True:
+            self._make_site_class.build_website(self)
