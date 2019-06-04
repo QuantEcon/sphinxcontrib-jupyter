@@ -9,8 +9,6 @@ SOURCE_PY = "_build/jupyter/executed/python"
 BUILD_PY = "_build/jupyter/html/python/"
 SOURCE_JL = "_build/jupyter/executed/julia"
 BUILD_JL = "_build/jupyter/html/julia/"
-DOWNLOAD_PY = BUILD_PY + "_downloads/"
-DOWNLOAD_JL = BUILD_JL + "_downloads/"
 
 class convertToHtmlWriter():
     
@@ -35,10 +33,10 @@ class convertToHtmlWriter():
             build_path = BUILD_PY + relative_path
 
             ## allow files to download if metadata is set
-            if (nb['metadata']['download_nb'] == True):
-                download_path = DOWNLOAD_PY + relative_path
-                ensuredir(download_path)
-                download_nb = download_path + "/" + "{}.ipynb".format(filename)
+            # if (nb['metadata']['download_nb'] == True):
+            #     download_path = DOWNLOAD_PY + relative_path
+            #     ensuredir(download_path)
+            #     download_nb = download_path + "/" + "{}.ipynb".format(filename)
 
             ensuredir(build_path)
             fl_html = build_path + "/" + "{}.html".format(filename)
@@ -49,10 +47,10 @@ class convertToHtmlWriter():
             build_path = BUILD_JL +  relative_path
 
             ## allow files to download if metadata is set
-            if (nb['metadata']['download_nb'] == True):
-                download_path = DOWNLOAD_JL + relative_path 
-                ensuredir(download_path)
-                download_nb = download_path + "/" + "{}.ipynb".format(filename)
+            # if (nb['metadata']['download_nb'] == True):
+            #     download_path = DOWNLOAD_JL + relative_path 
+            #     ensuredir(download_path)
+            #     download_nb = download_path + "/" + "{}.ipynb".format(filename)
 
             ensuredir(build_path)
             fl_html = build_path + "/" + "{}.html".format(filename)
@@ -65,7 +63,7 @@ class convertToHtmlWriter():
 
         nb['cells'] = nb['cells'][1:]                #skip first code-cell as preamble
 
-        #Write Executed Notebook as File
-        if (nb['metadata']['download_nb'] == True):
-            with open(download_nb, "wt", encoding="UTF-8") as f:
-                    nbformat.write(nb, f)
+        # #Write Executed Notebook as File
+        # if (nb['metadata']['download_nb'] == True):
+        #     with open(download_nb, "wt", encoding="UTF-8") as f:
+        #             nbformat.write(nb, f)

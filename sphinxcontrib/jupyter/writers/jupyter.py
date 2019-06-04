@@ -23,6 +23,12 @@ class JupyterWriter(docutils.writers.Writer):
         self.document.walkabout(visitor)
         self.output = nbformat.writes(visitor.output)
 
+    def _set_urlpath(self, urlpath=None):
+        """
+        Set a urlpath to be used to prepend links in the notebook, so that it can be different for different targets.
+        """
+        self.builder.urlpath = urlpath
+
     def _identify_translator(self, builder):
         """
         Determine which translator class to apply to this translation. The choices are 'code' and 'all'; all converts

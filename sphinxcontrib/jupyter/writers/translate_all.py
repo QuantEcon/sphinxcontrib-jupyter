@@ -24,7 +24,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indent = self.indent_char * 4
         self.default_ext = ".ipynb"
         self.html_ext = ".html"
-
+        self.urlpath = builder.urlpath
         # Variables used in visit/depart
         self.in_code_block = False  # if False, it means in markdown_cell
         self.in_block_quote = False
@@ -472,11 +472,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
                 refuri = node["refuri"]
-
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+
+                        ## add url path if it is set
+                        if self.urlpath is not None:
+                            refuri = self.urlpath + refuri
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
