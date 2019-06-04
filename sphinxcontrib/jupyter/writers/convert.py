@@ -31,7 +31,7 @@ class convertToHtmlWriter():
         build_path = BUILD +  relative_path
         ensuredir(build_path)
         fl_html = build_path + "/" + "{}.html".format(filename)
-
+        
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
