@@ -15,8 +15,8 @@ class MakeSiteWriter():
     def __init__(self):
         pass
     def build_website(self, builderSelf):
-        if os.path.exists("_build_website"):
-            shutil.rmtree("_build_website")
+        if os.path.exists(JUPYTER_WEBSITE):
+            shutil.rmtree(JUPYTER_WEBSITE)
 
         ## copies the html and downloads folder
         shutil.copytree("_build/jupyter/html/", JUPYTER_WEBSITE, symlinks=True)
