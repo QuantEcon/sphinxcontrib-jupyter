@@ -22,7 +22,7 @@ class MakeSiteWriter():
         shutil.copytree("_build/jupyter/html/", JUPYTER_WEBSITE, symlinks=True)
 
         ## copies all the static files
-        shutil.copytree("_build/jupyter/_static/","_build_website/_static/", symlinks=True)
+        shutil.copytree("_build/jupyter/_static/", JUPYTER_WEBSITE + "_static/", symlinks=True)
 
         ## copies all theme files to _static folder 
         if os.path.exists("theme/static"):
