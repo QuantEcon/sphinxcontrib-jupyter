@@ -24,7 +24,7 @@ class ExecuteNotebookWriter():
     logger = logging.getLogger(__name__)
     def execute_notebook(self, builderSelf, f, filename, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
-        coverage = execute_nb_config["coverage"]
+        coverage = builderSelf.config["jupyter_make_coverage"]
         timeout = execute_nb_config["timeout"]
         filename = filename
         subdirectory = ''
@@ -71,15 +71,16 @@ class ExecuteNotebookWriter():
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
         futures.append(future)
 
-    def check_execution_completion(self, builderSelf, future, nb, error_results, futures_name):
+    def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name):
         error_result = []
         builderSelf.dask_log['futures'].append(str(future))
+        status = 'pass'
         # store the exceptions in an error result array
         if future.status == 'error':
+            status = 'fail'
             error_result.append(future.exception())
             future.close()
             return
-        
         # using indices since nb is a tuple
         passed_metadata = nb[1]['metadata'] 
         filename = passed_metadata['filename']
@@ -90,6 +91,11 @@ class ExecuteNotebookWriter():
         if (builderSelf.config['jupyter_download_nb']):
             executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
         total_time = time.time() - passed_metadata['start_time']
+        if status == 'pass':
+            print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, total_time))
+        else:
+            print('({}/{})  {} -- {}'.format(count, total_count, filename, status))
+
         if (futures_name.startswith('delayed') != -1):
             # adding in executed notebooks list
             builderSelf.executed_notebooks.append(filename)
@@ -133,13 +139,21 @@ class ExecuteNotebookWriter():
 
         builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
         builderSelf.dask_log['futures'] = []
-        builderSelf._convert_class = convertToHtmlWriter(builderSelf)
+
+        ## create an instance of the class id config set
+        if (builderSelf.config['jupyter_generate_html']):
+            builderSelf._convert_class = convertToHtmlWriter(builderSelf)
+
         # this for loop gathers results in the background
+        total_count = len(builderSelf.futures)
+        count = 0
         for future, nb in as_completed(builderSelf.futures, with_results=True):
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, 'futures')
+            count += 1
+            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
 
         for future, nb in as_completed(builderSelf.delayed_futures, with_results=True):
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, 'delayed_futures')
+            count += 1
+            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
 
         return error_results
 

@@ -179,11 +179,11 @@ class JupyterBuilder(Builder):
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
             self.logger.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
-            progress(self.futures)
+            #progress(self.futures)
 
             # save executed notebook
             error_results = self._execute_notebook_class.save_executed_notebook(self)
-
+            
             ## produces a JSON file of dask execution
             self._execute_notebook_class.produce_dask_processing_report(self)
             
