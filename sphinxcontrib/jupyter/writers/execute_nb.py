@@ -84,9 +84,10 @@ class ExecuteNotebookWriter():
         # using indices since nb is a tuple
         passed_metadata = nb[1]['metadata'] 
         filename = passed_metadata['filename']
+        filename_with_path = passed_metadata['filename_with_path']
         executed_nb = nb[0]
         language_info = executed_nb['metadata']['kernelspec']
-        executed_nb['metadata']['filename_with_path'] = passed_metadata['filename_with_path']
+        executed_nb['metadata']['filename_with_path'] = filename_with_path
         executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
         if (builderSelf.config['jupyter_download_nb']):
             executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
@@ -129,7 +130,7 @@ class ExecuteNotebookWriter():
         # storing error info if any execution throws an error
         results = dict()
         results['runtime']  = total_time
-        results['filename'] = filename
+        results['filename'] = filename_with_path
         results['errors']   = error_result
         results['language'] = language_info
         error_results.append(results)
