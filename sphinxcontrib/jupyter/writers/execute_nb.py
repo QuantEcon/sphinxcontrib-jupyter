@@ -55,18 +55,15 @@ class ExecuteNotebookWriter():
                 builderSelf.executed_notebook_dir = JUPYTER_EXECUTED
         ensuredir(builderSelf.executed_notebook_dir)
 
-        if coverage:
-            ep = ExecutePreprocessor(timeout=timeout)
-        else:
-            if language == 'python':
-                if (sys.version_info > (3, 0)):
-                    # Python 3 code in this block
-                    ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
-                else:
-                    # Python 2 code in this block
-                    ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
-            elif language == 'julia':
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
+        if language == 'python':
+            if (sys.version_info > (3, 0)):
+                # Python 3 code in this block
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
+            else:
+                # Python 2 code in this block
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
+        elif language == 'julia':
+            ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
         starting_time = time.time()
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
         futures.append(future)
