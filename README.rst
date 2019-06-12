@@ -18,8 +18,10 @@ Generating Jupyter Notebooks
 Summary
 -------
 
-This sphinx extension can be used to build, execute a collection of
-`Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects and convert them to html. Execution of notebooks and creation of html files can be turned on/off by configuration variables mentioned later in the doc.
+This sphinx extension can be used to:
+1. build a collection of jupyter notebooks, 
+1. execute the `Jupyter <http://jupyter.org>`__ notebooks,
+1. convert the executed notebooks to html using `nbconvert` with template support.
 
 **Note:** It has mainly been written to support the use case of
 scientific publishing and hasn't been well tested outside of this
@@ -27,8 +29,9 @@ domain. Please provide feedback as an issue to this repository.
 
 **Requires:** Sphinx >= 1.7.2 (for running tests). 
 
-Demo
-----
+Examples
+--------
+
    * https://lectures.quantecon.org/ - series of lectures on quantitative economic modeling
 
 Installation
@@ -43,6 +46,12 @@ to get the latest version it is best to install directly by getting a copy of th
 .. code:: bash
 
    python setup.py install
+
+if you are wishing to make changes to the project it is best to install using
+
+.. code:: bash
+
+    python setup.py develop
 
 Usage
 -----
@@ -62,6 +71,9 @@ then run
 
 Usage in RST Files
 ------------------
+
+**Note:** The `documentation <http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest>`__ is the best resource
+to find usage and configuration settings. The details provided here only a basic subset of what sphinxcontrib-jupyter supports. 
 
 A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
 which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
@@ -281,22 +293,16 @@ This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
 Many thanks to the contributors of this project.
 
+* `@AakashGfude <https://github.com/AakashGfude`__
 * `@mmcky <https://github.com/mmcky>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
 * `@NickSifniotis <https://github.com/NickSifniotis>`__
 
-Projects using Extension
-------------------------
-
-1. `QuantEcon Lectures <https://lectures.quantecon.org>`__
-
-If you find this extension useful please let us know at
-contact@quantecon.org
 
 LICENSE
 -------
 
-Copyright © 2018 QuantEcon Development Team: BSD-3 All rights reserved.
+Copyright © 2019 QuantEcon Development Team: BSD-3 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
