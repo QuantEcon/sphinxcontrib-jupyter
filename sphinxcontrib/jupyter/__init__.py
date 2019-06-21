@@ -72,6 +72,7 @@ def setup(app):
     app.add_config_value("jupyter_download_nb",False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_urlpath", False, "jupyter")
+    app.add_config_value("jupyter_images_markdown", False, "jupyter")           #NOTE: Does not support scale, default=False
 
     return {
         "version": "0.2.1",
