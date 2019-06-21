@@ -174,7 +174,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
-        return_markdown = False             #TODO: enable return markdown option
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_images_urlpath:
@@ -183,24 +182,25 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
                     break  #don't need to check other matches
         attrs = node.attributes
-        # Construct HTML image
-        image = '<img src="{}" '.format(uri)
-        if "alt" in attrs.keys():
-            image += 'alt="{}" '.format(attrs["alt"])
-        style = ""
-        if "width" in attrs.keys():
-            style += "width:{};".format(attrs["width"])
-        if "height" in attrs.keys():
-            style += "height:{};".format(attrs["height"])
-        if "scale" in attrs.keys():
-            style = "width:{0}%;height:{0}%".format(attrs["scale"])
-        image += 'style="{}" '.format(style)
-        if "align" in attrs.keys():
-            image += 'align="{}"'.format(attrs["align"])
-        image = image.rstrip() + ">\n\n"  #Add double space for html
-        #-Construct MD image
-        if return_markdown:
+        if self.jupyter_images_markdown:
+            #-Construct MD image
             image = "![{0}]({0})".format(uri)
+        else:
+            # Construct HTML image
+            image = '<img src="{}" '.format(uri)
+            if "alt" in attrs.keys():
+                image += 'alt="{}" '.format(attrs["alt"])
+            style = ""
+            if "width" in attrs.keys():
+                style += "width:{};".format(attrs["width"])
+            if "height" in attrs.keys():
+                style += "height:{};".format(attrs["height"])
+            if "scale" in attrs.keys():
+                style = "width:{0}%;height:{0}%".format(attrs["scale"])
+            image += 'style="{}" '.format(style)
+            if "align" in attrs.keys():
+                image += 'align="{}"'.format(attrs["align"])
+            image = image.rstrip() + ">\n\n"  #Add double space for html
         self.markdown_lines.append(image)
 
     # math
