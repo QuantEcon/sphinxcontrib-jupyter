@@ -22,6 +22,7 @@ class ExecuteNotebookWriter():
     Executes jupyter notebook written in python or julia
     """
     logger = logging.getLogger(__name__)
+    startFlag = 0
     def execute_notebook(self, builderSelf, f, filename, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
@@ -65,8 +66,21 @@ class ExecuteNotebookWriter():
         elif language == 'julia':
             ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
         starting_time = time.time()
+
+        ### calling this function before starting work to ensure it starts recording
+        if (self.startFlag == 0):
+            self.startFlag = 1
+            builderSelf.client.get_task_stream()
+
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
         futures.append(future)
+
+    def task_execution_time(self, builderSelf):
+        ## calculates execution time of each task in client using get task stream
+        task_Info_latest = builderSelf.client.get_task_stream()[-1]
+        time_tuple = task_Info_latest['startstops'][0]
+        computing_time = time_tuple[2] - time_tuple[1]
+        return computing_time
 
     def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name):
         error_result = []
@@ -88,9 +102,12 @@ class ExecuteNotebookWriter():
         executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
         if (builderSelf.config['jupyter_download_nb']):
             executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
-        total_time = time.time() - passed_metadata['start_time']
+
+        # computing time for each task 
+        computing_time = self.task_execution_time(builderSelf)
+
         if status == 'pass':
-            print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, total_time))
+            print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
         else:
             print('({}/{})  {} -- {}'.format(count, total_count, filename, status))
 
@@ -126,7 +143,7 @@ class ExecuteNotebookWriter():
             builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
         # storing error info if any execution throws an error
         results = dict()
-        results['runtime']  = total_time
+        results['runtime']  = computing_time
         results['filename'] = filename_with_path
         results['errors']   = error_result
         results['language'] = language_info
@@ -145,12 +162,16 @@ class ExecuteNotebookWriter():
         # this for loop gathers results in the background
         total_count = len(builderSelf.futures)
         count = 0
+        update_count_delayed = 1
         for future, nb in as_completed(builderSelf.futures, with_results=True):
             count += 1
             builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
 
         for future, nb in as_completed(builderSelf.delayed_futures, with_results=True):
             count += 1
+            if update_count_delayed == 1:
+                update_count_delayed = 0
+                total_count += len(builderSelf.delayed_futures)
             builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
 
         return error_results
