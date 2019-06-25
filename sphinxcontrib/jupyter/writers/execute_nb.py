@@ -11,9 +11,9 @@ from io import open
 import sys
 
 JUPYTER_EXECUTED = "_build/jupyter/executed"
-JUPYTER_COVERAGE = "_build_coverage"
-JUPYTER_REPORTS = "_build_coverage/reports/"
-JUPYTER_ERROR = "_build_coverage/reports/{}"
+JUPYTER_COVERAGE = "_build_coverage/jupyter/executed"
+JUPYTER_REPORTS = "_build_coverage/jupyter/reports/"
+JUPYTER_ERROR = "_build_coverage/jupyter/reports/{}"
 
 
 class ExecuteNotebookWriter():
@@ -46,9 +46,9 @@ class ExecuteNotebookWriter():
 
         # - Parse Directories and execute them - #
         if coverage:
-            self.execution_cases(builderSelf, JUPYTER_COVERAGE, True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, JUPYTER_COVERAGE, False, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, JUPYTER_EXECUTED, False, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, JUPYTER_EXECUTED, True, subdirectory, language, futures, nb, filename, full_path)
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline

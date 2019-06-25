@@ -37,8 +37,8 @@ class MakeSiteWriter():
             self.logger.warning("Source frontend folder not present. Consider creating a source.frontend folder for html helpers")
 
         ## copies the report of execution results
-        if os.path.exists("_build/jupyter/reports/code-execution-results.json"):
-            shutil.copy2("_build/jupyter/reports/code-execution-results.json", JUPYTER_WEBSITE + "_static/")
+        if os.path.exists("_build_coverage/jupyter/reports/code-execution-results.json"):
+            shutil.copy2("_build_coverage/jupyter/reports/code-execution-results.json", JUPYTER_WEBSITE + "_static/")
         
         ## copies the downloads folder
         if "jupyter_download_nb" in builderSelf.config and builderSelf.config["jupyter_download_nb"] is True:
