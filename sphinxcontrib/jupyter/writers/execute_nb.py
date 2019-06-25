@@ -11,9 +11,9 @@ from io import open
 import sys
 
 JUPYTER_EXECUTED = "_build/jupyter/executed"
-JUPYTER_COVERAGE = "_build_coverage"
-JUPYTER_REPORTS = "_build_coverage/reports/"
-JUPYTER_ERROR = "_build_coverage/reports/{}"
+JUPYTER_COVERAGE = "_build_coverage/jupyter/executed"
+JUPYTER_REPORTS = "_build_coverage/jupyter/reports/"
+JUPYTER_ERROR = "_build_coverage/jupyter/reports/{}"
 
 
 class ExecuteNotebookWriter():
