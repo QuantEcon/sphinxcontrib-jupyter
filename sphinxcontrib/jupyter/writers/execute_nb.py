@@ -11,9 +11,9 @@ from io import open
 import sys
 
 JUPYTER_EXECUTED = "_build/jupyter/executed"
-JUPYTER_COVERAGE = "_build/jupyter/coverage"
-JUPYTER_REPORTS = "_build/jupyter/reports/"
-JUPYTER_ERROR = "_build/jupyter/reports/{}"
+JUPYTER_COVERAGE = "_build_coverage"
+JUPYTER_REPORTS = "_build_coverage/reports/"
+JUPYTER_ERROR = "_build_coverage/reports/{}"
 
 
 class ExecuteNotebookWriter():
@@ -37,42 +37,46 @@ class ExecuteNotebookWriter():
             language = 'python'
         elif (language.lower().find('julia') != -1):
             language = 'julia'
+            
         # check if there are subdirectories
         index = filename.rfind('/')
         if index > 0:
             subdirectory = filename[0:index]
             filename = filename[index + 1:]
 
-        # - Parse Directories - #
+        # - Parse Directories and execute them - #
         if coverage:
-            if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE + "/" + subdirectory
-            else:
-                builderSelf.executed_notebook_dir = JUPYTER_COVERAGE
+            self.execution_cases(builderSelf, JUPYTER_COVERAGE, True, subdirectory, language, futures, nb, filename, full_path)
         else:
-            if subdirectory != '':
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED + "/" + subdirectory
-            else:
-                builderSelf.executed_notebook_dir = JUPYTER_EXECUTED
+            self.execution_cases(builderSelf, JUPYTER_EXECUTED, False, subdirectory, language, futures, nb, filename, full_path)
+
+    def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
+        ## function to handle the cases of execution for coverage reports or html conversion pipeline
+        if subdirectory != '':
+            builderSelf.executed_notebook_dir = directory + "/" + subdirectory
+        else:
+            builderSelf.executed_notebook_dir = directory
+
+        ## ensure that executed notebook directory
         ensuredir(builderSelf.executed_notebook_dir)
 
+        ## specifying kernels
         if language == 'python':
             if (sys.version_info > (3, 0)):
                 # Python 3 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python3')
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python3')
             else:
                 # Python 2 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=True, kernel_name='python2')
+                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python2')
         elif language == 'julia':
-            ep = ExecutePreprocessor(timeout=-1, allow_errors=True)
-        starting_time = time.time()
+            ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors)
 
         ### calling this function before starting work to ensure it starts recording
         if (self.startFlag == 0):
             self.startFlag = 1
             builderSelf.client.get_task_stream()
 
-        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path, "start_time" : starting_time}})
+        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
         futures.append(future)
 
     def task_execution_time(self, builderSelf):
