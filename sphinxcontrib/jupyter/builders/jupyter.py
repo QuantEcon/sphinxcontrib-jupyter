@@ -69,7 +69,6 @@ class JupyterBuilder(Builder):
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
-        self.client.restart()
         self.dependency_lists = self.config["jupyter_dependency_lists"]
         self.executed_notebooks = []
         self.delayed_notebooks = dict()
@@ -178,20 +177,20 @@ class JupyterBuilder(Builder):
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
-            self.logger.info(bold("distributed dask scheduler progressbar for notebook execution and html conversion(if set in config)..."))
-            progress(self.futures)
+            self.logger.info(bold("Starting notebook execution and html conversion(if set in config)..."))
+            #progress(self.futures)
 
             # save executed notebook
             error_results = self._execute_notebook_class.save_executed_notebook(self)
 
-            ## produces a JSON file of dask execution
-            self._execute_notebook_class.produce_dask_processing_report(self)
-            
-            # # generate the JSON code execution reports file
-            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
-
             ##generate coverage if config value set
-            if self.config['jupyter_execute_nb']['coverage'] is True:
+            if self.config['jupyter_make_coverage']:
+                ## produces a JSON file of dask execution
+                self._execute_notebook_class.produce_dask_processing_report(self)
+                
+                ## generate the JSON code execution reports file
+                error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
+
                 self._execute_notebook_class.create_coverage_report(self, error_results)
 
         ### create a website folder
