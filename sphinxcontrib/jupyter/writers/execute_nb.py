@@ -77,6 +77,11 @@ class ExecuteNotebookWriter():
             builderSelf.client.get_task_stream()
 
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
+
+        ### dictionary to store info for errors in future
+        future_dict = { "filename": full_path, "filename_with_path": full_path, "language_info": nb['metadata']['kernelspec']}
+        builderSelf.futuresInfo[future.key] = future_dict
+
         futures.append(future)
 
     def task_execution_time(self, builderSelf):
@@ -90,61 +95,66 @@ class ExecuteNotebookWriter():
         error_result = []
         builderSelf.dask_log['futures'].append(str(future))
         status = 'pass'
-        # store the exceptions in an error result array
-        if future.status == 'error':
-            status = 'fail'
-            error_result.append(future.exception())
-            future.close()
-            return
-        # using indices since nb is a tuple
-        passed_metadata = nb[1]['metadata'] 
-        filename = passed_metadata['filename']
-        filename_with_path = passed_metadata['filename_with_path']
-        executed_nb = nb[0]
-        language_info = executed_nb['metadata']['kernelspec']
-        executed_nb['metadata']['filename_with_path'] = filename_with_path
-        executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
-        if (builderSelf.config['jupyter_download_nb']):
-            executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
 
         # computing time for each task 
         computing_time = self.task_execution_time(builderSelf)
 
-        if status == 'pass':
-            print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
-        else:
-            print('({}/{})  {} -- {}'.format(count, total_count, filename, status))
+        # store the exceptions in an error result array
+        if future.status == 'error':
+            status = 'fail'
+            for key,val in builderSelf.futuresInfo.items():
+                if key == future.key:
+                    filename_with_path = val['filename_with_path']
+                    filename = val['filename']
+                    language_info = val['language_info']
+            error_result.append(future.exception())
 
-        if (futures_name.startswith('delayed') != -1):
-            # adding in executed notebooks list
-            builderSelf.executed_notebooks.append(filename)
-            key_to_delete = False
-            for nb, arr in builderSelf.dependency_lists.items():
-                executed = 0
-                for elem in arr:
-                    if elem in builderSelf.executed_notebooks:
-                        executed += 1
-                if (executed == len(arr)):
-                    key_to_delete = nb
-                    notebook = builderSelf.delayed_notebooks.get(nb)
-                    builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, builderSelf.delayed_futures)
-            if (key_to_delete):
-                del builderSelf.dependency_lists[str(key_to_delete)]
+        else:
+            passed_metadata = nb[1]['metadata'] 
+            filename = passed_metadata['filename']
+            filename_with_path = passed_metadata['filename_with_path']
+            executed_nb = nb[0]
+            language_info = executed_nb['metadata']['kernelspec']
+            executed_nb['metadata']['filename_with_path'] = filename_with_path
+            executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
+            if (builderSelf.config['jupyter_download_nb']):
+                executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
+            if (futures_name.startswith('delayed') != -1):
+                # adding in executed notebooks list
+                builderSelf.executed_notebooks.append(filename)
                 key_to_delete = False
-        notebook_name = "{}.ipynb".format(filename)
-        executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
-        #Parse Executed notebook to remove hide-output blocks
-        for cell in executed_nb['cells']:
-            if cell['cell_type'] == "code":
-                if cell['metadata']['hide-output']:
-                    cell['outputs'] = []
-        #Write Executed Notebook as File
-        with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
-            nbformat.write(executed_nb, f)
-        
-        ## generate html if needed
-        if (builderSelf.config['jupyter_generate_html']):
-            builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
+                for nb, arr in builderSelf.dependency_lists.items():
+                    executed = 0
+                    for elem in arr:
+                        if elem in builderSelf.executed_notebooks:
+                            executed += 1
+                    if (executed == len(arr)):
+                        key_to_delete = nb
+                        notebook = builderSelf.delayed_notebooks.get(nb)
+                        builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, builderSelf.delayed_futures)
+                if (key_to_delete):
+                    del builderSelf.dependency_lists[str(key_to_delete)]
+                    key_to_delete = False
+            notebook_name = "{}.ipynb".format(filename)
+            executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
+
+            #Parse Executed notebook to remove hide-output blocks
+            for cell in executed_nb['cells']:
+                if cell['cell_type'] == "code":
+                    if cell['metadata']['hide-output']:
+                        cell['outputs'] = []
+            #Write Executed Notebook as File
+            with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
+                nbformat.write(executed_nb, f)
+            
+            ## generate html if needed
+            if (builderSelf.config['jupyter_generate_html']):
+                builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
+            
+        print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
+            
+
+
         # storing error info if any execution throws an error
         results = dict()
         results['runtime']  = computing_time
@@ -167,11 +177,11 @@ class ExecuteNotebookWriter():
         total_count = len(builderSelf.futures)
         count = 0
         update_count_delayed = 1
-        for future, nb in as_completed(builderSelf.futures, with_results=True):
+        for future, nb in as_completed(builderSelf.futures, with_results=True, raise_errors=False):
             count += 1
             builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
 
-        for future, nb in as_completed(builderSelf.delayed_futures, with_results=True):
+        for future, nb in as_completed(builderSelf.delayed_futures, with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0

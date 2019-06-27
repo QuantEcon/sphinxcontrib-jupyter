@@ -28,7 +28,7 @@ class JupyterBuilder(Builder):
     _execute_notebook_class = ExecuteNotebookWriter()
     _make_site_class = MakeSiteWriter()
     dask_log = dict()
-
+    futuresInfo = dict()
     futures = []
     threads_per_worker = 1
     n_workers = 1
