@@ -18,11 +18,16 @@ help:
 
 .PHONY: help Makefile
 
-rst-test: clean jupyter
-	python check_diffs.py
-
-server:
-	cd _build/jupyter && jupyter notebook
+preview:
+ifeq ($(target), website)
+	cd _build/jupyter_html/ && python -m http.server
+else
+ifdef lecture
+	cd _build/jupyter/ && jupyter notebook $(basename $(lecture)).ipynb
+else
+	cd _build/jupyter/ && jupyter notebook
+endif
+endif
 
 clean-coverage:
 	rm -rf $(BUILDCOVERAGE)

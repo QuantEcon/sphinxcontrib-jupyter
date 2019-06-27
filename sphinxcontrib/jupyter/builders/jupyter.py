@@ -194,5 +194,5 @@ class JupyterBuilder(Builder):
                 self._execute_notebook_class.create_coverage_report(self, error_results)
 
         ### create a website folder
-        if "jupyter_make_site" in self.config and self.config['jupyter_make_site'] is True:
+        if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
