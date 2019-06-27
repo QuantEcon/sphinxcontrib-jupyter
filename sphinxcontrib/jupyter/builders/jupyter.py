@@ -75,7 +75,6 @@ class JupyterBuilder(Builder):
         self.futures = []
         self.delayed_futures = []
 
-
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
             if docname not in self.env.all_docs:
