@@ -41,7 +41,7 @@ Installation
 
    pip install sphinxcontrib-jupyter
 
-to get the latest version it is best to install directly by getting a copy of the repository, and
+to get the **latest** version it is best to install directly by getting a copy of the repository, and
 
 .. code:: bash
 
@@ -72,218 +72,20 @@ then run
 Usage in RST Files
 ------------------
 
-**Note:** The `documentation <http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest>`__ is the best resource
-to find usage and configuration settings. The details provided here only a basic subset of what sphinxcontrib-jupyter supports. 
+The `documentation <http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest>`__ is the best resource
+to find usage examples.
 
 A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
 which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
 
-To generate an ``In`` style executable block you can use
-
-.. code:: rst
-
-    .. code-block:: python
-
-.. code:: rst
-
-    .. literalinclude::  
-
-To include code in the notebook that is not meant for execution can be
-included using ``:class: no-execute``. This is useful when writing code
-that is meant to throw errors, for example.
-
-.. code:: rst
-
-    .. code-block:: python
-        :class: no-execute
-
-this will generate a highlighted markdown cell of the contents of the
-code-block. An alias for this is ``:class: skip-test``. This is used
-in the context of a test environment that is using the collection of 
-notebooks to test a collection of code snippets.
-
-Exercise Solutions
-~~~~~~~~~~~~~~~~~~
-
-The extension has support for ``:class: solution`` on code-blocks. This
-allows for the compilation of two sets of notebooks, one containing solutions
-and one without.
-
-
-Test Blocks
-~~~~~~~~~~~
-
-Other class options for code-blocks include `test` to indicate the 
-code block contains a test which can be used for adding test logic
-for automatic testing of notebooks. This is by default set to `False`
-in the configuration and all test blocks are dropped.
-
-
-
-Jupyter Directive and Slides
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``jupyter`` directive accepts three different arguments ``cell-break``, ``slide`` and ``slide-type``
-How to use them is explained bellow
-
-
-cell-break
-++++++++++
-
-.. code:: rst
-    
-    .. jupyter::
-        :cell-break:
-
-it is used to break a `markdown_cell` in two, this is done for example, when a paragraph 
-is too large to fit in one slide.
-
-slide
-+++++
-
-If the user wants to create a notebook where the cells are converted into
-slides the folowing code needs to be included at the top of the .rst file.
-
-.. code:: rst
-
-    .. jupyter::
-        :slide: {{enable/disable}}
-
-``:slide: enable`` activates the slideshow metadata into the jupyter notebook, 
-setting as a default value that each **cell** is a **slide**. 
-The directive detects automatically the different cells 
-(going from a ``markdown_cell`` to a ``code_cell`` for example), 
-but also new cells are created when a subtitle is detected. If the user wants to force
-a new cell, the option ``cell-break`` can be added.
-
-
-
-slide-type
-++++++++++
-
-The default value for each cell would be ``slide``. If the user wants
-to change the upcoming cell to something different (``subslide``, ``fragment``, ``notes``, ``skip``)
-the following code must be included
-
-.. code:: rst
-
-    .. jupyter::
-        :slide-type: subslide
-
-
-
-Other Supported Directives
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-1. ``.. note::`` - the raw contents of this directive is included 
-into the notebook as a block quote with a **Note** title.
-1. ``.. only::`` - this will skip any only content that is not jupyter 
 
 .. _configuration:
 
 Configuration
 -------------
 
-The following additions must be made to ``conf.py`` file.
-
-.. code:: python
-
-    # --------------------------------------------
-    # sphinxcontrib-jupyter Configuration Settings
-    # --------------------------------------------
-
-    # Conversion Mode Settings
-    # If "all", convert codes and texts into jupyter notebook
-    # If "code", convert code-blocks only
-    jupyter_conversion_mode = "all"
-
-    jupyter_write_metadata = True
-
-    # Location for _static folder
-    jupyter_static_file_path = ["_static"]
-
-    # Configure Jupyter Kernels
-    jupyter_kernels = {
-        "python3": {
-            "kernelspec": {
-                "display_name": "Python",
-                "language": "python3",
-                "name": "python3"
-                },
-            "file_extension": ".py",
-        },
-        "julia": {
-            "kernelspec": {
-                "display_name": "Julia 0.6.0",
-                "language": "julia",
-                "name": "julia-0.6"
-                },
-            "file_extension": ".jl"
-        }
-    }
-
-    # Configure default language for Jupyter notebooks
-    # Can be changed in each notebook thanks to the ..highlight:: directive
-    jupyter_default_lang = "python3"
- 
-    # Configure Jupyter headers
-    jupyter_headers = {
-        "python3": [
-        ],
-        "julia": [
-        ],
-    }
-
-    # Prepend a Welcome Message to Each Notebook
-    jupyter_welcome_block = "welcome.rst"
-
-    # Solutions Configuration
-    jupyter_drop_solutions = True
-
-    # Tests configurations 
-    jupyter_drop_tests = True
-
-    # Add Ipython as Synonym for tests
-    jupyter_lang_synonyms = ["ipython"]
-
-    # Image Prefix (enable web storage references)
-    # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
-
-    #allow execution of notebooks
-    jupyter_execute_notebooks = True 
-
-    # Location of template folder for coverage reports
-    jupyter_template_coverage_file_path = "/path_to_coverage_template.html"
-
-    # generate html from IPYNB files
-    jupyter_generate_html = True
-    
-    # html template specific to your website needs
-    jupyter_html_template = "/path_to_html_template.tpl"
-    
-    #path to download notebooks from 
-    jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
-
-    #allow downloading of notebooks
-    jupyter_download_nb = True
-
-Dependency of notebooks on other notebooks for execution can also be added to the configuration file above in the form of a dictionary. The key/value pairs will contain the names of the notebook files.
-An example to illustrate this is as follows :-
-
-.. code:: python
-
-   # add your dependency lists here
-   jupyter_dependency_lists = {
-      'python_advanced_features' : ['python_essentials','python_oop'],
-      'discrete_dp' : ['dp_essentials'],
-   }
-
-TODO
-----
-
-1. remove need for Jupyter headers from configuration
-2. include support for adding output to In cells to give a precompiled look to generated notebook
-3. `Issues list <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues>`__
+The `documentation <http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest>`__ is the best resource for
+configuration settings.
 
 
 Credits
@@ -293,7 +95,7 @@ This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
 Many thanks to the contributors of this project.
 
-* `@AakashGfude <https://github.com/AakashGfude`__
+* `@AakashGfude <https://github.com/AakashGfude>`__
 * `@mmcky <https://github.com/mmcky>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
 * `@NickSifniotis <https://github.com/NickSifniotis>`__
