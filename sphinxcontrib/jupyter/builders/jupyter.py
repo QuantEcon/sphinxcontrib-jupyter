@@ -67,12 +67,13 @@ class JupyterBuilder(Builder):
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
-        self.dependency_lists = self.config["jupyter_dependency_lists"]
-        self.executed_notebooks = []
-        self.delayed_notebooks = dict()
-        self.futures = []
-        self.delayed_futures = []
+        if ("jupyter_make_site" in self.config and self.config["jupyter_execute_notebooks"]):
+            self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
+            self.dependency_lists = self.config["jupyter_dependency_lists"]
+            self.executed_notebooks = []
+            self.delayed_notebooks = dict()
+            self.futures = []
+            self.delayed_futures = []
 
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
