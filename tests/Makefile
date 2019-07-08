@@ -18,6 +18,9 @@ help:
 
 .PHONY: help Makefile
 
+rst-test: clean jupyter
+	python check_diffs.py
+
 preview:
 ifeq ($(target), website)
 	cd _build/jupyter_html/ && python -m http.server
