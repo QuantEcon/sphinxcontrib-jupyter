@@ -9,6 +9,7 @@ SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
 SOURCEDIR     = .
 BUILDDIR      = _build
+BUILDWEBSITE  = _build_website
 CORES 		  = 4
 BUILDCOVERAGE = _build_coverage
 
@@ -21,20 +22,38 @@ help:
 rst-test: clean jupyter
 	python check_diffs.py
 
-server:
-	cd _build/jupyter && jupyter notebook
+preview:
+ifneq (,$(filter $(parallel),website Website))
+	cd _build/jupyter_html/ && python -m http.server
+else 
+ifdef lecture
+	cd _build/jupyter/ && jupyter notebook $(basename $(lecture)).ipynb
+else
+	cd _build/jupyter/ && jupyter notebook
+endif
+endif
 
 clean-coverage:
 	rm -rf $(BUILDCOVERAGE)
 
-coverage: clean-coverage
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_make_site=0 -D jupyter_generate_html=0 -D jupyter_ignore_skip_test=0 -D jupyter_download_nb=0 
+clean-website:
+	rm -rf $(BUILDWEBSITE)
 
-coverage-parallel: clean-coverage
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_make_site=0 -D jupyter_generate_html=0 -D jupyter_ignore_skip_test=0 -D jupyter_download_nb=0 -D jupyter_number_workers=$(CORES)
+#### TODO - Add these back in once test cases are setup ####
+# coverage:
+# ifneq (,$(filter $(parallel),true True))
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0 -D jupyter_number_workers=$(CORES)
+# else
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0
+# endif
 
-jupyter-parallel:
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
+# website:
+# ifneq (,$(filter $(parallel),true True))
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE) -D jupyter_number_workers=$(CORES)
+# else
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
+# endif
+	
 
 test:
 	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -42,4 +61,4 @@ test:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -P
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

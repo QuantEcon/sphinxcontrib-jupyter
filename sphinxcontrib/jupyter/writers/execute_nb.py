@@ -10,11 +10,6 @@ from dask.distributed import as_completed
 from io import open
 import sys
 
-JUPYTER_EXECUTED = "_build/jupyter/executed"
-JUPYTER_COVERAGE = "_build_coverage/jupyter/executed"
-JUPYTER_REPORTS = "_build_coverage/jupyter/reports/"
-JUPYTER_ERROR = "_build_coverage/jupyter/reports/{}"
-
 
 class ExecuteNotebookWriter():
     
@@ -23,6 +18,11 @@ class ExecuteNotebookWriter():
     """
     logger = logging.getLogger(__name__)
     startFlag = 0
+    def __init__(self, builderSelf):
+        ### defining the directory paths
+        self.executedir = builderSelf.outdir + '/executed'
+        self.reportdir = builderSelf.outdir + '/reports/'
+        self.errordir = builderSelf.outdir + "/reports/{}"
     def execute_notebook(self, builderSelf, f, filename, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
@@ -46,9 +46,9 @@ class ExecuteNotebookWriter():
 
         # - Parse Directories and execute them - #
         if coverage:
-            self.execution_cases(builderSelf, JUPYTER_COVERAGE, False, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, self.executedir, False, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, JUPYTER_EXECUTED, True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, self.executedir, True, subdirectory, language, futures, nb, filename, full_path)
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -149,7 +149,7 @@ class ExecuteNotebookWriter():
             
             ## generate html if needed
             if (builderSelf.config['jupyter_generate_html']):
-                builderSelf._convert_class.convert(executed_nb, filename, language_info, "_build/jupyter/executed", passed_metadata['path'])
+                builderSelf._convert_class.convert(executed_nb, filename, language_info, self.executedir, passed_metadata['path'])
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -194,13 +194,12 @@ class ExecuteNotebookWriter():
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
-        ensuredir(JUPYTER_REPORTS)
-        json_filename = JUPYTER_REPORTS + fln
+        ensuredir(self.reportdir)
+        json_filename = self.reportdir + fln
 
         if os.path.isfile(json_filename):
             with open(json_filename, encoding="UTF-8") as json_file:
                 json_data = json.load(json_file)
-
                 temp_dictionary = dict()
                 for item in json_data['results']:
                     name = item['filename']
@@ -220,15 +219,21 @@ class ExecuteNotebookWriter():
             runtime = int(notebook_errors['runtime'] * 10)
             name = notebook_errors['filename']
             language = notebook_errors['language']['name']
-
             seconds = (runtime % 600) / 10
             minutes = int(runtime / 600)
+
+            extension = ''
+            if (language.lower().find('python') != -1):
+                extension = 'py'
+            elif (language.lower().find('julia') != -1):
+                extension = 'jl'
 
             nicer_runtime = str(minutes) + ":" + ("0" + str(seconds) if seconds < 10 else str(seconds))
             new_dictionary = {
                 'filename': name,
                 'runtime': nicer_runtime,
                 'num_errors': len(notebook_errors['errors']),
+                'extension': extension,
                 'language': language
             }
 
@@ -256,14 +261,14 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
+            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(self.reportdir))
 
     def produce_dask_processing_report(self, builderSelf, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
-        ensuredir(JUPYTER_REPORTS)
-        json_filename = JUPYTER_REPORTS + fln
+        ensuredir(self.reportdir)
+        json_filename = self.reportdir + fln
 
         try:
             if (sys.version_info > (3, 0)):
@@ -276,7 +281,7 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(JUPYTER_REPORTS))
+            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(self.reportdir))
 
     def create_coverage_report(self, builderSelf, error_results):
         """
@@ -293,7 +298,6 @@ class ExecuteNotebookWriter():
             filename = full_error_set['filename']
             current_language = full_error_set['language']
             language_name = current_language['extension']
-
             if error_result:
                 if language_name not in errors_by_language:
                     errors_by_language[language_name] = dict()
@@ -322,7 +326,7 @@ class ExecuteNotebookWriter():
             language_display_name = errors_by_language[lang_ext]['display_name']
             language = errors_by_language[lang_ext]['language']
             errors_by_file = errors_by_language[lang_ext]['files']
-            error_dir = JUPYTER_ERROR.format(lang_ext)
+            error_dir = self.errordir.format(lang_ext)
 
             if produce_text_reports:
                 # set specific language output file
