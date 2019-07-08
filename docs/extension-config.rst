@@ -1,53 +1,138 @@
 Extension Configuration and Options
 ===================================
 
+This section provides documentation on the full suite of options available in the extension. A summary of each
+option is provided in the table below along with more detailed information about each option including examples
+It can be useful to have multiple configurations when working on a large project, such as compiling notebooks for
+working on locally and editing and compiling the project for HTML. An example of how to set this up is 
+`here <project-config>`__
+
+An example *conf.py* is available `here <ExampleConf>`__
+
+The options are split into the different parts of the compilation pipeline that is available in this extension:
+
+1. `Constructing Jupyter Notebooks`_ (General Settings)
+2. `Executing Notebooks`_
+3. `Converting Notebooks to HTML`_
+4. `Computing Coverage Statistics`_
+
+Summary of Options
+------------------
+
+Constructing Jupyter notebooks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
 | Option                         | Description                                                           | Default               |
 +================================+=======================================================================+=======================+
-| jupyter_conversion_mode        | **["all", "code"]** This option specifies which writer to use when    | "all"                 |
+| jupyter_conversion_mode        | **["all", "code"]** This option specifies which writer to use when    | None                  |
 |                                | constructing notebooks. The "all" option produces complete notebooks  |                       |
 |                                | which includes text, figures, and code. The "code" option produces    |                       |
 |                                | notebooks that only contain the code blocks.                          |                       |
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
-| jupyter_static_file_path       | Specify path to `_static`__ folder                                    | []                    |
+| jupyter_static_file_path       | Specify path to `_static` folder                                      | []                    |
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
-| jupyter_header_block           | Add a header block to each generated notebook                         | ""                    |
+| jupyter_header_block           | Add a header block to every generated notebook as a Path to RST file  | ""                    |
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
 | jupyter_default_lang           | Specify default language for collection of RST files                  | "python3"             |
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
-| jupyter_lang_synonyms          | Specify any language synonyms. This will be used when parsing code   |                        |
+| jupyter_lang_synonyms          | Specify any language synonyms. This will be used when parsing code    | []                    |
 |                                | blocks. For example, python and ipython have slightly different       |                       |
 |                                | highlighting directives but contain code that can both be executed on |                       |
 |                                | the same kernel                                                       |                       |
 +--------------------------------+-----------------------------------------------------------------------+-----------------------+
-
-
+| `jupyter_kernels`_             | specify kernel information for the jupyter notebook metadata          |                       |
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
 
 .. TODO::
 
-    jupyter_kernels
     jupyter_write_metadata
     jupyter_options
     jupyter_drop_solutions
     jupyter_drop_tests
     jupyter_ignore_no_execute
     jupyter_ignore_skip_test
-    jupyter_execute_nb
-    jupyter_template_coverage_file_path
-    jupyter_generate_html
-    jupyter_html_template
+    jupyter_allow_html_only
+    jupyter_target_html
+    jupyter_images_markdown
+
+Executing Notebooks
+~~~~~~~~~~~~~~~~~~~
+
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+| Option                         | Description                                                           | Default               |
++================================+=======================================================================+=======================+
+| jupyter_execute_nb             | Enables the execution of generated notebooks                          | False                 |
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+
+.. TODO::
+
     jupyter_execute_notebooks
-    jupyter_make_site
     jupyter_dependency_lists
     jupyter_threads_per_worker
     jupyter_number_workers
-    jupyter_make_coverage
-    jupyter_allow_html_only
-    jupyter_target_html
+    jupyter_target_html = True
+
+Converting Notebooks to HTML
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+| Option                         | Description                                                           | Default               |
++================================+=======================================================================+=======================+
+| jupyter_generate_html          | Enable sphinx to generate HTML version of notebooks                   | False                 |
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+| jupyter_html_template          | Specify path to nbconvert html template file                          | ""                    |
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+
+
+.. TODO:: 
+
+    jupyter_make_site
+    jupyter_template_coverage_file_path
     jupyter_download_nb
     jupyter_download_nb_urlpath
     jupyter_images_urlpath
-    jupyter_images_markdown
+    
+    
+Computing Coverage Statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+| Option                         | Description                                                           | Default               |
++================================+=======================================================================+=======================+
+| jupyter_make_coverage          | Enable coverage statistics to be computed                             | False                 |
++--------------------------------+-----------------------------------------------------------------------+-----------------------+
+    
+
+Detailed Option Descriptions and Examples
+-----------------------------------------
+
+jupyter_kernels
+~~~~~~~~~~~~~~~
+
+*Default Value:* None 
+
+Specify kernel information for the jupyter notebook metadata. This is **required** in `conf.py`.
+
+.. code-block:: text
+
+    jupyter_kernels = {
+        "python3": {
+            "kernelspec": {
+                "display_name": "Python",
+                "language": "python3",
+                "name": "python3"
+                },
+            "file_extension": ".py",
+        },
+    }
+
+This information is used to connect to the desired jupyter kernel when starting the notebook.
+
+.. TODO:: 
+
+    See Issue `196 <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/196)>`__
+
 
 
 
@@ -65,88 +150,3 @@ The key/value pairs will contain the names of the notebook files. An example to 
       'discrete_dp' : ['dp_essentials'],
    }
 
-
-
-Example conf.py file
----------------------
-
-.. code:: python
-
-    # --------------------------------------------
-    # sphinxcontrib-jupyter Configuration Settings
-    # --------------------------------------------
-
-    # Conversion Mode Settings
-    # If "all", convert codes and texts into jupyter notebook
-    # If "code", convert code-blocks only
-    jupyter_conversion_mode = "all"
-
-    jupyter_write_metadata = True
-
-    # Location for _static folder
-    jupyter_static_file_path = ["_static"]
-
-    # Configure Jupyter Kernels
-    jupyter_kernels = {
-        "python3": {
-            "kernelspec": {
-                "display_name": "Python",
-                "language": "python3",
-                "name": "python3"
-                },
-            "file_extension": ".py",
-        },
-        "julia": {
-            "kernelspec": {
-                "display_name": "Julia 0.6.0",
-                "language": "julia",
-                "name": "julia-0.6"
-                },
-            "file_extension": ".jl"
-        }
-    }
-
-    # Configure default language for Jupyter notebooks
-    # Can be changed in each notebook thanks to the ..highlight:: directive
-    jupyter_default_lang = "python3"
- 
-    # Configure Jupyter headers
-    jupyter_headers = {
-        "python3": [
-        ],
-        "julia": [
-        ],
-    }
-
-    # Prepend a Welcome Message to Each Notebook
-    jupyter_welcome_block = "welcome.rst"
-
-    # Solutions Configuration
-    jupyter_drop_solutions = True
-
-    # Tests configurations 
-    jupyter_drop_tests = True
-
-    # Add Ipython as Synonym for tests
-    jupyter_lang_synonyms = ["ipython"]
-
-    # Image Prefix (enable web storage references)
-    # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
-
-    #allow execution of notebooks
-    jupyter_execute_notebooks = True 
-
-    # Location of template folder for coverage reports
-    jupyter_template_coverage_file_path = "/path_to_coverage_template.html"
-
-    # generate html from IPYNB files
-    jupyter_generate_html = True
-    
-    # html template specific to your website needs
-    jupyter_html_template = "/path_to_html_template.tpl"
-    
-    #path to download notebooks from 
-    jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
-
-    #allow downloading of notebooks
-    jupyter_download_nb = True

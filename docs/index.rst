@@ -25,6 +25,7 @@ the task of version control for large projects.
    extension-config
    usage
    examples
+   example-conf
 
 
 Credits
