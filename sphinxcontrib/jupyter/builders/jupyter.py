@@ -25,8 +25,7 @@ class JupyterBuilder(Builder):
     allow_parallel = True
 
     _writer_class = JupyterWriter
-    _execute_notebook_class = ExecuteNotebookWriter()
-    _make_site_class = MakeSiteWriter()
+    _make_site_class = MakeSiteWriter
     dask_log = dict()
     futuresInfo = dict()
     futures = []
@@ -75,6 +74,10 @@ class JupyterBuilder(Builder):
         self.futures = []
         self.delayed_futures = []
 
+        ### initializing required classes
+        self._execute_notebook_class = ExecuteNotebookWriter(self)
+        self._make_site_class = MakeSiteWriter(self)
+
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
             if docname not in self.env.all_docs:
@@ -104,9 +107,8 @@ class JupyterBuilder(Builder):
         # replace tuples in attribute values with lists
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
-
         ### print an output for downloading notebooks as well with proper links if variable is set
-        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"] is True:
+        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
             outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))

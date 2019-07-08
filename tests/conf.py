@@ -244,5 +244,6 @@ jupyter_lang_synonyms = ["ipython"]
 
 # Image Prefix (enable web storage references)
 # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+jupyter_download_nb = False
 
 

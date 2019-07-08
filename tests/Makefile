@@ -9,6 +9,7 @@ SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
 SOURCEDIR     = .
 BUILDDIR      = _build
+BUILDWEBSITE  = _build_website
 CORES 		  = 4
 BUILDCOVERAGE = _build_coverage
 
@@ -22,9 +23,9 @@ rst-test: clean jupyter
 	python check_diffs.py
 
 preview:
-ifeq ($(target), website)
+ifneq (,$(filter $(parallel),website Website))
 	cd _build/jupyter_html/ && python -m http.server
-else
+else 
 ifdef lecture
 	cd _build/jupyter/ && jupyter notebook $(basename $(lecture)).ipynb
 else
@@ -35,18 +36,21 @@ endif
 clean-coverage:
 	rm -rf $(BUILDCOVERAGE)
 
+clean-website:
+	rm -rf $(BUILDWEBSITE)
+
 coverage:
-ifeq ($(parallel), True)
+ifneq (,$(filter $(parallel),true True))
 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0 -D jupyter_number_workers=$(CORES)
 else
 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0
 endif
 
 website:
-ifeq ($(parallel), True)
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_number_workers=$(CORES)
+ifneq (,$(filter $(parallel),true True))
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE) -D jupyter_number_workers=$(CORES)
 else
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 endif
 	
 
