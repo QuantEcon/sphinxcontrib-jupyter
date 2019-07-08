@@ -200,7 +200,6 @@ class ExecuteNotebookWriter():
         if os.path.isfile(json_filename):
             with open(json_filename, encoding="UTF-8") as json_file:
                 json_data = json.load(json_file)
-
                 temp_dictionary = dict()
                 for item in json_data['results']:
                     name = item['filename']
@@ -220,15 +219,21 @@ class ExecuteNotebookWriter():
             runtime = int(notebook_errors['runtime'] * 10)
             name = notebook_errors['filename']
             language = notebook_errors['language']['name']
-
             seconds = (runtime % 600) / 10
             minutes = int(runtime / 600)
+
+            extension = ''
+            if (language.lower().find('python') != -1):
+                extension = 'py'
+            elif (language.lower().find('julia') != -1):
+                extension = 'jl'
 
             nicer_runtime = str(minutes) + ":" + ("0" + str(seconds) if seconds < 10 else str(seconds))
             new_dictionary = {
                 'filename': name,
                 'runtime': nicer_runtime,
                 'num_errors': len(notebook_errors['errors']),
+                'extension': extension,
                 'language': language
             }
 
@@ -293,7 +298,6 @@ class ExecuteNotebookWriter():
             filename = full_error_set['filename']
             current_language = full_error_set['language']
             language_name = current_language['extension']
-
             if error_result:
                 if language_name not in errors_by_language:
                     errors_by_language[language_name] = dict()
