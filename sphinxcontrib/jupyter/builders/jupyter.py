@@ -138,7 +138,7 @@ class JupyterBuilder(Builder):
                 nb = nbformat.reads(self.writer.output, as_version=4)
                 language_info = nb.metadata.kernelspec.language
                 self._convert_class = convertToHtmlWriter(self)
-                self._convert_class.convert(nb, docname, language_info, "_build/jupyter")
+                self._convert_class.convert(nb, docname, language_info, self.outdir)
 
         ### mkdir if the directory does not exist
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
