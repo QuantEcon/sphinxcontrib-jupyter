@@ -35,6 +35,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    solutions
    tables
    tests
+   test_for_pdf
 
 
 Indices and tables
