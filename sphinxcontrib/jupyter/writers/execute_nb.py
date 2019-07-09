@@ -150,6 +150,12 @@ class ExecuteNotebookWriter():
             ## generate html if needed
             if (builderSelf.config['jupyter_generate_html']):
                 builderSelf._convert_class.convert(executed_nb, filename, language_info, self.executedir, passed_metadata['path'])
+
+            ## generate latex if needed - TODOd
+            builderSelf._pdf_class.convertToLatex(executed_nb, filename)
+
+            ## generate pdf if needed -TODOd
+            #builderSelf._pdf_class.convertToPdf(executed_nb, filename)
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             

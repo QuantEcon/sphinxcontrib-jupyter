@@ -12,6 +12,7 @@ BUILDDIR      = _build
 BUILDWEBSITE  = _build_website
 CORES 		  = 4
 BUILDCOVERAGE = _build_coverage
+BUILDPDF      = _build_pdf
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -55,8 +56,8 @@ clean-website:
 # endif
 	
 
-test:
-	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+jupyterpdf:
+	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
