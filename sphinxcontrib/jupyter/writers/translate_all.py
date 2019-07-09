@@ -252,7 +252,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
+            if self.jupyter_target_pdf:
+                #pdf should have label following tag and removed html id tags in visit_target
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{equation-" + node["label"] + "}\n"
+            else:
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
             formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
 
         self.markdown_lines.append(formatted_text)
@@ -273,7 +277,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            if self.jupyter_target_pdf:
+                #pdf should have label following tag and removed html id tags in visit_target
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{equation-" + node["label"] + "}\n"
+            else:
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
             self.math_block_label = referenceBuilder
 
@@ -513,8 +521,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_target(self, node):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
-            self.markdown_lines.append(
-                "\n<a id='{}'></a>\n".format(refid))
+            if self.jupyter_target_pdf:
+                pass #no html targets when computing notebook to target pdf
+            else:
+                self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
     # list items
     def visit_bullet_list(self, node):
