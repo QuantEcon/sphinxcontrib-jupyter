@@ -69,7 +69,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'rst2ipynb', 'testpdf/*.rst']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'rst2ipynb']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -177,35 +177,8 @@ texinfo_documents = [
 # If "code", convert code-blocks only
 jupyter_conversion_mode = "all"
 
-jupyter_write_metadata = False
-
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
-
-#allow execution of notebooks
-jupyter_execute_notebooks = True
-
-#make website
-jupyter_make_site = True
-
-#path to download notebooks from 
-jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
-
-#allow downloading of notebooks
-jupyter_download_nb = True
-
-# Location of template folder for coverage reports
-jupyter_template_coverage_file_path = "theme/templates/error_report_template.html"
-
-# generate html from IPYNB files
-jupyter_generate_html = True
-
-jupyter_html_template = "theme/templates/lectures-nbconvert.tpl"
-
-jupyter_dependency_lists = {
-    'code_blocks' : ['code_synonyms','ignore'],
-    'exercises' : ['footnotes'],
-}
 
 # Configure Jupyter Kernels
 jupyter_kernels = {
@@ -230,19 +203,6 @@ jupyter_kernels = {
 # Default language for Jupyter notebooks
 jupyter_default_lang = "python3"
 
-# Prepend a Welcome Message to Each Notebook
-jupyter_welcome_block = "welcome.rst"
-
-# Solutions Configuration
-jupyter_drop_solutions = True
-
-# Tests configurations 
-jupyter_drop_tests = True
-
-# Add Ipython as Synonym for tests
-jupyter_lang_synonyms = ["ipython"]
-
-# Image Prefix (enable web storage references)
-# jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
-
+# Target PDF Construction
+jupyter_target_pdf = True
 

@@ -12,6 +12,10 @@ BUILDDIR      = _build
 CORES 		  = 4
 BUILDCOVERAGE = _build_coverage
 
+#Add PDF Test Cases
+SOURCEPDF = testpdf/
+BUILDPDF = _build/testpdf/
+
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -20,6 +24,9 @@ help:
 
 rst-test: clean jupyter
 	python check_diffs.py
+
+pdf:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_target_pdf=1
 
 server:
 	cd _build/jupyter && jupyter notebook

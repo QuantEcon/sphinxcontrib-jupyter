@@ -10,31 +10,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   code_blocks
-   code_synonyms
-   collapse
-   dependency
-   download
-   equation_labels
-   exercises
-   footnotes
-   ignore
-   images
-   inline
-   jupyter
-   links
-   links_target
-   lists
-   literal_include
-   math
-   notes
-   only
-   quote
-   simple_notebook
-   slides
-   solutions
-   tables
-   tests
+   test_for_pdf
 
 
 Indices and tables
