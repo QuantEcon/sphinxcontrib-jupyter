@@ -1,7 +1,5 @@
 .. _test_for_pdf:
 
-.. include:: /_static/includes/header.raw
-
 .. index::
     single: python
 
@@ -26,7 +24,7 @@ nec ante. Pellentesque a nulla. Cum sociis natoque penatibus et magnis dis partu
 mus. Aliquam tincidunt urna. Nulla ullamcorper vestibulum turpis. Pellentesque cursus luctus mauris.
 
 
-.. _label1abc
+.. _label1abc:
 
 
 Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo. Nam lacus
@@ -43,7 +41,7 @@ euismod nunc eu purus. Donec bibendum quam in tellus. Nullam cursus pulvinar lec
 vulputate metus eu enim. Vestibulum pellentesque felis eu massa.
 
 
-.. _label2:xyz
+.. _label2-xyz:
 
 
 Suspendisse vel felis. Ut lorem lorem, interdum eu, tincidunt sit amet, laoreet vitae, arcu. Aenean faucibus
@@ -86,7 +84,7 @@ Two key assumptions restrict economy :math:`(A,B)`:
 
 .. math:: a_{i,.} > \mathbf{0}\hspace{5mm}\forall i=1,2,\dots,m
 
-.. _label3_uvw
+.. _label3_uvw:
 
 
 A semi-positive :math:`m`-vector:math:`x` denotes the levels at which
@@ -96,7 +94,7 @@ Therefore,
 
 
 
-this is the :ref:`reference for label 2 <label2:xyz>`
+this is the :ref:`reference for label 2 <label2-xyz>`
 
 
 
