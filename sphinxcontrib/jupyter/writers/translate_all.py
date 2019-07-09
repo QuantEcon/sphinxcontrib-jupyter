@@ -486,17 +486,22 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
-                    #markdown doesn't handle closing brackets very well so will replace with %28 and %29
-                    refid = refid.replace("(", "%28")
-                    refid = refid.replace(")", "%29")
+                    if not self.jupyter_target_pdf:
+                        #markdown doesn't handle closing brackets very well so will replace with %28 and %29
+                        #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+                        refid = refid.replace("(", "%28")
+                        refid = refid.replace(")", "%29")
                     refuri = "#{}".format(refid)
                 # error
                 else:
                     self.error("Invalid reference")
                     refuri = ""
-
-            refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
-            refuri = refuri.replace(")", "%29")
+            
+            #TODO: review if both %28 replacements necessary in this function? Propose delete above in-link refuri
+            if not self.jupyter_target_pdf:
+                #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+                refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
+                refuri = refuri.replace(")", "%29")
             self.markdown_lines.append("]({})".format(refuri))
 
         if self.in_toctree:
