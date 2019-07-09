@@ -460,7 +460,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        self.markdown_lines.append("[")
+        if self.jupyter_target_pdf:
+            self.markdown_lines.append("\hyperlink{")
+        else:
+            self.markdown_lines.append("[")
         self.reference_text_start = len(self.markdown_lines)
 
     def depart_reference(self, node):
@@ -484,7 +487,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
-
                         ## add url path if it is set
                         if self.urlpath is not None:
                             refuri = self.urlpath + refuri
@@ -522,7 +524,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
             if self.jupyter_target_pdf:
-                pass #no html targets when computing notebook to target pdf
+                if 'equation' in refid:
+                    #no html targets when computing notebook to target pdf in labelled math
+                    pass 
+                else:
+                    #set hypertargets for non math targets
+                    self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n")
             else:
                 self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
