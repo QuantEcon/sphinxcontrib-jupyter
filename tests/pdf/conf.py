@@ -198,3 +198,5 @@ jupyter_default_lang = "python3"
 # Target PDF Construction
 jupyter_target_pdf = True
 
+#Switch Off Notebook Metadata
+jupyter_write_metadata = False

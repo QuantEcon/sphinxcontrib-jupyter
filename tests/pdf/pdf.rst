@@ -149,7 +149,7 @@ per nulla. Donec varius orci eget risus. Duis nibh mi, congue eu, accumsan eleif
 Then the *max-min problem* (the game from the maximizing player’s point
 of view) can be written as the *primal* LP
 
-this is maths equation 1 :eq:`this_equation_abc`
+this is maths equation :eq:`this_equation_abc`
 
 Hamburger, Thompson and Weil (1967) view the input-output pair of the
 economy as payoff matrices of two-player zero-sum games. Using this
@@ -201,4 +201,4 @@ pretium, ultricies non, pharetra in, velit. Integer arcu est, nonummy in, fermen
 
 
 
-this is maths equation 2 :eq:`this_eq2_xyz`
+this is maths equation :eq:`this_eq2_xyz`
