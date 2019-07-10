@@ -461,12 +461,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        if self.in_toctree and self.jupyter_target_pdf:
-            #Retain MD toctree elements
-            self.markdown_lines.append("[")
-        elif not self.in_topic and self.jupyter_target_pdf:
-            if 'equation-' in node['refid']:
-                self.markdown_lines.append("\eqref{")
+        if self.in_topic and self.jupyter_target_pdf:
+            #want simple text elements
+            pass
+        elif self.jupyter_target_pdf:
+            if "refid" in node:
+                if 'equation-' in node['refid']:
+                    self.markdown_lines.append("\eqref{")
             else:
                 self.markdown_lines.append("\hyperlink{")
         else:
@@ -484,8 +485,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 #Adjust contents (toc) text when targetting html to prevent nbconvert from breaking html on )
                 uri_text = uri_text.replace("(", "%28")
                 uri_text = uri_text.replace(")", "%29")
-            formatted_text = "](#{})".format(uri_text)
-            self.markdown_lines.append(formatted_text)
+            #Format end of reference in topic
+            if self.jupyter_target_pdf:
+                formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
+            else:
+                formatted_text = "](#{})".format(uri_text)
+            self.markdown_lines.append(formatted_text)            
         else:
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
@@ -532,6 +537,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     self.markdown_lines.append(refuri + "}")
                 else:
                     self.markdown_lines.append(refuri + "}{" + labeltext + "}")
+            # if self.jupyter_target_pdf and self.in_toctree:
+            #     #TODO: this will become an internal link when making a single unified latex file
+            #     formatted_text = " \\ref{" + refuri + "}"
+            #     self.markdown_lines.append(formatted_text)
             else:
                 self.markdown_lines.append("]({})".format(refuri))
 
