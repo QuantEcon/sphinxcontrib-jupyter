@@ -465,7 +465,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #Retain MD toctree elements
             self.markdown_lines.append("[")
         elif not self.in_topic and self.jupyter_target_pdf:
-            self.markdown_lines.append("\hyperlink{")
+            if 'equation-' in node['refid']:
+                self.markdown_lines.append("\eqref{")
+            else:
+                self.markdown_lines.append("\hyperlink{")
         else:
             self.markdown_lines.append("[")
         self.reference_text_start = len(self.markdown_lines)
@@ -524,7 +527,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 refuri = refuri.replace(")", "%29")
             if self.jupyter_target_pdf and self.in_inpage_reference:
                 labeltext = self.markdown_lines.pop()
-                self.markdown_lines.append(refuri + "}{" + labeltext + "}")
+                # Check for Equations as they do not need labetext
+                if 'equation-' in refuri:
+                    self.markdown_lines.append(refuri + "}")
+                else:
+                    self.markdown_lines.append(refuri + "}{" + labeltext + "}")
             else:
                 self.markdown_lines.append("]({})".format(refuri))
 
