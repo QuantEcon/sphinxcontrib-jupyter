@@ -183,7 +183,7 @@ jupyter_write_metadata = False
 jupyter_static_file_path = ["_static"]
 
 #allow execution of notebooks
-jupyter_execute_notebooks = True
+jupyter_execute_notebooks = False
 
 #make website
 jupyter_make_site = True
