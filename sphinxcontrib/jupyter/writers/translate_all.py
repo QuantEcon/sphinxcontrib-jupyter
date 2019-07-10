@@ -35,6 +35,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_footnote = False
         self.in_footnote_reference = False
         self.in_download_reference = False
+        self.in_inpage_reference = False
         self.in_caption = False
         self.in_toctree = False
         self.in_list = False
@@ -460,7 +461,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        if self.jupyter_target_pdf:
+        if not self.in_topic and self.jupyter_target_pdf:
             self.markdown_lines.append("\hyperlink{")
         else:
             self.markdown_lines.append("[")
@@ -496,23 +497,33 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
+                    self.in_inpage_reference = True
                     if not self.jupyter_target_pdf:
                         #markdown doesn't handle closing brackets very well so will replace with %28 and %29
                         #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
                         refid = refid.replace("(", "%28")
                         refid = refid.replace(")", "%29")
-                    refuri = "#{}".format(refid)
+                    if self.jupyter_target_pdf:
+                        refuri = refid
+                    else:
+                        #markdown target
+                        refuri = "#{}".format(refid)
                 # error
                 else:
                     self.error("Invalid reference")
                     refuri = ""
             
-            #TODO: review if both %28 replacements necessary in this function? Propose delete above in-link refuri
+            #TODO: review if both %28 replacements necessary in this function? 
+            #      Propose delete above in-link refuri
             if not self.jupyter_target_pdf:
                 #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
                 refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
                 refuri = refuri.replace(")", "%29")
-            self.markdown_lines.append("]({})".format(refuri))
+            if self.jupyter_target_pdf and self.in_inpage_reference:
+                labeltext = self.markdown_lines.pop()
+                self.markdown_lines.append(refuri + "}{" + labeltext + "}")
+            else:
+                self.markdown_lines.append("]({})".format(refuri))
 
         if self.in_toctree:
             self.markdown_lines.append("\n")
@@ -529,7 +540,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     pass 
                 else:
                     #set hypertargets for non math targets
-                    self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n")
+                    self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
             else:
                 self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
