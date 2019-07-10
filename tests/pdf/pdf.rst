@@ -199,6 +199,10 @@ fermentum eu, sodales cursus, magna. Donec eu purus. Quisque vehicula, urna sed 
 egestas dui, et convallis elit erat sed nulla. Donec luctus. Curabitur et nunc. Aliquam dolor odio, commodo
 pretium, ultricies non, pharetra in, velit. Integer arcu est, nonummy in, fermentum faucibus, egestas vel, odio.
 
-
-
 this is maths equation :eq:`this_eq2_xyz`
+
+
+Testing Citations
+------------------
+
+Testing a citation :cite:`test1458`

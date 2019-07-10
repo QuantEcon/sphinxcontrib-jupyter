@@ -125,7 +125,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     #=================
     def visit_Text(self, node):
         text = node.astext()
-
         #Escape Special markdown chars except in code block
         if self.in_code_block == False:
             text = text.replace("$", "\$")
@@ -508,6 +507,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                         ## add url path if it is set
                         if self.urlpath is not None:
                             refuri = self.urlpath + refuri
+                    elif self.jupyter_target_pdf and 'references#' in refuri:
+                        label = refuri.split("#")[-1]
+                        bibtex = self.markdown_lines.pop()
+                        if "hyperlink" in self.markdown_lines[-1]:
+                            self.markdown_lines.pop()
+                        refuri = "reference-\\cite{" + label
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
@@ -536,7 +541,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
                 refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
                 refuri = refuri.replace(")", "%29")
-            if self.jupyter_target_pdf and self.in_inpage_reference:
+            if self.jupyter_target_pdf and 'reference-' in refuri:
+                import pdb; pdb.set_trace()
+                self.markdown_lines.append(refuri.replace("reference-","") + "}")
+            elif self.jupyter_target_pdf and self.in_inpage_reference:
                 labeltext = self.markdown_lines.pop()
                 # Check for Equations as they do not need labetext
                 if 'equation-' in refuri:

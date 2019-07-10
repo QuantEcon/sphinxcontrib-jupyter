@@ -6,4 +6,5 @@ Tests for PDF Pipline
    :caption: Contents:
 
    pdf
+   references
 
