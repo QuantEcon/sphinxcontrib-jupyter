@@ -461,7 +461,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        if not self.in_topic and self.jupyter_target_pdf:
+        if self.in_toctree and self.jupyter_target_pdf:
+            #Retain MD toctree elements
+            self.markdown_lines.append("[")
+        elif not self.in_topic and self.jupyter_target_pdf:
             self.markdown_lines.append("\hyperlink{")
         else:
             self.markdown_lines.append("[")
