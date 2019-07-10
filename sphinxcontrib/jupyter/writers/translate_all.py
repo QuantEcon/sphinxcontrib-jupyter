@@ -461,13 +461,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        if self.in_topic and self.jupyter_target_pdf:
-            #want simple text elements
-            pass
-        elif self.jupyter_target_pdf:
+        if self.jupyter_target_pdf:
             if "refid" in node:
                 if 'equation-' in node['refid']:
                     self.markdown_lines.append("\eqref{")
+                elif self.in_topic:
+                    pass
+                else:
+                    self.markdown_lines.append("\hyperlink{")
             else:
                 self.markdown_lines.append("\hyperlink{")
         else:
@@ -487,6 +488,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 uri_text = uri_text.replace(")", "%29")
             #Format end of reference in topic
             if self.jupyter_target_pdf:
+                uri_text = uri_text.lower()
+                SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
+                                r"}", r"|", r":", r";", r","]
+                for CHAR in SPECIALCHARS:
+                    uri_text = uri_text.replace(CHAR,"")
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
             else:
                 formatted_text = "](#{})".format(uri_text)
