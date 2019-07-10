@@ -542,7 +542,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
                 refuri = refuri.replace(")", "%29")
             if self.jupyter_target_pdf and 'reference-' in refuri:
-                import pdb; pdb.set_trace()
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif self.jupyter_target_pdf and self.in_inpage_reference:
                 labeltext = self.markdown_lines.pop()
