@@ -10,7 +10,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   test_for_pdf
+   pdf
 
 
 Indices and tables

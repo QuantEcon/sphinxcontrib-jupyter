@@ -190,14 +190,6 @@ jupyter_kernels = {
         },
         "file_extension": ".py",
     },
-    "julia": {
-        "kernelspec": {
-            "display_name": "Julia 0.6.0",
-            "language": "julia",
-            "name": "julia-0.6"
-        },
-        "file_extension": ".jl"
-    }
 }
 
 # Default language for Jupyter notebooks
