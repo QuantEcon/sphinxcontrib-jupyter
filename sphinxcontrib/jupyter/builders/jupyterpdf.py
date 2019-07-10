@@ -63,6 +63,17 @@ class JupyterpdfBuilder(Builder):
         if "jupyter_number_workers" in self.config:
             self.n_workers = self.config["jupyter_number_workers"]
 
+        ## check if flags are unset. Give a warning
+        if "jupyter_execute_notebooks" in self.config and self.config['jupyter_execute_notebooks'] is False:
+            self.config['jupyter_execute_notebooks'] = True
+            self.logger.warning("execution of notebooks is mandatory for pdf conversion, so setting it on.")
+
+        if "jupyter_target_pdf" in self.config and self.config['jupyter_target_pdf'] is False:
+            self.config['jupyter_execute_notebooks'] = True
+            self.logger.warning("target pdf flag is mandatory for pdf conversion, so setting it on.")
+            import pdb;
+            pdb.set_trace()
+
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
 
