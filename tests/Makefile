@@ -21,13 +21,19 @@ CORES 		  = 4
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+.PHONY: help Makefile pdf rst-test
 
-rst-test: clean jupyter pdf
+rst-test: clean clean-pdf jupyter pdf
 	python check_diffs.py
 
 pdf:
 	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O)
+
+clean-pdf:
+	rm -rf $(BUILDPDF)
+
+pdf-test: clean-pdf pdf
+	python check_diffs.py
 
 server:
 	cd _build/jupyter && jupyter notebook
