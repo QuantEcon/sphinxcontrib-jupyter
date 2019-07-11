@@ -7,19 +7,32 @@ SHELL := bash
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
-SOURCEDIR     = .
-BUILDDIR      = _build
-BUILDWEBSITE  = _build_website
+#BASE
+SOURCEDIR     = base/
+BUILDDIR      = base/_build
+BUILDCOVERAGE = base/_build_coverage
+#PDF
+SOURCEPDF = pdf/
+BUILDPDF = pdf/_build/
+
 CORES 		  = 4
-BUILDCOVERAGE = _build_coverage
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+.PHONY: help Makefile pdf rst-test
 
-rst-test: clean jupyter
+rst-test: clean clean-pdf jupyter pdf
+	python check_diffs.py
+
+pdf:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O)
+
+clean-pdf:
+	rm -rf $(BUILDPDF)
+
+pdf-test: clean-pdf pdf
 	python check_diffs.py
 
 preview:
