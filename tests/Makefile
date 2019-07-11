@@ -40,6 +40,9 @@ clean-coverage:
 clean-website:
 	rm -rf $(BUILDWEBSITE)
 
+clean-pdf:
+	rm -rf $(BUILDPDF)
+
 #### TODO - Add these back in once test cases are setup ####
 # coverage:
 # ifneq (,$(filter $(parallel),true True))

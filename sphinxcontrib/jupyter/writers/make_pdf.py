@@ -43,4 +43,4 @@ class MakePdfWriter():
             f.close()
         
         ### converting to pdf using xelatex subprocess
-        subprocess.run(["xelatex","-output-directory",pdf_build_path, "--shell-escape",fl_tex])
+        subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
