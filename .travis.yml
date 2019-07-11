@@ -8,7 +8,8 @@ python:
 
 env:
   - SPHINX_VERSION=1.7.9
-  - SPHINX_VERSION=1.8.2
+  - SPHINX_VERSION=1.8.5
+  - SPHINX_VERSION=2.1.2
 
 notifications:
   email: false
