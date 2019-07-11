@@ -7,20 +7,32 @@ SHELL := bash
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
-SOURCEDIR     = .
-BUILDDIR      = _build
-BUILDWEBSITE  = _build_website
+#BASE
+SOURCEDIR     = base/
+BUILDDIR      = base/_build
+BUILDCOVERAGE = base/_build_coverage
+#PDF
+SOURCEPDF = pdf/
+BUILDPDF = pdf/_build/
+
 CORES 		  = 4
-BUILDCOVERAGE = _build_coverage
-BUILDPDF      = _build_pdf
 
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+.PHONY: help Makefile pdf rst-test
 
-rst-test: clean jupyter
+rst-test: clean clean-pdf jupyter pdf
+	python check_diffs.py
+
+pdf:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O)
+
+clean-pdf:
+	rm -rf $(BUILDPDF)
+
+pdf-test: clean-pdf pdf
 	python check_diffs.py
 
 preview:
@@ -40,6 +52,7 @@ clean-coverage:
 clean-website:
 	rm -rf $(BUILDWEBSITE)
 
+<<<<<<< HEAD
 clean-pdf:
 	rm -rf $(BUILDPDF)
 
@@ -51,6 +64,16 @@ clean-pdf:
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0
 # endif
 
+=======
+#### TODO - Add these back in once test cases are setup ####
+# coverage:
+# ifneq (,$(filter $(parallel),true True))
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0 -D jupyter_number_workers=$(CORES)
+# else
+# 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0
+# endif
+
+>>>>>>> master
 # website:
 # ifneq (,$(filter $(parallel),true True))
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE) -D jupyter_number_workers=$(CORES)
@@ -58,9 +81,12 @@ clean-pdf:
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 # endif
 	
+<<<<<<< HEAD
 
 jupyterpdf:
 	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
+=======
+>>>>>>> master
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

@@ -7,9 +7,8 @@ dist/
 dask-worker-space/
 __pycache__
 *.egg-info/
-tests/_build/
-tests/_build_website/
-tests/_build_pdf/
+tests/base/_build/
+tests/pdf/_build/
 tests/ipynb/*checkpoints
 *.pyc
 .DS_Store

@@ -56,6 +56,7 @@ def setup(app):
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
+    app.add_config_value("jupyter_target_pdf", False, "jupyter")
     app.add_config_value("jupyter_coverage_dir", None, "jupyter")
 
     

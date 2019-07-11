@@ -8,7 +8,7 @@ python:
 
 env:
   - SPHINX_VERSION=1.7.9
-  - SPHINX_VERSION=1.8.2
+  - SPHINX_VERSION=1.8.5
 
 notifications:
   email: false
@@ -27,6 +27,7 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat dask distributed 
   - pip install nbdime
+  - pip install sphinxcontrib-bibtex
   - python setup.py install
 
 script:
