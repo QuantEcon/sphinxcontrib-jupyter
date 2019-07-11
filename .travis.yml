@@ -11,6 +11,11 @@ env:
   - SPHINX_VERSION=1.8.5
   - SPHINX_VERSION=2.1.2
 
+matrix:
+  exclude:
+  - python: 2.7
+    env: SPHINX_VERSION=2.1.2
+
 notifications:
   email: false
 
