@@ -26,12 +26,6 @@ help:
 rst-test: clean clean-pdf jupyter pdf
 	python check_diffs.py
 
-pdf:
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O)
-
-clean-pdf:
-	rm -rf $(BUILDPDF)
-
 pdf-test: clean-pdf pdf
 	python check_diffs.py
 
@@ -71,8 +65,8 @@ clean-pdf:
 # endif
 	
 
-jupyterpdf:
-	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
+pdf:
+	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
