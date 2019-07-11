@@ -25,8 +25,7 @@ class JupyterBuilder(Builder):
     allow_parallel = True
 
     _writer_class = JupyterWriter
-    _execute_notebook_class = ExecuteNotebookWriter()
-    _make_site_class = MakeSiteWriter()
+    _make_site_class = MakeSiteWriter
     dask_log = dict()
     futuresInfo = dict()
     futures = []
@@ -68,13 +67,17 @@ class JupyterBuilder(Builder):
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
-        self.dependency_lists = self.config["jupyter_dependency_lists"]
-        self.executed_notebooks = []
-        self.delayed_notebooks = dict()
-        self.futures = []
-        self.delayed_futures = []
+        if ("jupyter_make_site" in self.config and self.config["jupyter_execute_notebooks"]):
+            self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
+            self.dependency_lists = self.config["jupyter_dependency_lists"]
+            self.executed_notebooks = []
+            self.delayed_notebooks = dict()
+            self.futures = []
+            self.delayed_futures = []
 
+        ### initializing required classes
+        self._execute_notebook_class = ExecuteNotebookWriter(self)
+        self._make_site_class = MakeSiteWriter(self)
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -105,9 +108,8 @@ class JupyterBuilder(Builder):
         # replace tuples in attribute values with lists
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
-
         ### print an output for downloading notebooks as well with proper links if variable is set
-        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"] is True:
+        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
             outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
@@ -137,7 +139,7 @@ class JupyterBuilder(Builder):
                 nb = nbformat.reads(self.writer.output, as_version=4)
                 language_info = nb.metadata.kernelspec.language
                 self._convert_class = convertToHtmlWriter(self)
-                self._convert_class.convert(nb, docname, language_info, "_build/jupyter")
+                self._convert_class.convert(nb, docname, language_info, self.outdir)
 
         ### mkdir if the directory does not exist
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
@@ -194,5 +196,5 @@ class JupyterBuilder(Builder):
                 self._execute_notebook_class.create_coverage_report(self, error_results)
 
         ### create a website folder
-        if "jupyter_make_site" in self.config and self.config['jupyter_make_site'] is True:
+        if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)

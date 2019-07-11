@@ -35,6 +35,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_footnote = False
         self.in_footnote_reference = False
         self.in_download_reference = False
+        self.in_inpage_reference = False
         self.in_caption = False
         self.in_toctree = False
         self.in_list = False
@@ -124,7 +125,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     #=================
     def visit_Text(self, node):
         text = node.astext()
-
         #Escape Special markdown chars except in code block
         if self.in_code_block == False:
             text = text.replace("$", "\$")
@@ -252,7 +252,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
+            if self.jupyter_target_pdf:
+                #pdf should have label following tag and removed html id tags in visit_target
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
+            else:
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
             formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
 
         self.markdown_lines.append(formatted_text)
@@ -273,7 +277,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            if self.jupyter_target_pdf:
+                #pdf should have label following tag and removed html id tags in visit_target
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
+            else:
+                referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
             self.math_block_label = referenceBuilder
 
@@ -452,7 +460,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         self.in_reference = True
-        self.markdown_lines.append("[")
+        if self.jupyter_target_pdf:
+            if "refid" in node:
+                if 'equation-' in node['refid']:
+                    self.markdown_lines.append("\eqref{")
+                elif self.in_topic:
+                    pass
+                else:
+                    self.markdown_lines.append("\hyperlink{")
+            else:
+                self.markdown_lines.append("\hyperlink{")
+        else:
+            self.markdown_lines.append("[")
         self.reference_text_start = len(self.markdown_lines)
 
     def depart_reference(self, node):
@@ -466,8 +485,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 #Adjust contents (toc) text when targetting html to prevent nbconvert from breaking html on )
                 uri_text = uri_text.replace("(", "%28")
                 uri_text = uri_text.replace(")", "%29")
-            formatted_text = "](#{})".format(uri_text)
-            self.markdown_lines.append(formatted_text)
+            #Format end of reference in topic
+            if self.jupyter_target_pdf:
+                uri_text = uri_text.lower()
+                SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
+                                r"}", r"|", r":", r";", r","]
+                for CHAR in SPECIALCHARS:
+                    uri_text = uri_text.replace(CHAR,"")
+                formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
+            else:
+                formatted_text = "](#{})".format(uri_text)
+            self.markdown_lines.append(formatted_text)            
         else:
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
@@ -476,28 +504,58 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
-
                         ## add url path if it is set
                         if self.urlpath is not None:
                             refuri = self.urlpath + refuri
+                    elif self.jupyter_target_pdf and 'references#' in refuri:
+                        label = refuri.split("#")[-1]
+                        bibtex = self.markdown_lines.pop()
+                        if "hyperlink" in self.markdown_lines[-1]:
+                            self.markdown_lines.pop()
+                        refuri = "reference-\\cite{" + label
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
-                    #markdown doesn't handle closing brackets very well so will replace with %28 and %29
-                    refid = refid.replace("(", "%28")
-                    refid = refid.replace(")", "%29")
-                    refuri = "#{}".format(refid)
+                    self.in_inpage_reference = True
+                    if not self.jupyter_target_pdf:
+                        #markdown doesn't handle closing brackets very well so will replace with %28 and %29
+                        #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+                        refid = refid.replace("(", "%28")
+                        refid = refid.replace(")", "%29")
+                    if self.jupyter_target_pdf:
+                        refuri = refid
+                    else:
+                        #markdown target
+                        refuri = "#{}".format(refid)
                 # error
                 else:
                     self.error("Invalid reference")
                     refuri = ""
-
-            refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
-            refuri = refuri.replace(")", "%29")
-            self.markdown_lines.append("]({})".format(refuri))
+            
+            #TODO: review if both %28 replacements necessary in this function? 
+            #      Propose delete above in-link refuri
+            if not self.jupyter_target_pdf:
+                #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+                refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
+                refuri = refuri.replace(")", "%29")
+            if self.jupyter_target_pdf and 'reference-' in refuri:
+                self.markdown_lines.append(refuri.replace("reference-","") + "}")
+            elif self.jupyter_target_pdf and self.in_inpage_reference:
+                labeltext = self.markdown_lines.pop()
+                # Check for Equations as they do not need labetext
+                if 'equation-' in refuri:
+                    self.markdown_lines.append(refuri + "}")
+                else:
+                    self.markdown_lines.append(refuri + "}{" + labeltext + "}")
+            # if self.jupyter_target_pdf and self.in_toctree:
+            #     #TODO: this will become an internal link when making a single unified latex file
+            #     formatted_text = " \\ref{" + refuri + "}"
+            #     self.markdown_lines.append(formatted_text)
+            else:
+                self.markdown_lines.append("]({})".format(refuri))
 
         if self.in_toctree:
             self.markdown_lines.append("\n")
@@ -508,8 +566,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_target(self, node):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
-            self.markdown_lines.append(
-                "\n<a id='{}'></a>\n".format(refid))
+            if self.jupyter_target_pdf:
+                if 'equation' in refid:
+                    #no html targets when computing notebook to target pdf in labelled math
+                    pass 
+                else:
+                    #set hypertargets for non math targets
+                    self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
+            else:
+                self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
     # list items
     def visit_bullet_list(self, node):

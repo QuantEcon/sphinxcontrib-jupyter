@@ -46,6 +46,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_target_html = builder.config["jupyter_target_html"]
         self.jupyter_images_urlpath = builder.config["jupyter_images_urlpath"]
         self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
+        self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
 
         # set the value of the cell metadata["slideshow"] to slide as the default option
         self.slide = "slide" 
@@ -58,9 +59,9 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         full_path_to_header_block = None
         for template_path in template_paths:
-            if os.path.isfile(template_path + "/" + header_block_filename):
-                full_path_to_header_block = os.path.normpath(
-                    template_path + "/" + header_block_filename)
+            if header_block_filename:
+                if os.path.isfile(template_path + "/" + header_block_filename):
+                   full_path_to_header_block = os.path.normpath( template_path + "/" + header_block_filename)
 
         if full_path_to_header_block:
             with open(full_path_to_header_block) as input_file:
