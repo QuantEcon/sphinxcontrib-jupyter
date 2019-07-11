@@ -36,7 +36,7 @@ def setup(app):
     app.add_config_value("jupyter_conversion_mode", None, "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")
     app.add_config_value("jupyter_static_file_path", [], "jupyter")
-    app.add_config_value("jupyter_header_block", "", "jupyter")
+    app.add_config_value("jupyter_header_block", None, "jupyter")
     app.add_config_value("jupyter_options", None, "jupyter")
     app.add_config_value("jupyter_default_lang", "python3", "jupyter")
     app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
@@ -45,15 +45,16 @@ def setup(app):
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
-    app.add_config_value("jupyter_template_coverage_file_path","", "jupyter")
+    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter")
     app.add_config_value("jupyter_generate_html", False, "jupyter")
-    app.add_config_value("jupyter_html_template","", "jupyter")
+    app.add_config_value("jupyter_html_template", None, "jupyter")
     app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
     app.add_config_value("jupyter_make_site", False, "jupyter")
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter")
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
+    app.add_config_value("jupyter_coverage_dir", None, "jupyter")
 
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
@@ -72,7 +73,7 @@ def setup(app):
     app.add_config_value("jupyter_target_html", False, "jupyter")
     app.add_config_value("jupyter_download_nb",False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_urlpath", False, "jupyter")
+    app.add_config_value("jupyter_images_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_markdown", False, "jupyter")           #NOTE: Does not support scale, default=False
 
     return {

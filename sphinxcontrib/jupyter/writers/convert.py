@@ -4,19 +4,20 @@ import os
 from io import open
 from sphinx.util.osutil import ensuredir
 
-BUILD = "_build/jupyter/html/"
-
 class convertToHtmlWriter():
     
     """
     Convert IPYNB to HTML using nbconvert and QuantEcon Template
     """
-    def __init__(self, parentSelf):
-        for path in [BUILD]:
+    def __init__(self, builderSelf):
+        
+        self.htmldir = builderSelf.outdir + "/html" #html directory 
+
+        for path in [self.htmldir]:
             ensuredir(path)
         self.html_exporter = HTMLExporter()
-        if (parentSelf):
-            self.html_exporter.template_file = parentSelf.config["jupyter_html_template"]
+        if (builderSelf):
+            self.html_exporter.template_file = builderSelf.config["jupyter_html_template"]
         else:
             self.html_exporter.template_file = self.config["jupyter_html_template"]
 
@@ -24,14 +25,17 @@ class convertToHtmlWriter():
         fl_nb = ''
         fl_html = ''
         relative_path = ''
+        build_path = self.htmldir
         #Convert to HTML
         if path:
             relative_path = path.replace(base_path,'')
             relative_path = relative_path[1:]
-        build_path = BUILD +  relative_path
+
+        if relative_path != '':
+            build_path = self.htmldir +  "/" + relative_path
+
         ensuredir(build_path)
         fl_html = build_path + "/" + "{}.html".format(filename)
-        
         with open(fl_html, "w") as f:
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
