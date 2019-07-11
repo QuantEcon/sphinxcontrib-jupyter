@@ -59,9 +59,9 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
 
         full_path_to_header_block = None
         for template_path in template_paths:
-            if os.path.isfile(template_path + "/" + header_block_filename):
-                full_path_to_header_block = os.path.normpath(
-                    template_path + "/" + header_block_filename)
+            if header_block_filename:
+                if os.path.isfile(template_path + "/" + header_block_filename):
+                   full_path_to_header_block = os.path.normpath( template_path + "/" + header_block_filename)
 
         if full_path_to_header_block:
             with open(full_path_to_header_block) as input_file:

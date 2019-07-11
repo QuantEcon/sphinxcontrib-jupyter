@@ -186,19 +186,19 @@ jupyter_static_file_path = ["_static"]
 jupyter_execute_notebooks = False
 
 #make website
-jupyter_make_site = True
+jupyter_make_site = False
 
 #path to download notebooks from 
 jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
 
 #allow downloading of notebooks
-jupyter_download_nb = True
+jupyter_download_nb = False
 
 # Location of template folder for coverage reports
 jupyter_template_coverage_file_path = "theme/templates/error_report_template.html"
 
 # generate html from IPYNB files
-jupyter_generate_html = True
+jupyter_generate_html = False
 
 jupyter_html_template = "theme/templates/lectures-nbconvert.tpl"
 
@@ -244,5 +244,6 @@ jupyter_lang_synonyms = ["ipython"]
 
 # Image Prefix (enable web storage references)
 # jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+jupyter_download_nb = False
 
 
