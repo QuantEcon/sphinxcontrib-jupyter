@@ -2,6 +2,7 @@ import nbformat
 from nbconvert import PDFExporter
 from nbconvert import LatexExporter
 import os
+import sys
 from io import open
 import subprocess
 from sphinx.util.osutil import ensuredir
@@ -43,4 +44,7 @@ class MakePdfWriter():
             f.close()
         
         ### converting to pdf using xelatex subprocess
-        subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
+        if sys.version_info.major == 2
+            subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
+        else:
+            subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
