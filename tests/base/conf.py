@@ -212,6 +212,6 @@ jupyter_drop_solutions = True
 # Tests configurations 
 jupyter_drop_tests = True
 
-# Add Ipython as Synonym for tests
-jupyter_lang_synonyms = ["ipython"]
+# Add Ipython, Pycon and python as language synonyms
+jupyter_lang_synonyms = ["ipython", "python", "pycon"]
 
