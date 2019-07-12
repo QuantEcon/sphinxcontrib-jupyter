@@ -206,3 +206,8 @@ Testing Citations
 ------------------
 
 Testing a citation :cite:`test1458`
+
+Testing Inline Math
+-------------------
+
+For example, let's calculate :math:`\int_{-2}^2 \phi(z) dz` where :math:`\phi` is the standard normal density
