@@ -9,6 +9,18 @@ python:
 env:
   - SPHINX_VERSION=1.7.9
   - SPHINX_VERSION=1.8.5
+  - SPHINX_VERSION=2.1.2
+
+matrix:
+  exclude:
+  - python: 2.7
+    env: SPHINX_VERSION=2.1.2
+
+directories:
+  - "/tmp/texlive"
+  - "$HOME/.texlive"
+
+timeout: 3600
 
 notifications:
   email: false
@@ -23,6 +35,9 @@ before_install:
   - ./miniconda.sh -b -p /home/travis/miniconda
   - export PATH=/home/travis/miniconda/bin:$PATH
   - conda update --yes conda
+  - travis_wait 45 bash ./util/setup_latex.sh
+  - export PATH="/tmp/texlive/bin/x86_64-linux:$PATH"
+
 
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat dask distributed 

@@ -38,8 +38,11 @@ and it is included as a non-execute cell
 
     using QuantEcon
 
-However this **currently** means **.. code-block:: python** is also included as a non-execute 
-cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`__]
+~~However this **currently** means **.. code-block:: python** is also included as a non-execute 
+cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`__]~~
+
+This has been fixed by using jupyter_lang_synonyms = ["python"] in **conf.py** file. So **python**
+will now be included alongside *python3*, *ipython*, and *pycon*.
 
 .. code-block:: python
 
@@ -48,9 +51,9 @@ cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`
 No Execute
 ----------
 
-This is a **.. code::** directive with **:class: no-execute**
+This is a **.. code-block::** directive with **:class: no-execute**
 
-.. code:: python
+.. code-block:: python
    :class: no-execute
 
     import numpy as np

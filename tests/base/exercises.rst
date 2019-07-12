@@ -15,6 +15,7 @@ This notebook tests the new exercise directive defined in this package
    - exercise
 
    .. code-block:: python
+      :class: no-execute
 
       def foobar(x, y, z):
          print(x, y, z)
