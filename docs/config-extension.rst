@@ -1,3 +1,5 @@
+.. _config_extension:
+
 Extension Configuration and Options
 ===================================
 
@@ -7,7 +9,7 @@ It can be useful to have multiple configurations when working on a large project
 working on locally and editing and compiling the project for HTML. An example of how to set this up is 
 `here <project-config>`__
 
-An example *conf.py* is available `here <ExampleConf>`__
+An example *conf.py* is available `here <config_example>`__
 
 The options are split into the different parts of the compilation pipeline that is available in this extension:
 

@@ -11,7 +11,7 @@ This sphinx extension can be used to build a collection of
     domain. Please provide feedback as an issue to this 
     `repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__.
 
-**Requires:** Sphinx >= 1.7.2 (for running tests). 
+**Requires:** Sphinx >= 1.7.2 (for running tests).
 
 One of the main benefits of writing Jupyter notebooks as ``RST`` files is to simplify
 the task of version control for large projects.
@@ -21,11 +21,11 @@ the task of version control for large projects.
    :caption: Contents:
 
    installation
-   sphinx-config
-   extension-config
+   config-sphinx
+   config-extension
    usage
    examples
-   example-conf
+   config-example
 
 
 Credits
