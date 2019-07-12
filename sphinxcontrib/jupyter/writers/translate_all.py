@@ -130,7 +130,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             text = text.replace("$", "\$")
 
         if self.in_math:
-            text = '$ {} $'.format(text.strip())
+            if self.jupyter_target_pdf:
+                text = '${}$'.format(text.strip())  #must remove spaces between $ and math for latex
+            else:
+                text = '$ {} $'.format(text.strip())
         elif self.in_math_block and self.math_block_label:
             text = "$$\n{0}{1}$${2}".format(
                         text.strip(), self.math_block_label, self.sep_paras
@@ -223,7 +226,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             # the flag is raised, the function can be exited.
             return
 
-        formatted_text = "$ {} $".format(math_text)
+        if self.jupyter_target_pdf:
+            formatted_text = "${}$".format(math_text) #must remove spaces between $ and math for latex
+        else:
+            formatted_text = "$ {} $".format(math_text)
 
         if self.table_builder:
             self.table_builder['line_pending'] += formatted_text
