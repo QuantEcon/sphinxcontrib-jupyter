@@ -44,7 +44,7 @@ class MakePdfWriter():
             f.close()
         
         ### converting to pdf using xelatex subprocess
-        if sys.version_info.major == 2
+        if sys.version_info.major == 2:
             subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
         else:
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
