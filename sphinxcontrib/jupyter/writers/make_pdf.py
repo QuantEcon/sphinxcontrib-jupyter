@@ -14,8 +14,8 @@ class MakePdfWriter():
     """
     logger = logging.getLogger(__name__)
     def __init__(self, builderSelf):
-        self.pdfdir = builderSelf.outdir + "/pdf" #html directory 
-        self.texdir = builderSelf.outdir + "/tex" #html directory 
+        self.pdfdir = builderSelf.outdir + "/pdf" #pdf directory 
+        self.texdir = builderSelf.outdir #latex directory 
 
         for path in [self.pdfdir, self.texdir]:
             ensuredir(path)
@@ -41,6 +41,7 @@ class MakePdfWriter():
         with open(fl_tex, "w") as f:
             tex_data, resources = self.tex_exporter.from_notebook_node(nb)
             f.write(tex_data)
+            ### need to output resources here ---- 
             f.close()
         
         ### converting to pdf using xelatex subprocess
