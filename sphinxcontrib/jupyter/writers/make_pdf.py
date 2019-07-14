@@ -17,6 +17,9 @@ class MakePdfWriter():
         self.pdfdir = builderSelf.outdir + "/pdf" #pdf directory 
         self.texdir = builderSelf.outdir #latex directory 
 
+        ## setting the working directory
+        os.chdir(builderSelf.outdir)
+
         for path in [self.pdfdir, self.texdir]:
             ensuredir(path)
 
