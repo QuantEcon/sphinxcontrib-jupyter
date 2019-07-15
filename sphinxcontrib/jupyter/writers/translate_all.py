@@ -495,7 +495,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf:
                 uri_text = uri_text.lower()
                 SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
-                                r"}", r"|", r":", r";", r","]
+                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’"]
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
