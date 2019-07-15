@@ -151,9 +151,6 @@ class ExecuteNotebookWriter():
             if (builderSelf.config['jupyter_generate_html']):
                 builderSelf._convert_class.convert(executed_nb, filename, language_info, self.executedir, passed_metadata['path'])
 
-            ## generate latex if needed - TODOd
-            builderSelf._pdf_class.convertToLatex(executed_nb, filename)
-
             ## generate pdf if needed -TODOd
             #builderSelf._pdf_class.convertToPdf(executed_nb, filename)
             
@@ -168,6 +165,7 @@ class ExecuteNotebookWriter():
         results['errors']   = error_result
         results['language'] = language_info
         error_results.append(results)
+        return filename
 
     def save_executed_notebook(self, builderSelf):
         error_results = []
@@ -185,15 +183,17 @@ class ExecuteNotebookWriter():
         update_count_delayed = 1
         for future, nb in as_completed(builderSelf.futures, with_results=True, raise_errors=False):
             count += 1
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
+            filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
+            builderSelf._pdf_class.convertToLatex(builderSelf, filename)
 
         for future, nb in as_completed(builderSelf.delayed_futures, with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0
                 total_count += len(builderSelf.delayed_futures)
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
-
+            filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
+            builderSelf._pdf_class.convertToLatex(builderSelf, filename)
+        
         return error_results
 
     def produce_code_execution_report(self, builderSelf, error_results, fln = "code-execution-results.json"):

@@ -173,4 +173,3 @@ class JupyterpdfBuilder(Builder):
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
-
