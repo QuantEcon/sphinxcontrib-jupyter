@@ -103,18 +103,154 @@ This is used by jupyter to connect the correct language kernel and is **required
 
     See Issue `196 <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/196)>`__
 
+jupyter_write_metadata
+----------------------
 
+write time and date information at the top of each notebook as notebook metadata
+
+.. note::
+
+    This option is slated to be deprecated
+
+jupyter_options
+---------------
+
+An dict-type object that is used by dask to control execution
+
+
+.. TODO:: 
+
+    This option needs to be reviewed
+
+jupyter_drop_solutions
+----------------------
+
+Drop ``code-blocks`` that include ``:class: solution``
+
+.. TODO:: 
+
+    This option needs to be reviewed
+
+jupyter_drop_tests
+------------------
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
+
+Drop ``code-blocks` that include ``:class: test``
 
 .. TODO::
 
-    #. jupyter_write_metadata
-    #. jupyter_options
-    #. jupyter_drop_solutions
-    #. jupyter_drop_tests
-    #. jupyter_ignore_no_execute
-    #. jupyter_ignore_skip_test
-    #. jupyter_allow_html_only
-    #. jupyter_target_html
-    #. jupyter_images_markdown
+    This option needs to be reviewed
+
+jupyter_ignore_no_execute:
+--------------------------
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
+
+When constructing notebooks this option can be enabled to ignore `:class: no-execute`
+for `code-blocks`. This is useful for `html` writer for pages that are meant to fail 
+but shouldn't be included in `coverage` tests. 
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_ignore_no_execute = True
+
+jupyter_ignore_skip_test
+------------------------
+
+When constructing notebooks this option can be enabled to ignore `:class: skip-test`
+for `code-blocks`.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_ignore_skip_test = True
+
+jupyter_allow_html_only
+-----------------------
+
+Enable this option to allow ``.. only:: html`` pass through to the notebooks. 
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_allow_html_only = True
+
+jupyter_target_html
+-------------------
+
+Enable this option to generate notebooks that favour the inclusion of ``html``
+in notebooks to support more advanced features.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True
+
+Supported Features:
+
+#. html based table support
+#. image inclusion as ``html`` figures
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_target_html = True
+
+
+jupyter_images_markdown
+-----------------------
+
+Force the inclusion of images as native markdown
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True
+
+.. note::
+
+    when this option is enabled the `:scale:` option is not supported
+    in RST.
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_images_markdown = True
+
 
 
