@@ -127,13 +127,6 @@ jupyter_drop_solutions
 
 Drop ``code-blocks`` that include ``:class: solution``
 
-.. TODO:: 
-
-    This option needs to be reviewed
-
-jupyter_drop_tests
-------------------
-
 .. list-table:: 
    :header-rows: 1
 
@@ -141,7 +134,21 @@ jupyter_drop_tests
    * - False (**default**)
    * - True 
 
+.. TODO:: 
+
+    This option needs to be reviewed
+
+jupyter_drop_tests
+------------------
+
 Drop ``code-blocks` that include ``:class: test``
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
 
 .. TODO::
 
