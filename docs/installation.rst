@@ -15,12 +15,15 @@ to upgrade your current installation to the latest version:
 
     pip install sphinxcontrib-jupyter --upgrade
 
+.. todo:: 
+
+    Add installation via conda-forge
+
 Alternative
 ~~~~~~~~~~~
 
-Anothe way to get the **latest** version it is to install directly 
-by getting a copy of the `repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__, 
-and:
+Another way to get the **latest** version it is to install directly 
+by getting a copy of the `repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__:
 
 .. code-block:: bash
 
@@ -32,7 +35,10 @@ and then use
 
    python setup.py install
 
-for developers or contributors it can be useful to install using the `develop` option:
+Developers
+~~~~~~~~~~
+
+For developers it can be useful to install using the `develop` option:
 
 .. code-block:: bash
 
