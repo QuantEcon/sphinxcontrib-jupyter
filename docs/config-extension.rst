@@ -16,7 +16,7 @@ The options are split into the different parts of the compilation pipeline that 
 
 .. toctree::
    :maxdepth: 1
-   :contents: Extension Configuration
+   :caption: Extension Configuration
 
    config-extension-notebooks
    config-extension-execution
