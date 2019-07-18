@@ -14,8 +14,9 @@ option is provided in the table below.
 
 The options are split into the different parts of the compilation pipeline that is available in this extension:
 
-.. contents:: Extension Configuration:
+.. toctree::
    :maxdepth: 1
+   :contents: Extension Configuration
 
    config-extension-notebooks
    config-extension-execution
