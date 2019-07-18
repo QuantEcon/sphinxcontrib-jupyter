@@ -1,3 +1,5 @@
+.. _examples:
+
 Examples
 ========
 
@@ -6,6 +8,7 @@ but the following provides some examples of the main conversions between RST and
 
 code-blocks
 -----------
+
 The following code in the **.rst** file 
 
 .. code:: rst

@@ -11,19 +11,22 @@ This sphinx extension can be used to build a collection of
     domain. Please provide feedback as an issue to this 
     `repository <https://github.com/QuantEcon/sphinxcontrib-jupyter>`__.
 
-**Requires:** Sphinx >= 1.7.2 (for running tests). 
+**Requires:** Sphinx >= 1.7.2 (for running tests).
 
-One of the benefits of writing Jupyter notebooks as ``RST`` files is to simplify
-the task of version control.
+One of the main benefits of writing Jupyter notebooks as ``RST`` files is to simplify
+the task of version control for large projects.
 
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
 
    installation
-   sphinx-config
+   config-sphinx
+   config-extension
    usage
    examples
+   config-example
+   config-project
 
 
 Credits
@@ -33,9 +36,11 @@ This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
 Many thanks to the lead developers of this project.
 
+
+* `@AakashGfude <https://github.com/AakashGfude>`__
+* `@mmcky <https://github.com/mmcky>`__
 * `@NickSifniotis <https://github.com/NickSifniotis>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
-* `@mmcky <https://github.com/mmcky>`__
 
 Contributors
 
@@ -52,7 +57,7 @@ contact@quantecon.org
 LICENSE
 =======
 
-Copyright © 2018 QuantEcon Development Team: BSD-3 All rights reserved.
+Copyright © 2019 QuantEcon Development Team: BSD-3 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
