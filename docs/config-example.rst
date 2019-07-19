@@ -1,29 +1,10 @@
-Sphinx Setup
-============
+.. _config_example:
 
-To initially setup a Sphinx project, please refer `here <https://www.sphinx-doc.org/en/master/usage/quickstart.html>`__
+Example `conf.py` file
+======================
 
-Update the project ``conf.py`` file to include the jupyter extension
-and add the desired **configuration** settings (see :doc:`Extension Configuration <extension-config>` section):
-
-.. code:: python
-
-    extensions = ["sphinxcontrib.jupyter"]
-
-then run
-
-.. code:: bash
-
-    make jupyter
-
-Configuration
--------------
-
-.. todo::
-
-    Update this section to properly document conf.py options
-
-The following additions must be made to ``conf.py`` file.
+After running a sphinx-quickstart you can add the `jupyter` options needed
+for your project in a similar fashion to what is shown belows. 
 
 .. code:: python
 
@@ -36,6 +17,7 @@ The following additions must be made to ``conf.py`` file.
     # If "code", convert code-blocks only
     jupyter_conversion_mode = "all"
 
+    # Write notebook creation metadata to the top of the notebook
     jupyter_write_metadata = True
 
     # Location for _static folder
@@ -51,27 +33,11 @@ The following additions must be made to ``conf.py`` file.
                 },
             "file_extension": ".py",
         },
-        "julia": {
-            "kernelspec": {
-                "display_name": "Julia 0.6.0",
-                "language": "julia",
-                "name": "julia-0.6"
-                },
-            "file_extension": ".jl"
-        }
     }
 
     # Configure default language for Jupyter notebooks
     # Can be changed in each notebook thanks to the ..highlight:: directive
     jupyter_default_lang = "python3"
- 
-    # Configure Jupyter headers
-    jupyter_headers = {
-        "python3": [
-        ],
-        "julia": [
-        ],
-    }
 
     # Prepend a Welcome Message to Each Notebook
     jupyter_welcome_block = "welcome.rst"
@@ -84,5 +50,3 @@ The following additions must be made to ``conf.py`` file.
 
     # Add Ipython as Synonym for tests
     jupyter_lang_synonyms = ["ipython"]
-
-    
