@@ -27,6 +27,6 @@ Provide path to template coverage file
 
 ``conf.py`` usage:
 
-.. code-block::
+.. code-block:: python
 
     jupyter_template_coverage_file_path = "theme/templates/<file>.json"

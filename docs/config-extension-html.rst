@@ -33,7 +33,7 @@ Specify path to nbconvert html template file
 .. note::
 
     Documentation on nbconvert templates can be found 
-    `here<https://nbconvert.readthedocs.io/en/latest/customizing.html#Customizing-nbconvert>`__
+    `here <https://nbconvert.readthedocs.io/en/latest/customizing.html#Customizing-nbconvert>`_
 
 ``conf.py`` usage:
 
@@ -52,7 +52,7 @@ Enable sphinx to construct a complete website
 
 This option:
 
-#. fetches coverage statistics if `coverage<coverage_extension_coverage>`_ is enabled. 
+#. fetches coverage statistics if `coverage <coverage_extension_coverage>`_ is enabled. 
 
 ``conf.py`` usage:
 

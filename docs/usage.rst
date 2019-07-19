@@ -1,12 +1,11 @@
 .. _usage:
 
-RST Conversion and Usage
-========================
-
 .. note::
 
-    A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
-    which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
+    REWRITE. DO NOT INCLUDE IN INDEX
+
+RST Conversion and Usage
+========================
 
 The following specifies the relationship between default Sphinx directives
 and how they will be interpreted by this Jupyter extension.
