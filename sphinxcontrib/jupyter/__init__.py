@@ -1,3 +1,6 @@
+import yaml
+yaml.warnings({'YAMLLoadWarning': False})
+
 from .builders.jupyter import JupyterBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
