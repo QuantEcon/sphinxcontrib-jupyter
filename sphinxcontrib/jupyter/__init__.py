@@ -12,6 +12,8 @@ from sphinx.locale import admonitionlabels
 admonitionlabels["exercise"] = "Exercise"
 admonitionlabels["exercise_cfu"] = "Check for understanding"
 
+import pkg_resources
+VERSION = pkg_resources.get_distribution('pip').version
 
 def _noop(*args, **kwargs):
     pass
@@ -81,7 +83,7 @@ def setup(app):
     app.add_config_value("jupyter_images_markdown", False, "jupyter")           #NOTE: Does not support scale, default=False
 
     return {
-        "version": "0.2.1",
+        "version": VERSION,
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
