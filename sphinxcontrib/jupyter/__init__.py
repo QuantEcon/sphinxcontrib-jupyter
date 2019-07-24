@@ -12,7 +12,8 @@ from sphinx.locale import admonitionlabels
 admonitionlabels["exercise"] = "Exercise"
 admonitionlabels["exercise_cfu"] = "Check for understanding"
 
-from ../../setup import VERSION
+import pkg_resources
+VERSION = pkg_resources.get_distribution('pip').version
 
 def _noop(*args, **kwargs):
     pass
