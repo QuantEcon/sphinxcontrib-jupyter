@@ -9,6 +9,8 @@ __pycache__
 *.egg-info/
 tests/base/_build/
 tests/pdf/_build/
+tests/pdf/_static/
+tests/pdf/theme/
 tests/ipynb/*checkpoints
 *.pyc
 .DS_Store

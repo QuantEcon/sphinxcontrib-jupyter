@@ -8,6 +8,7 @@ import subprocess
 from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
+from distutils.dir_util import copy_tree
 
 class MakePdfWriter():
     """
@@ -42,21 +43,23 @@ class MakePdfWriter():
         ## setting the working directory
         os.chdir(self.texdir)
 
-        # fl_pdf = pdf_build_path + "/" + "{}.pdf".format(filename)
-        
-        # print(builderSelf.executed_notebook_dir, "executed_notebook_dir")
-        # import pdb
-        # pdb.set_trace()
+        ## copies all theme folder images to static folder
+        if os.path.exists(builderSelf.confdir + "/theme/static/img"):
+            copy_tree(builderSelf.confdir + "/theme/static/img", builderSelf.executed_notebook_dir + "/_static/img/", preserve_symlinks=1)
+        else:
+            self.logger.warning("Theme folder not present. Consider creating a theme folder for static assets")
+
         fl_ipynb = builderSelf.executed_notebook_dir + "/" + "{}.ipynb".format(filename)
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
 
+        fl_tex_template = builderSelf.srcdir + "/" + builderSelf.config['jupyter_latex_template']
         ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
         ### converting to pdf using xelatex subprocess
         if sys.version_info.major == 2:
-            subprocess.call(["jupyter", "nbconvert","--to","latex","from", fl_ipynb])
+            subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
             subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
         else:
-            subprocess.run(["jupyter", "nbconvert","--to","latex","from", fl_ipynb])
+            subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])

@@ -192,6 +192,9 @@ jupyter_kernels = {
     },
 }
 
+# latex template specific to your website needs
+jupyter_latex_template = "theme/templates/latex.tplx"
+
 # Default language for Jupyter notebooks
 jupyter_default_lang = "python3"
 
@@ -200,3 +203,7 @@ jupyter_target_pdf = True
 
 #Switch Off Notebook Metadata
 jupyter_write_metadata = False
+
+jupyter_pdf_title = True
+
+jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"

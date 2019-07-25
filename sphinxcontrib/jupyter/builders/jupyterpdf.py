@@ -3,6 +3,7 @@ import os.path
 import docutils.io
 
 import nbformat
+import json
 from sphinx.util.osutil import ensuredir, os_path
 from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
@@ -123,7 +124,10 @@ class JupyterpdfBuilder(Builder):
         self.writer._set_urlpath(None)
         self.writer.write(doctree, destination)
 
-        ### execute the notebook - keep it forcefully on - TODOd
+        #### add latex specific metadata to notebook
+        self.writer.output = self.add_latex_metadata(self.writer.output)
+
+        ### execute the notebook - keep it forcefully on
         strDocname = str(docname)
         if strDocname in self.dependency_lists.keys():
             self.delayed_notebooks.update({strDocname: self.writer.output})
@@ -152,6 +156,7 @@ class JupyterpdfBuilder(Builder):
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
+            print(entry," the entry path")
             if not os.path.exists(entry):
                 self.logger.warning(
                     "jupyter_static_path entry {} does not exist"
@@ -173,3 +178,19 @@ class JupyterpdfBuilder(Builder):
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
+
+    def add_latex_metadata(self, nb_string):
+        nb_obj = json.loads(nb_string)
+
+        ## initialize latex metadata
+        nb_obj['metadata']['latex_metadata'] = {}
+
+        ## add check for logo here as well
+        if "jupyter_pdf_title" in self.config and self.config['jupyter_pdf_title']:
+            nb_obj['metadata']['latex_metadata']["title"] = self.config['jupyter_pdf_title']
+            if "jupyter_pdf_logo" in self.config and self.config['jupyter_pdf_logo']:
+                nb_obj['metadata']['latex_metadata']['logo'] = self.config['jupyter_pdf_logo']
+
+        nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
+        return nb_string
+

@@ -58,6 +58,9 @@ def setup(app):
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
     app.add_config_value("jupyter_target_pdf", False, "jupyter")
     app.add_config_value("jupyter_coverage_dir", None, "jupyter")
+    app.add_config_value("jupyter_latex_template", None, "jupyter")
+    app.add_config_value("jupyter_pdf_title", False, "jupyter")
+    app.add_config_value("jupyter_pdf_logo", None, "jupyter")
 
     
     # Jupyter Directive
