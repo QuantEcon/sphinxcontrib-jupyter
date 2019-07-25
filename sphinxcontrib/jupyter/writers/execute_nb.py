@@ -185,7 +185,8 @@ class ExecuteNotebookWriter():
         for future, nb in as_completed(builderSelf.futures, with_results=True, raise_errors=False):
             count += 1
             filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
-            builderSelf._pdf_class.convertToLatex(builderSelf, filename)
+            if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
+                builderSelf._pdf_class.convertToLatex(builderSelf, filename)
 
         for future, nb in as_completed(builderSelf.delayed_futures, with_results=True, raise_errors=False):
             count += 1
@@ -193,7 +194,8 @@ class ExecuteNotebookWriter():
                 update_count_delayed = 0
                 total_count += len(builderSelf.delayed_futures)
             filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
-            builderSelf._pdf_class.convertToLatex(builderSelf, filename)
+            if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
+                builderSelf._pdf_class.convertToLatex(builderSelf, filename)
         
         return error_results
 
