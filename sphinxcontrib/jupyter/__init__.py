@@ -1,3 +1,7 @@
+# import warnings
+# ### selectively remove warnings
+# warnings.filterwarnings("ignore", message="calling yaml.load()", category=RuntimeWarning)
+
 from .builders.jupyter import JupyterBuilder
 from .builders.jupyterpdf import JupyterpdfBuilder
 from .directive.jupyter import jupyter_node
@@ -10,7 +14,6 @@ from sphinx.locale import admonitionlabels
 admonitionlabels["exercise"] = "Exercise"
 admonitionlabels["exercise_cfu"] = "Check for understanding"
 
-
 def _noop(*args, **kwargs):
     pass
 
@@ -22,6 +25,7 @@ def visit_exercise_node(self, node):
 
 def depart_exercise_node(self, node):
     return HTML.depart_admonition(self, node)
+    
 
 def setup(app):
     execute_nb_obj = {

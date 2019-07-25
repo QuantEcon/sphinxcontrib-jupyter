@@ -84,6 +84,7 @@ class ExecuteNotebookWriter():
 
         futures.append(future)
 
+
     def task_execution_time(self, builderSelf):
         ## calculates execution time of each task in client using get task stream
         task_Info_latest = builderSelf.client.get_task_stream()[-1]

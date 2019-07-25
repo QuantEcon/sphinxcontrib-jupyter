@@ -9,9 +9,9 @@ from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
 from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
+from dask.distributed import Client, progress
 from ..writers.execute_nb import ExecuteNotebookWriter
 from ..writers.make_pdf import MakePdfWriter
-from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
 
@@ -77,8 +77,6 @@ class JupyterpdfBuilder(Builder):
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
 
         #### forced execution of notebook
-
-
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
         self.dependency_lists = self.config["jupyter_dependency_lists"]
         self.executed_notebooks = []

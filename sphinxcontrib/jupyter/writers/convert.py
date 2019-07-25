@@ -15,12 +15,12 @@ class convertToHtmlWriter():
 
         for path in [self.htmldir]:
             ensuredir(path)
-        self.html_exporter = HTMLExporter()
-        if (builderSelf):
-            self.html_exporter.template_file = builderSelf.config["jupyter_html_template"]
-        else:
-            self.html_exporter.template_file = self.config["jupyter_html_template"]
+        self.html_exporter = HTMLExporter(config=None)
 
+        if "jupyter_html_template" in builderSelf.config:
+            self.html_exporter.template_file = builderSelf.config["jupyter_html_template"]
+
+        
     def convert(self, nb, filename, language, base_path, path=None):
         fl_nb = ''
         fl_html = ''
