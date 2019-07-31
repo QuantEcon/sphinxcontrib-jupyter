@@ -1,6 +1,5 @@
-# import warnings
-# ### selectively remove warnings
-# warnings.filterwarnings("ignore", message="calling yaml.load()", category=RuntimeWarning)
+import yaml
+yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
 from .builders.jupyterpdf import JupyterpdfBuilder
@@ -13,6 +12,9 @@ from sphinx.writers.html import HTMLTranslator as HTML
 from sphinx.locale import admonitionlabels
 admonitionlabels["exercise"] = "Exercise"
 admonitionlabels["exercise_cfu"] = "Check for understanding"
+
+import pkg_resources
+VERSION = pkg_resources.get_distribution('pip').version
 
 def _noop(*args, **kwargs):
     pass
@@ -39,7 +41,7 @@ def setup(app):
     app.add_builder(JupyterpdfBuilder)
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
-    app.add_config_value("jupyter_conversion_mode", None, "jupyter")
+    app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")
     app.add_config_value("jupyter_static_file_path", [], "jupyter")
     app.add_config_value("jupyter_header_block", None, "jupyter")
@@ -88,7 +90,7 @@ def setup(app):
     app.add_config_value("jupyter_images_markdown", False, "jupyter")           #NOTE: Does not support scale, default=False
 
     return {
-        "version": "0.2.1",
+        "version": VERSION,
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }

@@ -23,7 +23,6 @@ the task of version control for large projects.
    installation
    config-sphinx
    config-extension
-   usage
    examples
    config-example
    config-project

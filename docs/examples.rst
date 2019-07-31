@@ -1,7 +1,13 @@
 .. _examples:
 
-Examples
-========
+RST Conversion Gallery
+======================
+
+.. note::
+
+    A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
+    which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
+
 
 Most of the functionalities are tested `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
 but the following provides some examples of the main conversions between RST and the Jupyter notebook domain.
@@ -91,7 +97,6 @@ images and figures
 
 The following code in the .rst file 
 
-
 .. code:: rst 
 
     Images
@@ -135,6 +140,10 @@ will look as follows in the jupyter notebook
 .. image:: img/images.png
 .. image:: img/figure.png
 
+.. warning::
+
+    if :code:`jupyter_images_markdown = True` then the ``:scale:``, ``:height:`` 
+    and `:width:`` attributes will be ignored.
 
 jupyter-directive
 -----------------
@@ -236,7 +245,7 @@ The following code in the .rst file
     and labeled test cases
 
     .. math::
-    :label: firsteq
+       :label: firsteq
 
         \mathbb P\{z = v \mid x \}
         = \begin{cases} 
@@ -258,7 +267,7 @@ The following code in the .rst file
     Simple test case with reference in text
 
     .. math::
-    :label: test
+       :label: test
 
         v = p + \beta v
 
@@ -295,9 +304,9 @@ The following code in the .rst file
 
     .. epigraph::
 
-    "Debugging is twice as hard as writing the code in the first place.
-    Therefore, if you write the code as cleverly as possible, you are, by definition,
-    not smart enough to debug it."
+        "Debugging is twice as hard as writing the code in the first place.
+        Therefore, if you write the code as cleverly as possible, you are, by definition,
+        not smart enough to debug it."
     
     -- Brian Kernighan
 
@@ -305,9 +314,9 @@ The following code in the .rst file
 
     .. epigraph::
 
-    "Debugging is twice as hard as writing the code in the first place.
-    Therefore, if you write the code as cleverly as possible, you are, by definition,
-    not smart enough to debug it." -- Brian Kernighan
+        "Debugging is twice as hard as writing the code in the first place.
+        Therefore, if you write the code as cleverly as possible, you are, by definition,
+        not smart enough to debug it." -- Brian Kernighan
 
     with some final text
 
@@ -363,12 +372,9 @@ The following code in the .rst file
 
         print(w)
 
-
     Math 
     ++++
 
-
-        
     The previous function was 
 
     .. math:: f(x)=\sin(4\pi x)\cos(4\pi x)e^{-7x}
@@ -557,3 +563,9 @@ will look as follows in the jupyter notebook
 
 
 .. image:: img/tests.png
+
+.. note::
+
+    inclusion of tests in the generated notebook can be controlled in the ``conf.py``
+    file using :code:`jupyter_drop_tests = False`. This is useful when using the 
+    ``coverage`` build pathway. 
