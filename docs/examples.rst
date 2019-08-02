@@ -8,9 +8,12 @@ RST Conversion Gallery
     A minimum configured sphinx repo is available `here <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal>`__
     which generates a `sample notebook <https://github.com/QuantEcon/sphinxcontrib-jupyter.minimal#simple_notebookrst>`__
 
+.. contents:: Examples
 
-Most of the functionalities are tested `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
-but the following provides some examples of the main conversions between RST and the Jupyter notebook domain.
+The test suite, located `here <https://github.com/QuantEcon/sphinxcontrib-jupyter/tree/master/tests>`__
+provides examples of conversions between RST and the Jupyter notebook which form the test cases 
+for this extension. It can be a useful resource to check how elements are converted if they are not 
+contained in this gallery.
 
 code-blocks
 -----------
@@ -55,41 +58,6 @@ The following code in the **.rst** file
 will look as follows in the jupyter notebook
 
 .. image:: img/code-block.png
-
-
-
-footnotes
----------
-
-The following code in the .rst file 
-
-
-.. code:: rst
-
-    Rubric
-    ======
-
-    Define the government's one-period loss function [#f1]_
-
-    .. math::
-        :label: target
-
-        r(y, u)  =  y' R y  + u' Q u
-
-
-    History dependence has two sources: (a) the government's ability to commit [#f2]_ to a sequence of rules at time :math:`0`
-
-
-    .. rubric:: Footnotes
-
-    .. [#f1] The problem assumes that there are no cross products between states and controls in the return function.  A simple transformation  converts a problem whose return function has cross products into an equivalent problem that has no cross products.
-
-    .. [#f2] The government would make different choices were it to choose sequentially, that is,  were it to select its time :math:`t` action at time :math:`t`.
-
-will look as follows in the jupyter notebook
-
-
-.. image:: img/footnotes.png
 
 
 images and figures
@@ -396,6 +364,38 @@ will look as follows in the jupyter notebook
 
 .. image:: img/slides.png
 
+footnotes
+---------
+
+The following code in the .rst file 
+
+
+.. code:: rst
+
+    Rubric
+    ======
+
+    Define the government's one-period loss function [#f1]_
+
+    .. math::
+        :label: target
+
+        r(y, u)  =  y' R y  + u' Q u
+
+
+    History dependence has two sources: (a) the government's ability to commit [#f2]_ to a sequence of rules at time :math:`0`
+
+
+    .. rubric:: Footnotes
+
+    .. [#f1] The problem assumes that there are no cross products between states and controls in the return function.  A simple transformation  converts a problem whose return function has cross products into an equivalent problem that has no cross products.
+
+    .. [#f2] The government would make different choices were it to choose sequentially, that is,  were it to select its time :math:`t` action at time :math:`t`.
+
+will look as follows in the jupyter notebook
+
+
+.. image:: img/footnotes.png
 
 
 solutions
@@ -449,13 +449,24 @@ will look as follows in the jupyter notebook
 
 .. image:: img/solutions.png
 
+.. todo::
 
+    Currently generating the two sets of notebooks requires two separate
+    runs of sphinx which is incovenient. It would be better to develop a set 
+    of notebooks without solutions (as Default) and a set of notebooks with
+    solutions in a subdir.
 
 tables
 ------
 
-The following code in the .rst file 
+Basic table support is provided by this extension. 
 
+.. note::
+
+    Complex tables are **not** currently supported. 
+    See Issue [#54](https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/54)
+
+The following code in the .rst file 
 
 .. code:: rst 
 
