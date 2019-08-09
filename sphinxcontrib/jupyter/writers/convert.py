@@ -22,7 +22,7 @@ class convertToHtmlWriter():
         if os.path.exists(templateFolder):
             pass
         else:
-            self.logger.warning("template directory not found")
+            builderSelf.logger.warning("template directory not found")
             exit()
 
         self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
