@@ -21,6 +21,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import sphinx
+SPHINX_VERSION = sphinx.version_info
 
 # -- General configuration ------------------------------------------------
 
@@ -70,6 +72,8 @@ language = None
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'rst2ipynb', 'testpdf/*.rst']
+if SPHINX_VERSION[0] < 2:
+    patterns = ['exercise*.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
