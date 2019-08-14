@@ -6,7 +6,7 @@ Managing Large Projects
 
 Large projects may require different build pathways due to the time required 
 for execution of embedded code. This can be done by modifying the ``Makefile``
-to accomodate multiple build pathways. 
+to accommodate multiple build pathways. 
 
 You may, for example, wish to leave ``make jupyter`` simply building notebooks
 while setting up an alternative ``make`` command to target a full ``website`` 
@@ -30,7 +30,7 @@ store resultant files from the options selected.
 
 .. note:: 
 
-    this method also preserves the ``sphinx`` cache mechanism for each build pathway.
+    This method also preserves the ``sphinx`` cache mechanism for each build pathway.
 
 .. warning::
 

@@ -15,7 +15,8 @@ that are available in this extension:
    config-extension-coverage
 
 It can also be useful to have multiple configurations when working on a large project, such as generating notebooks for
-working on locally and editing and compiling the project for HTML in a deployment setting. 
+working on locally while compiling the project for HTML in a deployment setting. 
+
 Further details on how to manage large projects can be found `here <config_project>`__.
 
 An example *conf.py* is available `here <config_example>`__
