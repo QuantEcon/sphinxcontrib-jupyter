@@ -28,8 +28,8 @@ class ExerciselistDirective(SphinxDirective):
     optional_arguments = 0
     option_spec = {
         "scope": lambda x: directives.choice(x, ("file", "section", "all")),
-        "from": lambda x: directives.unchanged,
-        "force": lambda x: directives.flag,
+        "from": lambda x: directives.unchanged(x),
+        "force": lambda x: directives.flag(x),
     }
     def run(self):
         list_number = self.env.new_serialno('exerciselist')
@@ -40,7 +40,11 @@ class ExerciselistDirective(SphinxDirective):
         # create node and add some properties for later use
         node = exerciselist_node('')
         node["scope"] = self.options.get("scope", "file")
-        node["force"] = self.options.get("force", False)
+        node["force"] = self.options.get("force", False) != False
+        node["from"] = self.options.get("from", None)
+
+        if node["scope"] != "file" and node["from"] is not None:
+            raise ValueError("Cannot set scope to be anything other than file AND set from")
         node["_id"] = node_id
         node["_target_id"] = target_id
 
@@ -72,7 +76,6 @@ class ExerciseDirective(SphinxDirective):
 
         exercise_number = self.env.new_serialno('exercise')
         target_id = f"exercise-{exercise_number:d}"
-        # import ipdb; ipdb.set_trace()
         targetnode = nodes.target('', '', ids=[target_id])
         _path = self.env.docname.replace("/", "-")
         node_id = f"{_path}-{exercise_number}"
@@ -162,8 +165,10 @@ def process_exercise_nodes(app, doctree, fromdocname):
     # Augment each todo with a backlink to the original location.
     env = app.builder.env
 
-    def matches_scope(scope, x):
+    def matches_scope(from_file, scope, x):
         "given an exerciselist_node, check its scope and see if exercise x matches"
+        if from_file is not None:
+            return x == from_file
         if scope == "file":
             return x == fromdocname
         elif scope == "section":
@@ -186,13 +191,12 @@ def process_exercise_nodes(app, doctree, fromdocname):
             continue
 
         for ex_id, ex_info in env.exercise_all_exercises.items():
-            if not matches_scope(node["scope"], ex_info["docname"]):
+            if not matches_scope(node["from"], node["scope"], ex_info["docname"]):
                 continue
 
 
             # make link from location in exercise list back to site where exercise appeared
             # in document
-            # import ipdb; ipdb.set_trace()
             back_to_text_para = _make_backlink(
                 app, "(", "back to text", ")",
                 ex_info["docname"], fromdocname, ex_info["target"]["refid"]
