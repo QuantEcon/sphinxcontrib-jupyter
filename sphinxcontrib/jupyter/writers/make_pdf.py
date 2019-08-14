@@ -52,7 +52,8 @@ class MakePdfWriter():
         fl_ipynb = builderSelf.executed_notebook_dir + "/" + "{}.ipynb".format(filename)
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
 
-        fl_tex_template = builderSelf.srcdir + "/" + builderSelf.config['jupyter_latex_template']
+        fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
+        print()
         ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
         ### converting to pdf using xelatex subprocess
         if sys.version_info.major == 2:
