@@ -4,11 +4,8 @@ Exercises
 This notebook tests the new exercise directive defined in this package
 
 .. exercise::
-   :class: cfu
 
-   This is a check for understanding exercise
-
-   This is a note that has some *italic* and **bold** embedded
+   This is a note that has some _italic_ and **bold** embedded
 
    - list
    - in
@@ -37,3 +34,17 @@ text in between exercise
 .. exercise::
 
    This is a normal exercise
+
+
+Collected Exercises
+-------------------
+
+Below should not report anything...
+
+.. exerciselist::
+
+
+This, however should repeat exercises from above
+
+.. exerciselist::
+   :force:
