@@ -38,12 +38,12 @@ Many thanks to the lead developers of this project.
 
 * `@AakashGfude <https://github.com/AakashGfude>`__
 * `@mmcky <https://github.com/mmcky>`__
-* `@NickSifniotis <https://github.com/NickSifniotis>`__
-* `@myuuuuun <https://github.com/myuuuuun>`__ 
 
 Contributors
 
 * `FelipeMaldonado <https://github.com/FelipeMaldonado>`__
+* `@myuuuuun <https://github.com/myuuuuun>`__ 
+* `@NickSifniotis <https://github.com/NickSifniotis>`__
 
 Projects using Extension
 ------------------------

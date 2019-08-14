@@ -3,6 +3,14 @@
 Computing Coverage Statistics
 =============================
 
+.. warning::
+
+    ``make coverage`` will currently produce a ``json`` report
+    that can be used to support an execution status page. But adding
+    badges and a status page needs to be made into an option and 
+    specified via the default theme. 
+    See `#237 <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/237>`__
+
 jupyter_make_coverage
 ---------------------
 

@@ -111,7 +111,7 @@ will look as follows in the jupyter notebook
 .. warning::
 
     if :code:`jupyter_images_markdown = True` then the ``:scale:``, ``:height:`` 
-    and `:width:`` attributes will be ignored.
+    and ``:width:`` attributes will be ignored.
 
 jupyter-directive
 -----------------
