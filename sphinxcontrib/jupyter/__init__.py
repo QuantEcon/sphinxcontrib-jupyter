@@ -11,6 +11,8 @@ from .transform import JupyterOnlyTransform
 import pkg_resources
 VERSION = pkg_resources.get_distribution('pip').version
 
+import sphinx
+SPHINX_VERSION = sphinx.version_info
 
 def _noop(*args, **kwargs):
     pass
@@ -39,9 +41,7 @@ def setup(app):
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
     app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
-    app.add_config_value(
-        "jupyter_template_coverage_file_path", None, "jupyter"
-    )
+    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter")
     app.add_config_value("jupyter_generate_html", False, "jupyter")
     app.add_config_value("jupyter_html_template", None, "jupyter")
     app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
@@ -58,25 +58,21 @@ def setup(app):
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
-    # exercise directive
-    # app.add_directive("exercise", ExerciseDirective)
-    # app.add_node(
-    #     exercise,
-    #     html=(exercise.visit_exercise_node, exercise.depart_exercise_node)
-    # )
-    app.add_config_value('exercise_include_exercises', True, 'html')
-    app.add_config_value('exercise_inline_exercises', False, 'html')
-    app.add_node(exercise.exerciselist_node)
-    app.add_node(
-        exercise.exercise_node,
-        html=(exercise.visit_exercise_node, exercise.depart_exercise_node),
-        latex=(exercise.visit_exercise_node, exercise.depart_exercise_node),
-        text=(exercise.visit_exercise_node, exercise.depart_exercise_node)
-    )
-    app.add_directive('exercise', exercise.ExerciseDirective)
-    app.add_directive('exerciselist', exercise.ExerciselistDirective)
-    app.connect('doctree-resolved', exercise.process_exercise_nodes)
-    app.connect('env-purge-doc', exercise.purge_exercises)
+    # Exercise directive
+    if SPHINX_VERSION[0] >= 2:
+        app.add_config_value('exercise_include_exercises', True, 'html')
+        app.add_config_value('exercise_inline_exercises', False, 'html')
+        app.add_node(exercise.exerciselist_node)
+        app.add_node(
+            exercise.exercise_node,
+            html=(exercise.visit_exercise_node, exercise.depart_exercise_node),
+            latex=(exercise.visit_exercise_node, exercise.depart_exercise_node),
+            text=(exercise.visit_exercise_node, exercise.depart_exercise_node)
+        )
+        app.add_directive('exercise', exercise.ExerciseDirective)
+        app.add_directive('exerciselist', exercise.ExerciselistDirective)
+        app.connect('doctree-resolved', exercise.process_exercise_nodes)
+        app.connect('env-purge-doc', exercise.purge_exercises)
 
     # jupyter setup
     app.add_transform(JupyterOnlyTransform)
@@ -85,9 +81,7 @@ def setup(app):
     app.add_config_value("jupyter_download_nb", False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_urlpath", None, "jupyter")
-    app.add_config_value(
-        "jupyter_images_markdown", False, "jupyter"
-    )  #NOTE: Does not support scale, default=False
+    app.add_config_value("jupyter_images_markdown", False, "jupyter")
 
     return {
         "version": VERSION,
