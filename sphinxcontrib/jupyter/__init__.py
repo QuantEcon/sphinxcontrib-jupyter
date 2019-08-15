@@ -26,6 +26,9 @@ def setup(app):
         "coverage": False,
     }
 
+    #Add Sphinx Version to ENV Configuration
+    app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
+
     # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
