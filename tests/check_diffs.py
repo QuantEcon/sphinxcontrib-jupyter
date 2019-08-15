@@ -17,7 +17,7 @@ import sphinx
 import re
 
 SPHINX_VERSION = sphinx.version_info
-CONFIGSETS = ['base', 'pdf']
+CONFIGSETS = ['base', 'pdf', "no_inline_exercises"]
 
 #-Diff Configuration-#
 NB_VERSION = 4

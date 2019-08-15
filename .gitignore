@@ -13,3 +13,4 @@ tests/ipynb/*checkpoints
 *.pyc
 .DS_Store
 .vscode/
+doctrees/
