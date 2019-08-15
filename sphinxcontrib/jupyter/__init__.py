@@ -5,7 +5,6 @@ from .builders.jupyter import JupyterBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
-from .directive import exercise
 from .transform import JupyterOnlyTransform
 
 import pkg_resources
@@ -13,6 +12,9 @@ VERSION = pkg_resources.get_distribution('pip').version
 
 import sphinx
 SPHINX_VERSION = sphinx.version_info
+
+if SPHINX_VERSION[0] >= 2:
+    from .directive import exercise
 
 def _noop(*args, **kwargs):
     pass
