@@ -79,6 +79,7 @@ class ExerciseDirective(SphinxDirective):
     has_content = True
     option_spec = {
         "label": directives.unchanged,
+        "title": directives.unchanged
     }
     node_class_str = "exercise"
     title_root = "Exercise"
@@ -97,8 +98,10 @@ class ExerciseDirective(SphinxDirective):
         node["_id"] = node_id
         node["classes"] = [self.options.get("class", None)]
         node["label"] = self.options.get("label", None)
+        title_root = self.options.get("title", self.title_root)
+        node["title_root"] = title_root
 
-        title = _(f"{self.title_root} {num + 1}")
+        title = _(f"{title_root} {num + 1}")
 
         para = nodes.paragraph()
         para += nodes.strong(title, title)
@@ -116,6 +119,7 @@ class ExerciseDirective(SphinxDirective):
             'target': targetnode,
             "number": num,
             "label": node["label"],
+            "title_root": title_root,
         }
         return [targetnode, node]
 
@@ -247,8 +251,9 @@ def process_exercise_nodes(app, doctree, fromdocname):
 
                 # make a link from site where exercise appeared in document, back
                 # to new location in exercise list
+                _ex_title = ex_info["title_root"].lower()
                 inline_para = _make_backlink(
-                    app, "See exercise {} in the ".format(ex_info["number"] + 1),
+                    app, "See {} {} in the ".format(_ex_title, ex_info["number"] + 1),
                     "exercise list", "",
                     fromdocname, ex_info["docname"], listinfo["target"]["refid"]
                 )
@@ -272,7 +277,8 @@ def process_exercise_nodes(app, doctree, fromdocname):
                         _src_path = app.builder.get_relative_uri(
                             fromdocname, ex_info["docname"]
                         )
-                        new_title = "Exercise {} ({})".format(ex_info["number"] + 1, _src_path)
+                        _title_root = ex_to_add["title_root"]
+                        new_title = "{} {} ({})".format(_title_root, ex_info["number"] + 1, _src_path)
                         parent.replace_self([nodes.strong(_(new_title), _(new_title))])
             content.append(ex_to_add)
             content.append(back_to_text_para)

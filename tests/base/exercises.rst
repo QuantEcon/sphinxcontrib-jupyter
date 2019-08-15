@@ -38,8 +38,9 @@ text in between exercise
 
 .. exercise::
    :label: pyfun_functions_2
+   :title: Question
 
-   I'm a function with a label and a solution
+   I'm a function with a label and a different title
 
    Define a function named ``var`` that takes a list (call it ``x``) and
    computes the variance. This function should use the `mean` function that we
