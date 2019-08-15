@@ -256,7 +256,9 @@ def process_exercise_nodes(app, doctree, fromdocname):
                 # replace this exercise with the link
                 bq = nodes.block_quote()
                 bq += inline_para
-                all_exercises[ex_id].replace_self([bq])
+                if ex_info.get("removed", False) is not True:
+                    all_exercises[ex_id].replace_self([bq])
+                    ex_info["removed"] = True
 
             ex_to_add = ex_info['node_copy'].deepcopy()
             if ex_info["docname"] != listinfo["docname"]:
