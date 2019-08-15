@@ -13,6 +13,14 @@ that are available in this extension:
    config-extension-execution
    config-extension-html
    config-extension-coverage
+   config-extension-exercise
+
+This extension also offers additional directives that can be used while writing your documents
+
+.. toctree::
+   :maxdepth: 1
+
+   directives
 
 It can also be useful to have multiple configurations when working on a large project, such as generating notebooks for
 working on locally while compiling the project for HTML in a deployment setting. 
