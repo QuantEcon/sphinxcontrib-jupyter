@@ -69,6 +69,9 @@ Provided Options
    * - ``:force:``
      - force exercises to render where they are defined
      - True/False
+   * - ``:title:``
+     - Specify title used for exercise block
+     - 
 
 ``:scope:`` 
 ^^^^^^^^^^^
