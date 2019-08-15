@@ -36,6 +36,33 @@ text in between exercise
    This is a normal exercise
 
 
+.. exercise::
+   :label: pyfun_functions_2
+
+   I'm a function with a label and a solution
+
+   Define a function named ``var`` that takes a list (call it ``x``) and
+   computes the variance. This function should use the `mean` function that we
+   defined earlier.
+
+   Hint: :math:`\text{variance} = \frac{1}{N} \sum_i (x_i - \text{mean}(x))^2`
+
+   .. code-block:: python
+
+      # your code here
+
+
+.. exercise::
+   :label: label2
+
+   This is another function with a label
+
+   - and
+   - *a*
+   - **list**!
+
+
+
 Collected Exercises
 -------------------
 

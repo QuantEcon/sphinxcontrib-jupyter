@@ -5,7 +5,7 @@ from docutils.parsers.rst import directives, Directive
 from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
 
-RE_EXERCISE_NUM = re.compile("^Exercise \d+$")
+RE_EXERCISE_NUM = re.compile(r"^Exercise \d+$")
 
 class exercise_node(nodes.General, nodes.Element):
     pass
@@ -20,6 +20,7 @@ def visit_exercise_node(self, node):
 
 
 def depart_exercise_node(self, node):
+    self.depart_para(node)
     self.visit_para(node)
 
 
@@ -28,8 +29,9 @@ class ExerciselistDirective(SphinxDirective):
     optional_arguments = 0
     option_spec = {
         "scope": lambda x: directives.choice(x, ("file", "section", "all")),
-        "from": lambda x: directives.unchanged(x),
-        "force": lambda x: directives.flag(x),
+        "from": directives.unchanged,
+        "labels": directives.unchanged,
+        "force": directives.flag,
     }
     def run(self):
         list_number = self.env.new_serialno('exerciselist')
@@ -42,6 +44,11 @@ class ExerciselistDirective(SphinxDirective):
         node["scope"] = self.options.get("scope", "file")
         node["force"] = self.options.get("force", False) != False
         node["from"] = self.options.get("from", None)
+        _labels = self.options.get("labels", None)
+        if _labels is not None:
+            node["labels"] = [x.strip() for x in _labels.split(",")]
+        else:
+            node["labels"] = None
 
         if node["scope"] != "file" and node["from"] is not None:
             raise ValueError("Cannot set scope to be anything other than file AND set from")
@@ -70,23 +77,28 @@ class ExerciseDirective(SphinxDirective):
     required_arguments = 0
     option_spec = {"class": lambda x: directives.choice(x, ("cfu", ))}
     has_content = True
+    option_spec = {
+        "label": directives.unchanged,
+    }
+    node_class_str = "exercise"
+    title_root = "Exercise"
+    env_attr = 'exercise_all_exercises'
 
     def run(self):
         self.assert_has_content()
 
-        exercise_number = self.env.new_serialno('exercise')
-        target_id = f"exercise-{exercise_number:d}"
+        num = self.env.new_serialno(self.node_class_str)
+        target_id = f"{self.node_class_str}-{num:d}"
         targetnode = nodes.target('', '', ids=[target_id])
         _path = self.env.docname.replace("/", "-")
-        node_id = f"{_path}-{exercise_number}"
+        node_id = f"{_path}-{num}"
 
-        node = exercise_node("\n".join(self.content))
+        node = self.node_class("\n".join(self.content))
         node["_id"] = node_id
-        if "class" in self.options:
-            node["classes"] = [self.options["class"]]
+        node["classes"] = [self.options.get("class", None)]
+        node["label"] = self.options.get("label", None)
 
-        title_root = "Exercise"
-        title = _(f"{title_root} {exercise_number + 1}")
+        title = _(f"{self.title_root} {num + 1}")
 
         para = nodes.paragraph()
         para += nodes.strong(title, title)
@@ -94,15 +106,16 @@ class ExerciseDirective(SphinxDirective):
 
         self.state.nested_parse(self.content, self.content_offset, node)
 
-        if not hasattr(self.env, 'exercise_all_exercises'):
-            self.env.exercise_all_exercises = {}
+        if not hasattr(self.env, self.env_attr):
+            setattr(self.env, self.env_attr, dict())
 
-        self.env.exercise_all_exercises[node_id] = {
+        getattr(self.env, self.env_attr)[node_id] = {
             'docname': self.env.docname,
             'lineno': self.lineno,
-            'exercise': node.deepcopy(),
+            'node_copy': node.deepcopy(),
             'target': targetnode,
-            "number": exercise_number,
+            "number": num,
+            "label": node["label"],
         }
         return [targetnode, node]
 
@@ -165,20 +178,46 @@ def process_exercise_nodes(app, doctree, fromdocname):
     # Augment each todo with a backlink to the original location.
     env = app.builder.env
 
-    def matches_scope(from_file, scope, x):
-        "given an exerciselist_node, check its scope and see if exercise x matches"
+    def should_include_exercise(listnode, exercise_info):
+        """
+        given an exerciselist_node and an exercise_info, check to see if
+        the exercise belongs in the list
+
+        Logic as follows:
+
+        - First check labels. if listnode specified labels,
+          ensure exercise_info["label"] is selected in the lists labels
+        - If that passes, then check listnode's from option. If specified
+          exercise_info["docname"] must match listnode["from"]
+        - If that passes then check scopes.
+            - If scope is file, check if  exercise_info["docname"] matches
+              fromdocname (closed over)
+            - If scope is section, check if exercise_info["docname"] comes
+              from same section as fromdocname
+        - If that passes, include everything
+
+        """
+        # unpack args
+        from_file = listnode["from"]
+        scope = listnode["scope"]
+        labels = listnode["labels"]
+        if labels is not None:
+            # we just check label now
+            return exercise_info["label"] in labels
+
+        ex_src_doc = exercise_info["docname"]
         if from_file is not None:
-            return x == from_file
+            return ex_src_doc == from_file
         if scope == "file":
-            return x == fromdocname
+            return ex_src_doc == fromdocname
         elif scope == "section":
             # check if not inside section
-            if ("/" not in x) and ("/" not in fromdocname):
+            if ("/" not in ex_src_doc) and ("/" not in fromdocname):
                 return True
             elif "/" not in fromdocname:
-                # x is in a section, but the exerciselist is not
+                # ex_src_doc is in a section, but the exerciselist is not
                 return False
-            return x.rsplit('/', 1)[0] == fromdocname.rsplit('/', 1)[0]
+            return ex_src_doc.rsplit('/', 1)[0] == fromdocname.rsplit('/', 1)[0]
 
         return True
 
@@ -191,9 +230,8 @@ def process_exercise_nodes(app, doctree, fromdocname):
             continue
 
         for ex_id, ex_info in env.exercise_all_exercises.items():
-            if not matches_scope(node["from"], node["scope"], ex_info["docname"]):
+            if not should_include_exercise(node, ex_info):
                 continue
-
 
             # make link from location in exercise list back to site where exercise appeared
             # in document
@@ -220,9 +258,9 @@ def process_exercise_nodes(app, doctree, fromdocname):
                 bq += inline_para
                 all_exercises[ex_id].replace_self([bq])
 
-            ex_to_add = ex_info['exercise'].deepcopy()
-            if node["scope"] in ["all", "section"] and (ex_info["docname"] != listinfo["docname"]):
-                # if scope > file (either section or all) make the heading be
+            ex_to_add = ex_info['node_copy'].deepcopy()
+            if ex_info["docname"] != listinfo["docname"]:
+                # If the exercise comes from a different file make the heading be
                 # `Exercise \d (path)`, e.g. `Exercise 4 (pandas/groupby)` only here in
                 # the task list... not inline
                 for text_node in ex_to_add.traverse(nodes.Text):

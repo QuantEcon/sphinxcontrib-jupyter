@@ -45,6 +45,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
        exercises
        exercise_list_section
        exercise_list_all
+       exercise_list_labels
        section2/index
 
 Indices and tables
