@@ -20,7 +20,7 @@ to upgrade your current installation to the latest version:
     Add installation to distribute via conda-forge.
     See Issue `#160 <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/160>`__.
 
-You can refer to the `relese notes <https://github.com/QuantEcon/sphinxcontrib-jupyter/releases>`__
+You can refer to the `release notes <https://github.com/QuantEcon/sphinxcontrib-jupyter/releases>`__
 for information on each release.
 
 Alternative
