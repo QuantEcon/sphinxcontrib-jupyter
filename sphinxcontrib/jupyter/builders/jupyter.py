@@ -14,6 +14,7 @@ from ..writers.convert import convertToHtmlWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
+from ..writers.utils import copy_dependencies
 
 class JupyterBuilder(Builder):
     """
@@ -176,6 +177,9 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
+
+		## copies the dependencies for notebooks
+        copy_dependencies(self)
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures
