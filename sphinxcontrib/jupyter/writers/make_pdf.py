@@ -53,14 +53,11 @@ class MakePdfWriter():
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
 
         fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
-        print()
-        ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
-        ### converting to pdf using xelatex subprocess
-        if sys.version_info.major == 2:
-            subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
-            subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
-            subprocess.call(["xelatex","-output-directory",pdf_build_path, fl_tex])
-        else:
+
+        ## do not convert index and zreferences to latex
+        if filename.find('index') == -1 or filename.find('zreferences') == -1:  
+            ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
+            ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
