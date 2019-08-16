@@ -38,9 +38,8 @@ text in between exercise
 
 .. exercise::
    :label: pyfun_functions_2
-   :title: Question
 
-   I'm a function with a label and a different title
+   I'm a function with a label and a solution
 
    Define a function named ``var`` that takes a list (call it ``x``) and
    computes the variance. This function should use the `mean` function that we
@@ -67,12 +66,13 @@ text in between exercise
 Collected Exercises
 -------------------
 
-Below should not report anything...
+**All exercises from file appear below**
 
 .. exerciselist::
 
 
-This, however should repeat exercises from above
+Repeated again because force doesn't matter
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. exerciselist::
    :force:

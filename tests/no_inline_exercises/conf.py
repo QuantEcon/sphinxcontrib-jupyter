@@ -220,4 +220,4 @@ jupyter_drop_tests = True
 jupyter_lang_synonyms = ["ipython", "python", "pycon"]
 
 exercise_include_exercises = True
-exercise_inline_exercises = True
+exercise_inline_exercises = False
