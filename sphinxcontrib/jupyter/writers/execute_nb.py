@@ -289,7 +289,7 @@ class ExecuteNotebookWriter():
 
     def create_coverage_report(self, builderSelf, error_results):
         """
-            Creates a coverage report of the errors in notebook
+        Creates a coverage report of the errors in notebook
         """
         errors = []
         error_results = []
@@ -315,7 +315,8 @@ class ExecuteNotebookWriter():
                 errors_by_language[language_name]['files'][filename] = error_result
 
         # Create the error report from the HTML template, if it exists.
-        error_report_template_file = builderSelf.config["jupyter_template_coverage_file_path"]
+        templateFolder = builderSelf.config['jupyter_template_path']
+        error_report_template_file = templateFolder + "/" + builderSelf.config["jupyter_template_coverage_file_path"]
 
         error_report_template = []
         if not os.path.isfile(error_report_template_file):
