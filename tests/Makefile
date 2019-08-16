@@ -14,6 +14,9 @@ BUILDCOVERAGE = base/_build_coverage
 #PDF
 SOURCEPDF = pdf/
 BUILDPDF = pdf/_build/
+#no_inline_exercises
+SOURCENOEX     = no_inline_exercises/
+BUILDNOEX      = no_inline_exercises/_build
 
 CORES 		  = 4
 
@@ -35,10 +38,19 @@ clean-pdf:
 pdf-test: clean-pdf pdf
 	python check_diffs.py
 
+no-inline:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCENOEX)" "$(BUILDNOEX)" $(SPHINXOPTS) $(O)
+
+clean-no-inline:
+	rm -rf $(BUILDNOEX)
+
+no-inline-test: clean-no-inline no-inline
+	python check_diffs.py
+
 preview:
 ifneq (,$(filter $(parallel),website Website))
 	cd _build/jupyter_html/ && python -m http.server
-else 
+else
 ifdef lecture
 	cd _build/jupyter/ && jupyter notebook $(basename $(lecture)).ipynb
 else
@@ -66,7 +78,7 @@ clean-website:
 # else
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 # endif
-	
+
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

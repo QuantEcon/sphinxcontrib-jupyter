@@ -7,6 +7,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
+from ..writers.utils import copy_dependencies
 from io import open
 import sys
 
@@ -187,6 +188,9 @@ class ExecuteNotebookWriter():
                 update_count_delayed = 0
                 total_count += len(builderSelf.delayed_futures)
             builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
+
+        ## copies the dependencies to the executed folder
+        copy_dependencies(builderSelf, builderSelf.executed_notebook_dir)
 
         return error_results
 
