@@ -825,7 +825,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     @classmethod
     def add_extension_to_inline_link(cls, uri, ext):
         if "." not in uri:
-            if uri[0] == "#":
+            if len(uri) > 0 and uri[0] == "#":
                 return uri
             uri, id_ = cls.split_uri_id(uri)
             if len(id_) == 0:
