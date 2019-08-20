@@ -175,6 +175,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
+        print(self.builder.outdir, "outdir?")
         if self.jupyter_images_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
