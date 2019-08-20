@@ -61,3 +61,39 @@ class MakePdfWriter():
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
+
+    def add_labels():
+        f = open(file1, "r", encoding="utf8")
+        rstList = []
+        for line in f:
+            rstList.append(line)
+        f.close()
+
+        g=[]
+        g.append('s')
+        # appended this 's' so that actual label list can be at 1st position and not 0
+        for i in range(0,len(rstList)):
+            a = rstList[i].split()
+            if(len(a)!=0 and a[0]==":label:"):
+                a[1] = a[1].lower()
+                srr=""
+                for x in range(0,len(a[1])):
+                    if(a[1][x] == "_" or a[1][x] == ":" or a[1][x] == ";" or a[1][x]=="\\"):
+                        srr+= "-"
+                    else:
+                        srr+=a[1][x]
+                g.append(srr)
+
+        latest_list = make_texList(file2)
+
+        f = open(file2, "w", encoding="utf8")
+        for i in range(0,len(latest_list)):
+            a = latest_list[i].split()
+            if(len(a)!=0 and "\\tag" in a[-1]):
+                z = int(re.findall(r'[0-9]+', a[-1])[0])
+                f.write(latest_list[i][:-1]+"\label{eq:"+g[z]+"}\n")
+            else:
+                f.write(latest_list[i])
+
+        f.close()
+
