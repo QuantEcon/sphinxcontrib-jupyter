@@ -86,5 +86,65 @@ web referenced images.
 
     jupyter_images_urlpath = "s3://<path>/_static/img/"
 
+jupyter_theme
+-------------
+
+Specify theme name
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_theme = <theme-name>
+
+The theme should be located in the path of `jupyter_theme_path`. The default
+path would be: ``theme/<theme-name>/``
 
 
+jupyter_theme_path
+------------------
+
+Specify location for theme files
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Value
+   * - "theme" (**default**)
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_theme_path = "theme"
+
+jupyter_template_path
+---------------------
+
+Specify path for templates
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Value
+   * - "templates" (**default**)
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_template_path = "templates"
+
+jupyter_template_html
+---------------------
+
+Specify ``html`` template to be used by ``nbconvert``
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_template_html = <path to tpl file>
+
+The template file should be located in the path of ``jupyter_template_path``. 
+The default path would be: ``templates/<tpl file>``

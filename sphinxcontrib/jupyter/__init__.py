@@ -5,35 +5,31 @@ from .builders.jupyter import JupyterBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
-from .directive.exercise import ExerciseDirective, exercise_node
 from .transform import JupyterOnlyTransform
-from sphinx.writers.html import HTMLTranslator as HTML
-from sphinx.locale import admonitionlabels
-admonitionlabels["exercise"] = "Exercise"
-admonitionlabels["exercise_cfu"] = "Check for understanding"
 
 import pkg_resources
 VERSION = pkg_resources.get_distribution('pip').version
+
+import sphinx
+SPHINX_VERSION = sphinx.version_info
+
+if SPHINX_VERSION[0] >= 2:
+    from .directive import exercise
 
 def _noop(*args, **kwargs):
     pass
 
 
-def visit_exercise_node(self, node):
-    iscfu = "cfu" in node.attributes["classes"]
-    name = "exercise_cfu" if iscfu else "exercise"
-    return HTML.visit_admonition(self, node, name)
-
-def depart_exercise_node(self, node):
-    return HTML.depart_admonition(self, node)
-
 def setup(app):
     execute_nb_obj = {
-        "no-text" : True,
-        "timeout" : 600,
-        "text_reports" : True,
-        "coverage" : False,
+        "no-text": True,
+        "timeout": 600,
+        "text_reports": True,
+        "coverage": False,
     }
+
+    #Add Sphinx Version to ENV Configuration
+    app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
     app.add_builder(JupyterBuilder)
@@ -61,6 +57,9 @@ def setup(app):
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
     app.add_config_value("jupyter_target_pdf", False, "jupyter")
     app.add_config_value("jupyter_coverage_dir", None, "jupyter")
+    app.add_config_value("jupyter_theme", None, "jupyter")
+    app.add_config_value("jupyter_theme_path", "theme", "jupyter")
+    app.add_config_value("jupyter_template_path", "templates", "jupyter")
     app.add_config_value("jupyter_dependencies", None, "jupyter")
 
     # Jupyter Directive
@@ -68,20 +67,30 @@ def setup(app):
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
-    # exercise directive
-    app.add_directive("exercise", ExerciseDirective)
-    app.add_node(
-        exercise_node,
-        html=(visit_exercise_node, depart_exercise_node)
-    )
+    # Exercise directive
+    if SPHINX_VERSION[0] >= 2:
+        app.add_config_value('exercise_include_exercises', True, 'html')
+        app.add_config_value('exercise_inline_exercises', False, 'html')
+        app.add_node(exercise.exerciselist_node)
+        app.add_node(
+            exercise.exercise_node,
+            html=(exercise.visit_exercise_node, exercise.depart_exercise_node),
+            latex=(exercise.visit_exercise_node, exercise.depart_exercise_node),
+            text=(exercise.visit_exercise_node, exercise.depart_exercise_node)
+        )
+        app.add_directive('exercise', exercise.ExerciseDirective)
+        app.add_directive('exerciselist', exercise.ExerciselistDirective)
+        app.connect('doctree-resolved', exercise.process_exercise_nodes)
+        app.connect('env-purge-doc', exercise.purge_exercises)
 
+    # jupyter setup
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "jupyter")
     app.add_config_value("jupyter_target_html", False, "jupyter")
-    app.add_config_value("jupyter_download_nb",False, "jupyter")
+    app.add_config_value("jupyter_download_nb", False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_markdown", False, "jupyter")           #NOTE: Does not support scale, default=False
+    app.add_config_value("jupyter_images_markdown", False, "jupyter")
 
     return {
         "version": VERSION,

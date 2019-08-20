@@ -7,12 +7,12 @@ To initially setup a Sphinx project, please refer `here <https://www.sphinx-doc.
 
 .. note::
 
-    QuantEcon is currently developing a custom quickstart to assist with setting up a
-    sphinx project customised to use this extension and provide more guidance
-    with the configuration process.
+    QuantEcon has developed a ``jupinx-quickstart`` that can assist with setting up a repository
+    to get you up and running quickly. Please refer to the `Jupinx Project <https://jupinx.quantecon.org/>`__ 
+    for more details.
 
-Update the project ``conf.py`` file to include the jupyter extension
-and add the desired configuration settings 
+You can use the sphinx quickstart and update the project ``conf.py`` file to 
+include the jupyter extension and add the desired configuration settings 
 (see :doc:`Extension Configuration <config-extension>` section for details):
 
 .. code:: python
@@ -26,4 +26,4 @@ once the extension is installed you can then run:
     make jupyter
 
 The :doc:`Extension Configuration <config-extension>` section includes details 
-on how to configure the extension.
+on how to configure the extension in your ``conf.py``.

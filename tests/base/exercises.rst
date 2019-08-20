@@ -4,11 +4,8 @@ Exercises
 This notebook tests the new exercise directive defined in this package
 
 .. exercise::
-   :class: cfu
 
-   This is a check for understanding exercise
-
-   This is a note that has some *italic* and **bold** embedded
+   This is a note that has some _italic_ and **bold** embedded
 
    - list
    - in
@@ -37,3 +34,45 @@ text in between exercise
 .. exercise::
 
    This is a normal exercise
+
+
+.. exercise::
+   :label: pyfun_functions_2
+   :title: Question
+
+   I'm a function with a label and a different title
+
+   Define a function named ``var`` that takes a list (call it ``x``) and
+   computes the variance. This function should use the `mean` function that we
+   defined earlier.
+
+   Hint: :math:`\text{variance} = \frac{1}{N} \sum_i (x_i - \text{mean}(x))^2`
+
+   .. code-block:: python
+
+      # your code here
+
+
+.. exercise::
+   :label: label2
+
+   This is another function with a label
+
+   - and
+   - *a*
+   - **list**!
+
+
+
+Collected Exercises
+-------------------
+
+Below should not report anything...
+
+.. exerciselist::
+
+
+This, however should repeat exercises from above
+
+.. exerciselist::
+   :force:
