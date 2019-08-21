@@ -60,7 +60,7 @@ Slide: Should have 2 code blocks as fragments (test)
 .. jupyter::
     :slide-type: fragment
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     # This code block should be a Fragment!
     fibonacci_functional = (lambda n, first=1, second=1:
@@ -70,6 +70,6 @@ Slide: Should have 2 code blocks as fragments (test)
 .. jupyter::
     :slide-type: fragment
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     for k in fibonacci_functional(10):print(k,end=' ')
