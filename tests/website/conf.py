@@ -243,7 +243,7 @@ jupyter_drop_tests = True
 jupyter_lang_synonyms = ["ipython", "python", "pycon"]
 
 # Image Prefix (enable web storage references)
-# jupyter_images_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
+# jupyter_download_nb_image_urlpath = "https://github.com/QuantEcon/sphinxcontrib-jupyter/raw/master/tests/_static/"
 jupyter_download_nb = False
 
 

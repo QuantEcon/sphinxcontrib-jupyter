@@ -29,11 +29,11 @@ class JupyterWriter(docutils.writers.Writer):
         """
         self.builder.urlpath = urlpath
 
-    def _set_jupyter_images_urlpath(self, urlpath=None):
+    def _set_jupyter_download_nb_image_urlpath(self, urlpath=None):
         """
         Set a urlpath to be used to prepend image paths in the notebook, so that it can be different for different targets.
         """
-        self.builder.jupyter_images_urlpath = urlpath
+        self.builder.jupyter_download_nb_image_urlpath = urlpath
 
     def _identify_translator(self, builder):
         """

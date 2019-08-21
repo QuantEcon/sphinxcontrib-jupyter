@@ -175,10 +175,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_images_urlpath:
+        if self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
-                    uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
+                    uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
                     break  #don't need to check other matches
         attrs = node.attributes
         if self.jupyter_images_markdown:
