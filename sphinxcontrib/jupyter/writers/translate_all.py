@@ -767,7 +767,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if 'slide' in node.attributes:
             pass
         if 'slide-type' in node.attributes:
-            pass
+            if self.slide is "fragment":
+                self.add_markdown_cell()   #start a new cell
 
 
 
