@@ -124,7 +124,8 @@ class JupyterBuilder(Builder):
 
             outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
-            self.writer._set_urlpath(self.config["jupyter_download_nb_urlpath"])
+            self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
+            self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
             self.writer.write(doctree, destination)
 
             try:
@@ -134,7 +135,8 @@ class JupyterBuilder(Builder):
                 self.warn("error writing file %s: %s" % (outfilename, err))
 
         ### output notebooks for executing
-        self.writer._set_urlpath(None)
+        self.writer._set_ref_urlpath(None)
+        self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 
         ### execute the notebook

@@ -89,7 +89,7 @@ def setup(app):
     app.add_config_value("jupyter_target_html", False, "jupyter")
     app.add_config_value("jupyter_download_nb", False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_markdown", False, "jupyter")
 
     return {
