@@ -73,12 +73,10 @@ Request Sphinx to generate a collection of download notebooks to support a websi
     jupyter_download_nb = True
 
 
-jupyter_images_urlpath
-----------------------
+jupyter_download_nb_images_urlpath
+----------------------------------
 
-Apply a url prefix when writing images in Jupyter notebooks. This is useful when
-paired with ``jupyter_download_nb`` so that download notebooks are complete with
-web referenced images.
+Apply a url prefix when writing images in Jupyter notebooks for `download` notebook set. 
 
 ``conf.py`` usage:
 
