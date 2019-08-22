@@ -25,6 +25,21 @@ class MakeSiteWriter():
         if os.path.exists(self.websitedir):
             shutil.rmtree(self.websitedir)
 
+        builderSelf.themePath = builderSelf.config['jupyter_theme_path']
+        themeFolder = builderSelf.config['jupyter_theme']
+    
+        if themeFolder is not None:
+            builderSelf.themePath = builderSelf.themePath + "/" + themeFolder
+
+        if os.path.exists(builderSelf.themePath):
+            pass
+        else:
+            self.logger.warning("theme directory not found")
+            exit()
+
+        htmlFolder = builderSelf.themePath + "/html/"
+        staticFolder = builderSelf.themePath + "/static"
+
         ## copies the html and downloads folder
         shutil.copytree(builderSelf.outdir + "/html/", self.websitedir, symlinks=True)
 
@@ -32,16 +47,16 @@ class MakeSiteWriter():
         shutil.copytree(builderSelf.outdir + "/_static/", self.websitedir + "_static/", symlinks=True)
 
         ## copies all theme files to _static folder 
-        if os.path.exists("theme/static"):
-            copy_tree("theme/static", self.websitedir + "_static/", preserve_symlinks=1)
+        if os.path.exists(staticFolder):
+            copy_tree(staticFolder, self.websitedir + "_static/", preserve_symlinks=1)
         else:
-            self.logger.warning("Theme folder not present. Consider creating a theme folder for static assets")
+            self.logger.warning("static folder not present in the themes directory")
 
         ## copies the helper html files 
-        if os.path.exists("theme/html"):
-            copy_tree("theme/html", self.websitedir, preserve_symlinks=1)
+        if os.path.exists(htmlFolder):
+            copy_tree(htmlFolder, self.websitedir, preserve_symlinks=1)
         else:
-            self.logger.warning("Source frontend folder not present. Consider creating a source.frontend folder for html helpers")
+            self.logger.warning("html folder not present in the themes directory")
 
 
         if "jupyter_coverage_dir" in builderSelf.config and builderSelf.config["jupyter_coverage_dir"]:

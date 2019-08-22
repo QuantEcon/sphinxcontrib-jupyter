@@ -7,6 +7,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
+from ..writers.utils import copy_dependencies
 from io import open
 import sys
 
@@ -196,7 +197,10 @@ class ExecuteNotebookWriter():
             filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
             if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
                 builderSelf._pdf_class.convertToLatex(builderSelf, filename)
-        
+
+        ## copies the dependencies to the executed folder
+        copy_dependencies(builderSelf, builderSelf.executed_notebook_dir)
+
         return error_results
 
     def produce_code_execution_report(self, builderSelf, error_results, fln = "code-execution-results.json"):
@@ -294,7 +298,7 @@ class ExecuteNotebookWriter():
 
     def create_coverage_report(self, builderSelf, error_results):
         """
-            Creates a coverage report of the errors in notebook
+        Creates a coverage report of the errors in notebook
         """
         errors = []
         error_results = []
@@ -320,7 +324,8 @@ class ExecuteNotebookWriter():
                 errors_by_language[language_name]['files'][filename] = error_result
 
         # Create the error report from the HTML template, if it exists.
-        error_report_template_file = builderSelf.config["jupyter_template_coverage_file_path"]
+        templateFolder = builderSelf.config['jupyter_template_path']
+        error_report_template_file = templateFolder + "/" + builderSelf.config["jupyter_template_coverage_file_path"]
 
         error_report_template = []
         if not os.path.isfile(error_report_template_file):

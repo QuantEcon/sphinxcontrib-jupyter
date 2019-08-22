@@ -21,6 +21,8 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import sphinx
+SPHINX_VERSION = sphinx.version_info
 
 # -- General configuration ------------------------------------------------
 
@@ -31,7 +33,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinxcontrib.jupyter', 'sphinx.ext.mathjax']
+extensions = ['sphinxcontrib.jupyter', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -47,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'sphinxcontrib-jupyter.testcases'
-copyright = '2018, QuantEcon Development Team'
+copyright = '2019, QuantEcon Development Team'
 author = 'QuantEcon Development Team'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -70,6 +72,8 @@ language = None
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'rst2ipynb', 'testpdf/*.rst']
+if SPHINX_VERSION[0] < 2:
+    exclude_patterns += ['exercise*.rst', 'section2/exercise*.rst']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -209,9 +213,11 @@ jupyter_welcome_block = "welcome.rst"
 # Solutions Configuration
 jupyter_drop_solutions = True
 
-# Tests configurations 
+# Tests configurations
 jupyter_drop_tests = True
 
 # Add Ipython, Pycon and python as language synonyms
 jupyter_lang_synonyms = ["ipython", "python", "pycon"]
 
+exercise_include_exercises = True
+exercise_inline_exercises = True

@@ -15,10 +15,17 @@ class convertToHtmlWriter():
 
         for path in [self.htmldir]:
             ensuredir(path)
-        self.html_exporter = HTMLExporter(config=None)
+        self.html_exporter = HTMLExporter()
+        
+        templateFolder = builderSelf.config['jupyter_template_path']
 
-        if "jupyter_html_template" in builderSelf.config:
-            self.html_exporter.template_file = builderSelf.config["jupyter_html_template"]
+        if os.path.exists(templateFolder):
+            pass
+        else:
+            builderSelf.logger.warning("template directory not found")
+            exit()
+
+        self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
 
         
     def convert(self, nb, filename, language, base_path, path=None):

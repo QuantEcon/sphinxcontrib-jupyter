@@ -260,4 +260,20 @@ Force the inclusion of images as native markdown
     jupyter_images_markdown = True
 
 
+jupyter_dependencies
+--------------------
 
+Specify file or directory level dependencies
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_dependencies = {
+        <dir> : ['file1', 'file2'],
+        {<dir>}/<file.rst> : ['file1']
+    }
+
+this allows you to specify a companion data file for 
+a given ``RST`` document and it will get copied through sphinx
+to the ``_build`` folder.

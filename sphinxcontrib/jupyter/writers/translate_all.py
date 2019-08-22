@@ -41,7 +41,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_list = False
         self.in_math = False
         self.in_math_block = False
-        self.in_exercise = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -501,7 +500,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
             else:
                 formatted_text = "](#{})".format(uri_text)
-            self.markdown_lines.append(formatted_text)            
+            self.markdown_lines.append(formatted_text)
         else:
             # if refuri exists, then it includes id reference(#hoge)
             if "refuri" in node.attributes:
@@ -540,8 +539,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 else:
                     self.error("Invalid reference")
                     refuri = ""
-            
-            #TODO: review if both %28 replacements necessary in this function? 
+
+            #TODO: review if both %28 replacements necessary in this function?
             #      Propose delete above in-link refuri
             if not self.jupyter_target_pdf:
                 #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
@@ -575,7 +574,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf:
                 if 'equation' in refid:
                     #no html targets when computing notebook to target pdf in labelled math
-                    pass 
+                    pass
                 else:
                     #set hypertargets for non math targets
                     self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
@@ -733,40 +732,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_literal_block(self, node):
         JupyterCodeTranslator.visit_literal_block(self, node)
-        mkdown = self.output_cell_type == JupyterOutputCellGenerators.MARKDOWN
-        if self.in_code_block and not (self.in_exercise and mkdown):
+        if self.in_code_block:
             self.add_markdown_cell()
 
     def depart_literal_block(self, node):
         JupyterCodeTranslator.depart_literal_block(self, node)
-        # TODO: this is a pretty ugly hack...
-        if self.in_exercise:
-            if self.output["cells"][-1].cell_type != "markdown":
-                return
-            # Inserted markdown cell for this code snipppet. Let's
-            # pop that cell off the back of the cell list, and add the
-            # inserted lines to our list of markdown_lines
-            src = self.output["cells"].pop().source
-            self.markdown_lines += ["\n\n", src]
-
     def visit_note(self, node):
         self.in_note = True
         self.markdown_lines.append(">**Note**\n>\n>")
 
     def depart_note(self, node):
         self.in_note = False
-
-    def visit_exercise_node(self, node):
-        self.in_exercise = True
-        cfu = "cfu" in node.attributes.get("classes", ["assignment"])
-        text = "Check for understanding" if cfu else "Exercise"
-        self.markdown_lines.extend("<blockquote>")  # do this on own line
-        self.markdown_lines.append("\n\n**{}**\n\n".format(text))
-
-    def depart_exercise_node(self, node):
-        self.markdown_lines.extend(["\n", "</blockquote>", "\n\n"])
-        self.in_exercise = False
-        self.add_markdown_cell()
 
     def depart_raw(self, node):
         self.markdown_lines.append("\n\n")
@@ -836,11 +812,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         * append `markdown_lines` to notebook
         * reset `markdown_lines`
         """
-        mkdown = self.output_cell_type == JupyterOutputCellGenerators.MARKDOWN
-        need_code_cell = self.in_code_block and not mkdown
-
-        if self.in_exercise and need_code_cell:
-                self.markdown_lines.extend(["\n", "</blockquote>"])
         line_text = "".join(self.markdown_lines)
         formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
         slide_info = {'slide_type': self.slide}
@@ -852,8 +823,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.slide = "slide"  # set as the by default value
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
-            if self.in_exercise and need_code_cell:
-                self.markdown_lines.extend(["<blockquote>", "\n"])
 
     @classmethod
     def split_uri_id(cls, uri):
@@ -862,6 +831,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     @classmethod
     def add_extension_to_inline_link(cls, uri, ext):
         if "." not in uri:
+            if len(uri) > 0 and uri[0] == "#":
+                return uri
             uri, id_ = cls.split_uri_id(uri)
             if len(id_) == 0:
                 return "{}{}".format(uri, ext)
