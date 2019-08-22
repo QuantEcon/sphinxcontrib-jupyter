@@ -20,12 +20,9 @@ if SPHINX_VERSION[0] >= 2:
 def _noop(*args, **kwargs):
     pass
 
-<<<<<<< HEAD
 def depart_exercise_node(self, node):
     return HTML.depart_admonition(self, node)
     
-=======
->>>>>>> master
 
 def setup(app):
     execute_nb_obj = {

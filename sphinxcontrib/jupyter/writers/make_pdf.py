@@ -9,6 +9,7 @@ from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
+from .process_latex import main as latexProcessing 
 
 class MakePdfWriter():
     """
@@ -59,6 +60,7 @@ class MakePdfWriter():
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+            latexProcessing(self, fl_tex)
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
             subprocess.run(["xelatex","-output-directory",pdf_build_path, fl_tex])
 
