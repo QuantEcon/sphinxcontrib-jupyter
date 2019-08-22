@@ -217,7 +217,7 @@ jupyter_drop_solutions = True
 jupyter_drop_tests = True
 
 # Add Ipython, Pycon and python as language synonyms
-jupyter_lang_synonyms = ["ipython", "python", "pycon"]
+jupyter_lang_synonyms = ["ipython", "python", "pycon", "ipython3"]
 
 exercise_include_exercises = True
 exercise_inline_exercises = True
