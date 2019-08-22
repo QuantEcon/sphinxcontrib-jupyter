@@ -11,3 +11,8 @@ should list a python highlighted program
    :language: julia
 
 this is a julia highlighted program but is in a markdown cell as the default language for the notebook is **python**
+
+Literal includes can also have hidden output
+
+.. literalinclude:: ./simple_program.py
+   :class: hide-output
