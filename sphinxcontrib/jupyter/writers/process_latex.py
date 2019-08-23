@@ -12,12 +12,24 @@ def make_texList(f):
         texList.append(line)
     return texList
 
-def func_replace(a, b, f):
+def func_replace(a, b, f, data):
     #convert to string:
-    data = f.read()
     f.seek(0)
-    f.write(data.replace(a, b))
-    f.truncate()
+    # print(data)
+    # import pdb
+    # pdb.set_trace()
+    data = data.replace(a, b)
+    data = data.replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#")
+    data = data.replace("Section \\ref{equation-", "Eq.~\eqref{eq:")
+    data = data.replace("href{zreferences.html\#", "cite{zreferences.html\#")
+    data = data.replace("\\paragraph", "\\textbf")
+    data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
+    data = data.replace("}{{[}","}ywqp")
+    data = data.replace("tp{]}}", "glbu")
+    data = data.replace(".png}\\\\", ".png}"+"\n"+"\\end{figure}")
+    data = data.replace("{muth19}", "{muth1960}")
+    data = data.replace("0.9\\paperheight}}{", "0.9\\paperheight}}{executed/")
+    return data
 
 
 def func_delete(a, b, f):
@@ -28,20 +40,24 @@ def func_delete(a, b, f):
         f.write(srr)
 
 def make_changes(f):
-    func_replace("Section \\ref{equation-", "Eq.~\eqref{eq:", f)
-    func_replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#", f)
-    # func_replace("href{zreferences.html\#", "cite{zreferences.html\#", f)
-    # func_replace("\\paragraph", "\\textbf", f)
-    # func_replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in", f)
-    # func_replace("% Add a bibliography block to the postdoc", "% Add a bibliography block to the postdoc"+"\n"+"    \\bibliographystyle{plain}"+"\n"+"    \\bibliography{_static/quant-econ}", f)
-    #func_delete("zreferences","#", f)
-    # func_replace("}{{[}","}ywqp", f)
-    # func_replace("tp{]}}", "glbu", f)
+    ## read the file contents
+
+    data = f.read()
+    data += "Section \\ref{equation- \\n href{zreferences.ipynb\#  href{zreferences.html\# "
+    data = func_replace(f, data)
+    data = func_replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#", f, data)
+    data = func_replace("Section \\ref{equation-", "Eq.~\eqref{eq:", f, data)
+    # func_replace("href{zreferences.html\#", "cite{zreferences.html\#", f, data)
+    # func_replace("\\paragraph", "\\textbf", f, data)
+    # func_replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in", f, data)
+    # #func_delete("zreferences","#", f)
+    # func_replace("}{{[}","}ywqp", f, data)
+    # func_replace("tp{]}}", "glbu", f, data)
     # func_delete("ywqp", "glbu", f)
+    f.write(data)
 
 def main(self, filename):
     with open(filename,'r+', encoding="utf8") as f:
-        print(f, "name")
         make_changes(f)
             
 
