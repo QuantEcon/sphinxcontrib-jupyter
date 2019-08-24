@@ -19,15 +19,9 @@ def func_replace(f, data):
     # import pdb
     # pdb.set_trace()
     #data = data.replace(a, b)
-    data = data.replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#")
-    data = data.replace("Section \\ref{equation-", "Eq.~\eqref{eq:")
-    data = data.replace("href{zreferences.html\#", "cite{zreferences.html\#")
     data = data.replace("\\paragraph", "\\textbf")
     data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
-    data = data.replace("}{{[}","}ywqp")
-    data = data.replace("tp{]}}", "glbu")
     data = data.replace(".png}\\\\", ".png}"+"\n"+"\\end{figure}")
-    data = data.replace("{muth19}", "{muth1960}")
     data = data.replace("0.9\\paperheight}}{", "0.9\\paperheight}}{executed/")
     return data
 
