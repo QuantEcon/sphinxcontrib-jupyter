@@ -12,13 +12,13 @@ def make_texList(f):
         texList.append(line)
     return texList
 
-def func_replace(a, b, f, data):
+def func_replace(f, data):
     #convert to string:
     f.seek(0)
     # print(data)
     # import pdb
     # pdb.set_trace()
-    data = data.replace(a, b)
+    #data = data.replace(a, b)
     data = data.replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#")
     data = data.replace("Section \\ref{equation-", "Eq.~\eqref{eq:")
     data = data.replace("href{zreferences.html\#", "cite{zreferences.html\#")
@@ -45,8 +45,8 @@ def make_changes(f):
     data = f.read()
     data += "Section \\ref{equation- \\n href{zreferences.ipynb\#  href{zreferences.html\# "
     data = func_replace(f, data)
-    data = func_replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#", f, data)
-    data = func_replace("Section \\ref{equation-", "Eq.~\eqref{eq:", f, data)
+    # data = func_replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#", f, data)
+    # data = func_replace("Section \\ref{equation-", "Eq.~\eqref{eq:", f, data)
     # func_replace("href{zreferences.html\#", "cite{zreferences.html\#", f, data)
     # func_replace("\\paragraph", "\\textbf", f, data)
     # func_replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in", f, data)
