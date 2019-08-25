@@ -5,6 +5,7 @@ from io import open
 import subprocess
 from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
+import re
 
 def make_texList(f):
     texList = []
@@ -21,17 +22,80 @@ def func_replace(f, data):
     #data = data.replace(a, b)
     data = data.replace("\\paragraph", "\\textbf")
     data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
-    data = data.replace(".png}\\\\", ".png}"+"\n"+"\\end{figure}")
-    data = data.replace("0.9\\paperheight}}{", "0.9\\paperheight}}{executed/")
+
+#     func_replace("\\hypertarget{qe-notebook-header}{}"+"\n"+"\\begin{verbatim}"+"\n"+"    <a href=\"https://quantecon.org/\" title=\"quantecon.org\">"+"\n"+"            <img style=\"width:250px;display:inline;\" width=\"250px\" src=\"https://assets.quantecon.org/img/qe-menubar-logo.svg\" alt=\"QuantEcon\">"+"\n"+"    </a>"+"\n"+"\\end{verbatim}", "", file2)
+
+#     func_replace("\\href{http","\\abchref{http", file2)
+
+#     func_replace("\\href{","\\href{https://lectures.quantecon.org/py/", file2)
+
+#     func_replace(".ipynb}{", ".html}{", file2)
+
+#     func_replace("\\abchref","\\href", file2)
+
+#     func_replace("\\begin{Verbatim}[", "\\begin{Verbatim}[fontsize=\\scriptsize,",file2)
+#     func_replace("0in", "0in"+"\n"+"\n"+"vbnmc", file2)
+
+#     func_replace("\\hypertarget{contents}{%", "jhgbnm"+"\n"+"\\hypertarget{contents}{%", file2)
+
+#     clearFile("vbnmc", "jhgbnm", file2)
+
+#     func_replace("\\label{contents}}", "\\label{contents}}"+"\n"+"vbnmc", file2)
+
+#     func_replace("}"+"\n"+"\n"+"  \\begin{itemize}"+"\n"+"  \\tightlist"+"\n"+"  \\item"+"\n"+"    Section \\ref{", "jhgbnm"+"\n"+"  \\begin{itemize}"+"\n"+"  \\item"+"\n"+"    Section \\ref{", file2)
+
+#     clearFile("vbnmc", "jhgbnm", file2)
+
+#     func_replace("\\subsection{", "\\section{", file2)
+
+#     func_replace("\\subsubsection{", "\\subsection{", file2)
+
+#     func_replace("\\label{contents}","\\label{contents-"+file2[9:len(file2)-4]+"}", file2)
+
+#     func_replace("\\hypertarget{contents}","\\hypertarget{contents-"+file2[9:len(file2)-4]+"}", file2)
+#     func_replace("\\caption", "aghdwmz\\", file2)
+      ## maketitle tex issue  
+#     if(file2 =="executed/coase.tex"):
+#         func_replace("Coase?s", "Coase's", file2)
+
+#     if(file2 == "executed/dyn_stack.tex"):
+#         func_replace("vs.~Stackelberg", "vs. Stackelberg", file2)
+#         func_replace("vs.stackelberg", "vs-stackelberg", file2)
     return data
 
 
-def func_delete(a, b, f):
+def func_delete(a, b, f, data):
     texLista = make_texList(f)
+    srr = ""
     for i in range(0,len(texLista)):
         srr = ""
         srr += re.sub(a+'.*?'+b,'',texLista[i])
-        f.write(srr)
+    return srr
+
+def clearFile(beginDelete, stopDelete, path):
+
+        input = open(path, "r")
+        lines = input.readlines()
+        input.close()
+
+        currentFlag = False
+        nextFlag = False
+        deleteFlag =  False
+
+        output = open(path, "w")
+
+        for line in lines:
+        if nextFlag == True:
+        nextFlag = False
+        deleteFlag = False
+
+        if beginDelete in line:
+        deleteFlag = True
+        elif stopDelete in line:
+        nextFlag = True
+
+        if deleteFlag == False:
+        output.write(line)
 
 def make_changes(f):
     ## read the file contents
@@ -48,6 +112,8 @@ def make_changes(f):
     # func_replace("}{{[}","}ywqp", f, data)
     # func_replace("tp{]}}", "glbu", f, data)
     # func_delete("ywqp", "glbu", f)
+    data = func_delete("aghdwmz", "}", f, data)
+    #data = func_delete(f, data)
     f.write(data)
 
 def main(self, filename):

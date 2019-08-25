@@ -77,5 +77,6 @@ class MakePdfWriter():
             #     print(e)
             #     exit()
             subprocess.run(["xelatex","-interaction=nonstopmode","-output-directory",pdf_build_path, fl_tex])
+            subprocess.run(["bibtex", ])
             subprocess.run(["xelatex","-interaction=nonstopmode","-output-directory",pdf_build_path, fl_tex])
-
+            subprocess.run(["bibtex"])
