@@ -180,6 +180,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if file_path in uri:
                     uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
                     break  #don't need to check other matches
+        else:
+            commonpath = os.path.commonprefix([self.builder.srcdir, self.builder.outdir])
+            prefix = self.builder.outdir.replace(commonpath,'')
+            uri  = prefix + "/" + uri
         attrs = node.attributes
         if self.jupyter_images_markdown:
             #-Construct MD image
