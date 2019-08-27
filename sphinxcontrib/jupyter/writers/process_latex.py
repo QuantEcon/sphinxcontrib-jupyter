@@ -23,37 +23,37 @@ def func_replace(f, data):
     data = data.replace("\\paragraph", "\\textbf")
     data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
 
-#     func_replace("\\hypertarget{qe-notebook-header}{}"+"\n"+"\\begin{verbatim}"+"\n"+"    <a href=\"https://quantecon.org/\" title=\"quantecon.org\">"+"\n"+"            <img style=\"width:250px;display:inline;\" width=\"250px\" src=\"https://assets.quantecon.org/img/qe-menubar-logo.svg\" alt=\"QuantEcon\">"+"\n"+"    </a>"+"\n"+"\\end{verbatim}", "", file2)
+    data = data.replace("\\hypertarget{qe-notebook-header}{}"+"\n"+"\\begin{verbatim}"+"\n"+"    <a href=\"https://quantecon.org/\" title=\"quantecon.org\">"+"\n"+"            <img style=\"width:250px;display:inline;\" width=\"250px\" src=\"https://assets.quantecon.org/img/qe-menubar-logo.svg\" alt=\"QuantEcon\">"+"\n"+"    </a>"+"\n"+"\\end{verbatim}", "")
 
-#     func_replace("\\href{http","\\abchref{http", file2)
+    data = data.replace("\\href{http","\\abchref{http")
 
-#     func_replace("\\href{","\\href{https://lectures.quantecon.org/py/", file2)
+    data = data.replace("\\href{","\\href{https://lectures.quantecon.org/py/")
 
-#     func_replace(".ipynb}{", ".html}{", file2)
+    data = data.replace(".ipynb}{", ".html}{")
 
-#     func_replace("\\abchref","\\href", file2)
+    data = data.replace("\\abchref","\\href")
 
-#     func_replace("\\begin{Verbatim}[", "\\begin{Verbatim}[fontsize=\\scriptsize,",file2)
-#     func_replace("0in", "0in"+"\n"+"\n"+"vbnmc", file2)
+    data = data.replace("\\begin{Verbatim}[", "\\begin{Verbatim}[fontsize=\\scriptsize,")
+    data = data.replace("0in", "0in"+"\n"+"\n"+"vbnmc")
 
-#     func_replace("\\hypertarget{contents}{%", "jhgbnm"+"\n"+"\\hypertarget{contents}{%", file2)
+    data = data.replace("\\hypertarget{contents}{%", "jhgbnm"+"\n"+"\\hypertarget{contents}{%")
 
-#     clearFile("vbnmc", "jhgbnm", file2)
+    clearFile("vbnmc", "jhgbnm")
 
-#     func_replace("\\label{contents}}", "\\label{contents}}"+"\n"+"vbnmc", file2)
+    data = data.replace("\\label{contents}}", "\\label{contents}}"+"\n"+"vbnmc")
 
-#     func_replace("}"+"\n"+"\n"+"  \\begin{itemize}"+"\n"+"  \\tightlist"+"\n"+"  \\item"+"\n"+"    Section \\ref{", "jhgbnm"+"\n"+"  \\begin{itemize}"+"\n"+"  \\item"+"\n"+"    Section \\ref{", file2)
+    data = data.replace("}"+"\n"+"\n"+"  \\begin{itemize}"+"\n"+"  \\tightlist"+"\n"+"  \\item"+"\n"+"    Section \\ref{", "jhgbnm"+"\n"+"  \\begin{itemize}"+"\n"+"  \\item"+"\n"+"    Section \\ref{")
 
-#     clearFile("vbnmc", "jhgbnm", file2)
+    clearFile("vbnmc", "jhgbnm")
 
-#     func_replace("\\subsection{", "\\section{", file2)
+    data = data.replace("\\subsection{", "\\section{")
 
-#     func_replace("\\subsubsection{", "\\subsection{", file2)
+    data = data.replace("\\subsubsection{", "\\subsection{")
 
-#     func_replace("\\label{contents}","\\label{contents-"+file2[9:len(file2)-4]+"}", file2)
+    data = data.replace("\\label{contents}","\\label{contents-"+file2[9:len(file2)-4]+"}")
 
-#     func_replace("\\hypertarget{contents}","\\hypertarget{contents-"+file2[9:len(file2)-4]+"}", file2)
-#     func_replace("\\caption", "aghdwmz\\", file2)
+    data = data.replace("\\hypertarget{contents}","\\hypertarget{contents-"+file2[9:len(file2)-4]+"}")
+    data = data.replace("\\caption", "aghdwmz\\")
       ## maketitle tex issue  
 #     if(file2 =="executed/coase.tex"):
 #         func_replace("Coase?s", "Coase's", file2)
