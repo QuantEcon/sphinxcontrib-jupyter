@@ -186,7 +186,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 #Otherwise full file_path needs to be replaced
                 else:
                     uri = uri.replace(file_path+"/", self.jupyter_download_nb_image_urlpath)
-                import pdb; pdb.set_trace()
         attrs = node.attributes
         if self.jupyter_images_markdown:
             #-Construct MD image
