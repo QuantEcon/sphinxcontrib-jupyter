@@ -174,6 +174,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
         """
         uri = node.attributes["uri"]
+        #Adjust for Relative References
+        if "../" in uri:
+            num_path_steps = uri.count("../")
+            uri = "/".join(uri.split("/")[num_path_steps:])             #remove leading folders added by sphinx
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
