@@ -175,11 +175,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_download_nb_image_urlpath:
+        if self.jupyter_download_nb and self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
-                if file_path in uri:
-                    uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
-                    break  #don't need to check other matches
+                #Adjust Relative References
+                if "../" in uri:
+                    uri = uri.replace("../","")
+                #If the root path "/" is specified in RST URI then only the name of the source directory will be needed for substitution
+                if "/" in file_path and uri.split("/")[0] == file_path.split("/")[-1]:
+                    uri = uri.replace(file_path.split("/")[-1]+"/", self.jupyter_download_nb_image_urlpath)
+                #Otherwise full file_path needs to be replaced
+                else:
+                    uri = uri.replace(file_path+"/", self.jupyter_download_nb_image_urlpath)
+                import pdb; pdb.set_trace()
         attrs = node.attributes
         if self.jupyter_images_markdown:
             #-Construct MD image
