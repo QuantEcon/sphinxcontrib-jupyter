@@ -175,7 +175,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_download_nb and self.jupyter_download_nb_image_urlpath:
+        if self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
                 #Adjust Relative References
                 if "../" in uri:
