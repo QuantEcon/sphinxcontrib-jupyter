@@ -183,9 +183,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 #If the root path "/" is specified in RST URI then only the name of the source directory will be needed for substitution
                 if "/" in file_path and uri.split("/")[0] == file_path.split("/")[-1]:
                     uri = uri.replace(file_path.split("/")[-1]+"/", self.jupyter_download_nb_image_urlpath)
+                    break
                 #Otherwise full file_path needs to be replaced
                 else:
                     uri = uri.replace(file_path+"/", self.jupyter_download_nb_image_urlpath)
+                    break
         attrs = node.attributes
         if self.jupyter_images_markdown:
             #-Construct MD image
