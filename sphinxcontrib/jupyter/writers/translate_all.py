@@ -178,10 +178,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
-        if self.jupyter_images_urlpath:
+        if self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
-                    uri = uri.replace(file_path +"/", self.jupyter_images_urlpath)
+                    uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
                     break  #don't need to check other matches
         attrs = node.attributes
         if self.jupyter_images_markdown:
@@ -758,7 +758,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if 'slide' in node.attributes:
                 self.metadata_slide = node['slide'] # this activates the slideshow metadata for the notebook
             if 'slide-type' in node.attributes:
-                self.slide = node['slide-type'] # replace the by default value
+                if "fragment" in node['slide-type']:
+                    self.add_markdown_cell(slide_type=node['slide-type'])   #start a new cell
+                self.slide = node['slide-type'] # replace the default value
         except:
             pass
         #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
@@ -774,8 +776,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             pass
         if 'slide-type' in node.attributes:
             pass
-
-
 
     def visit_comment(self, node):
         raise nodes.SkipNode
@@ -805,7 +805,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # ================
     # general methods
     # ================
-    def add_markdown_cell(self):
+    def add_markdown_cell(self, slide_type="slide"):
         """split a markdown cell here
 
         * add the slideshow metadata
@@ -820,7 +820,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
             if self.metadata_slide:  # modify the slide metadata on each cell
                 new_md_cell.metadata["slideshow"] = slide_info
-                self.slide = "slide"  # set as the by default value
+                self.slide = slide_type
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 

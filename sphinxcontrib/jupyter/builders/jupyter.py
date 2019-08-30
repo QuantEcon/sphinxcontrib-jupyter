@@ -79,6 +79,9 @@ class JupyterBuilder(Builder):
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
         self._make_site_class = MakeSiteWriter(self)
+        self.executedir = self.outdir + '/executed'
+        self.reportdir = self.outdir + '/reports/'
+        self.errordir = self.outdir + "/reports/{}"
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -104,6 +107,13 @@ class JupyterBuilder(Builder):
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
 
+        ## copies the dependencies to the notebook folder
+        copy_dependencies(self)
+
+        if (self.config["jupyter_execute_notebooks"]):
+             ## copies the dependencies to the executed folder
+            copy_dependencies(self, self.executedir)
+
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
@@ -114,7 +124,8 @@ class JupyterBuilder(Builder):
 
             outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
-            self.writer._set_urlpath(self.config["jupyter_download_nb_urlpath"])
+            self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
+            self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
             self.writer.write(doctree, destination)
 
             try:
@@ -124,7 +135,8 @@ class JupyterBuilder(Builder):
                 self.warn("error writing file %s: %s" % (outfilename, err))
 
         ### output notebooks for executing
-        self.writer._set_urlpath(None)
+        self.writer._set_ref_urlpath(None)
+        self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 
         ### execute the notebook
@@ -177,9 +189,6 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-
-		## copies the dependencies for notebooks
-        copy_dependencies(self)
 
         if (self.config["jupyter_execute_notebooks"]):
             # watch progress of the execution of futures

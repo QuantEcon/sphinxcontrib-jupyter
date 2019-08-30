@@ -7,7 +7,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
-from ..writers.utils import copy_dependencies
 from io import open
 import sys
 
@@ -20,10 +19,7 @@ class ExecuteNotebookWriter():
     logger = logging.getLogger(__name__)
     startFlag = 0
     def __init__(self, builderSelf):
-        ### defining the directory paths
-        self.executedir = builderSelf.outdir + '/executed'
-        self.reportdir = builderSelf.outdir + '/reports/'
-        self.errordir = builderSelf.outdir + "/reports/{}"
+        pass
     def execute_notebook(self, builderSelf, f, filename, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
@@ -47,9 +43,9 @@ class ExecuteNotebookWriter():
 
         # - Parse Directories and execute them - #
         if coverage:
-            self.execution_cases(builderSelf, self.executedir, False, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, builderSelf.executedir, False, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, self.executedir, True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, builderSelf.executedir, True, subdirectory, language, futures, nb, filename, full_path)
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -151,10 +147,7 @@ class ExecuteNotebookWriter():
             
             ## generate html if needed
             if (builderSelf.config['jupyter_generate_html']):
-                builderSelf._convert_class.convert(executed_nb, filename, language_info, self.executedir, passed_metadata['path'])
-
-            ## generate pdf if needed -TODOd
-            #builderSelf._pdf_class.convertToPdf(executed_nb, filename)
+                builderSelf._convert_class.convert(executed_nb, filename, language_info, builderSelf.executedir, passed_metadata['path'])
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -198,17 +191,14 @@ class ExecuteNotebookWriter():
             if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
                 builderSelf._pdf_class.convertToLatex(builderSelf, filename)
 
-        ## copies the dependencies to the executed folder
-        copy_dependencies(builderSelf, builderSelf.executed_notebook_dir)
-
         return error_results
 
     def produce_code_execution_report(self, builderSelf, error_results, fln = "code-execution-results.json"):
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
-        ensuredir(self.reportdir)
-        json_filename = self.reportdir + fln
+        ensuredir(builderSelf.reportdir)
+        json_filename = builderSelf.reportdir + fln
 
         if os.path.isfile(json_filename):
             with open(json_filename, encoding="UTF-8") as json_file:
@@ -274,14 +264,14 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(self.reportdir))
+            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
     def produce_dask_processing_report(self, builderSelf, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
-        ensuredir(self.reportdir)
-        json_filename = self.reportdir + fln
+        ensuredir(builderSelf.reportdir)
+        json_filename = builderSelf.reportdir + fln
 
         try:
             if (sys.version_info > (3, 0)):
@@ -294,7 +284,7 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(self.reportdir))
+            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
     def create_coverage_report(self, builderSelf, error_results):
         """
@@ -340,7 +330,7 @@ class ExecuteNotebookWriter():
             language_display_name = errors_by_language[lang_ext]['display_name']
             language = errors_by_language[lang_ext]['language']
             errors_by_file = errors_by_language[lang_ext]['files']
-            error_dir = self.errordir.format(lang_ext)
+            error_dir = builderSelf.errordir.format(lang_ext)
 
             if produce_text_reports:
                 # set specific language output file

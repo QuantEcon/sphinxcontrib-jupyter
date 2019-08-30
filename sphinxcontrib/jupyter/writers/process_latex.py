@@ -13,13 +13,9 @@ def make_texList(f):
         texList.append(line)
     return texList
 
-def func_replace(f, data):
+def func_replace(f, data, filename):
     #convert to string:
     f.seek(0)
-    # print(data)
-    # import pdb
-    # pdb.set_trace()
-    #data = data.replace(a, b)
     data = data.replace("\\paragraph", "\\textbf")
     data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
 
@@ -34,25 +30,23 @@ def func_replace(f, data):
     data = data.replace("\\abchref","\\href")
 
     data = data.replace("\\begin{Verbatim}[", "\\begin{Verbatim}[fontsize=\\scriptsize,")
+
     data = data.replace("0in", "0in"+"\n"+"\n"+"vbnmc")
 
     data = data.replace("\\hypertarget{contents}{%", "jhgbnm"+"\n"+"\\hypertarget{contents}{%")
-
-    clearFile("vbnmc", "jhgbnm")
 
     data = data.replace("\\label{contents}}", "\\label{contents}}"+"\n"+"vbnmc")
 
     data = data.replace("}"+"\n"+"\n"+"  \\begin{itemize}"+"\n"+"  \\tightlist"+"\n"+"  \\item"+"\n"+"    Section \\ref{", "jhgbnm"+"\n"+"  \\begin{itemize}"+"\n"+"  \\item"+"\n"+"    Section \\ref{")
 
-    clearFile("vbnmc", "jhgbnm")
-
     data = data.replace("\\subsection{", "\\section{")
 
     data = data.replace("\\subsubsection{", "\\subsection{")
-
+    print(filename, " what is the filename --- ")
     data = data.replace("\\label{contents}","\\label{contents-"+file2[9:len(file2)-4]+"}")
 
     data = data.replace("\\hypertarget{contents}","\\hypertarget{contents-"+file2[9:len(file2)-4]+"}")
+
     data = data.replace("\\caption", "aghdwmz\\")
       ## maketitle tex issue  
 #     if(file2 =="executed/coase.tex"):
@@ -64,60 +58,37 @@ def func_replace(f, data):
     return data
 
 
-def func_delete(a, b, f, data):
-    texLista = make_texList(f)
-    srr = ""
-    for i in range(0,len(texLista)):
-        srr = ""
-        srr += re.sub(a+'.*?'+b,'',texLista[i])
-    return srr
+def func_delete(a, b, f, delete_within_line=True):
+    beginDelete = False
+    endDelete = False
+    edited = []
+    for line in f.readlines():
+        if delete_within_line is True:
+           if a in line and b in line:
+              line = re.sub(a+'.*?'+b,'',line)
+           edited.append(line)
+        else:
+           if a in line:
+              beginDelete = True
+           if beginDelete is False or endDelete is True:
+              edited.append(line)
+           if b in line:
+              endDelete = True
 
-def clearFile(beginDelete, stopDelete, path):
+    return edited
 
-        input = open(path, "r")
-        lines = input.readlines()
-        input.close()
-
-        currentFlag = False
-        nextFlag = False
-        deleteFlag =  False
-
-        output = open(path, "w")
-
-        for line in lines:
-        if nextFlag == True:
-        nextFlag = False
-        deleteFlag = False
-
-        if beginDelete in line:
-        deleteFlag = True
-        elif stopDelete in line:
-        nextFlag = True
-
-        if deleteFlag == False:
-        output.write(line)
-
-def make_changes(f):
+def make_changes(f, filename):
     ## read the file contents
 
     data = f.read()
     data += "Section \\ref{equation- \\n href{zreferences.ipynb\#  href{zreferences.html\# "
-    data = func_replace(f, data)
-    # data = func_replace("href{zreferences.ipynb\#", "cite{zreferences.ipynb\#", f, data)
-    # data = func_replace("Section \\ref{equation-", "Eq.~\eqref{eq:", f, data)
-    # func_replace("href{zreferences.html\#", "cite{zreferences.html\#", f, data)
-    # func_replace("\\paragraph", "\\textbf", f, data)
-    # func_replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in", f, data)
-    # #func_delete("zreferences","#", f)
-    # func_replace("}{{[}","}ywqp", f, data)
-    # func_replace("tp{]}}", "glbu", f, data)
-    # func_delete("ywqp", "glbu", f)
-    data = func_delete("aghdwmz", "}", f, data)
-    #data = func_delete(f, data)
+    data = func_replace(f, data, filename)
+    data = func_delete("vbnmc", "jhgbnm", f, False)
+    data = func_delete("aghdwmz", "}", f)
     f.write(data)
 
 def main(self, filename):
     with open(filename,'r+', encoding="utf8") as f:
-        make_changes(f)
+        make_changes(f, filename)
             
 

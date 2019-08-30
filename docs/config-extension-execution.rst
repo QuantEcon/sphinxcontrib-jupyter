@@ -55,6 +55,26 @@ The key/value pairs will contain the names of the notebook files.
    }
 
 
+jupyter_dependencies
+--------------------
+
+Specify support (dependencies) for notebook collection at the `file` or 
+the `directory` level.
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+   jupyter_dependencies = {
+       <dir> : ['file1', 'file2'],
+       {<dir>}/<file.rst> : ['file1']
+   }
+
+.. note::
+
+    to specify a support file at the root level of the source directory
+    the key should be `""`
+
 jupyter_number_workers
 ----------------------
 

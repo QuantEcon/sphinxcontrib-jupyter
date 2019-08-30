@@ -3,6 +3,7 @@ import os
 import nbformat.v4
 from xml.etree.ElementTree import ElementTree
 from enum import Enum
+from sphinx.util.osutil import ensuredir
 from shutil import copy
 
 class LanguageTranslator:
@@ -151,9 +152,10 @@ def copy_dependencies(builderSelf, outdir = None):
         depenencyObj = builderSelf.config['jupyter_dependencies']
         for key, deps in depenencyObj.items():
             full_src_path = srcdir + "/" + key
-            if os.path.isdir(full_src_path):
+            if full_src_path.find('.') == -1:
                 ## handling the case of key being a directory
                 full_dest_path = outdir + "/" + key
+                ensuredir(full_dest_path)
                 for dep in deps:
                     copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
             elif os.path.isfile(full_src_path):
