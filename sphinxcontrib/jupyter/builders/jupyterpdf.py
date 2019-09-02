@@ -87,6 +87,9 @@ class JupyterpdfBuilder(Builder):
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
         self._pdf_class = MakePdfWriter(self)
+        self.executedir = self.outdir + '/executed'
+        self.reportdir = self.outdir + '/reports/'
+        self.errordir = self.outdir + "/reports/{}"
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -119,7 +122,8 @@ class JupyterpdfBuilder(Builder):
         destination = docutils.io.StringOutput(encoding="utf-8")
 
         ### output notebooks for executing
-        self.writer._set_urlpath(None)
+        self.writer._set_ref_urlpath(None)
+        self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 
         #### add latex specific metadata to notebook

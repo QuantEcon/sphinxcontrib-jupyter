@@ -42,19 +42,20 @@ def func_replace(f, data, filename):
     data = data.replace("\\subsection{", "\\section{")
 
     data = data.replace("\\subsubsection{", "\\subsection{")
-    print(filename, " what is the filename --- ")
-    data = data.replace("\\label{contents}","\\label{contents-"+file2[9:len(file2)-4]+"}")
 
-    data = data.replace("\\hypertarget{contents}","\\hypertarget{contents-"+file2[9:len(file2)-4]+"}")
+    data = data.replace("\\label{contents}","\\label{contents-"+filename+"}")
+
+    data = data.replace("\\hypertarget{contents}","\\hypertarget{contents-"+filename+"}")
 
     data = data.replace("\\caption", "aghdwmz\\")
-      ## maketitle tex issue  
-#     if(file2 =="executed/coase.tex"):
-#         func_replace("Coase?s", "Coase's", file2)
+    
+    ## maketitle tex issue  need to change this 
+    if(filename =="coase"):
+         data = data.replace("Coase?s", "Coase's")
 
-#     if(file2 == "executed/dyn_stack.tex"):
-#         func_replace("vs.~Stackelberg", "vs. Stackelberg", file2)
-#         func_replace("vs.stackelberg", "vs-stackelberg", file2)
+    if(filename == "dyn_stack"):
+        data = data.replace("vs.~Stackelberg", "vs. Stackelberg")
+        data = data.replace("vs.stackelberg", "vs-stackelberg")
     return data
 
 
@@ -75,7 +76,7 @@ def func_delete(a, b, f, delete_within_line=True):
            if b in line:
               endDelete = True
 
-    return edited
+    return ''.join(edited)
 
 def make_changes(f, filename):
     ## read the file contents
@@ -89,6 +90,8 @@ def make_changes(f, filename):
 
 def main(self, filename):
     with open(filename,'r+', encoding="utf8") as f:
-        make_changes(f, filename)
+         index = filename.rfind('/')
+         filename = filename[(index + 1):len(filename)-4]
+         make_changes(f, filename)
             
 
