@@ -61,22 +61,26 @@ class MakePdfWriter():
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             latexProcessing(self, fl_tex)
-            #p = None
-            #try:
-            #p = subprocess.Popen(('xelatex',"-interaction=nonstopmode","-output-directory",pdf_build_path, fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-            #subprocess.run(["xelatex","-interaction=nonstopmode","-output-directory",pdf_build_path, fl_tex])
-            #p.communicate()
-            #print(p.stdout)
-            #     assert (p.returncode == 0), 'xelatex exited with %d' % p.returncode
-            # except OSError as e:
-            #     print("or here ?")
-            #     print >> sys.stderr, 'Failed to run pygmentize: %s' % str(e)
-            # except AssertionError as e:
-            #     print("here?")
-            #     print(p.stdout)
-            #     print(e)
-            #     exit()
-            subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
-            subprocess.run(["bibtex", fl_tex])
-            subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
-            subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
+            p = None
+            try:
+                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p.communicate()
+                p = subprocess.Popen(('bibtex',fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p.communicate()
+                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p.communicate()
+                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                p.communicate()
+                assert (p.returncode == 0), 'xelatex exited with %d' % p.returncode
+            except OSError as e:
+                print(e)
+                exit()
+                #print >> sys.stderr, 'Failed to run pygmentize: %s' % str(e)
+            except AssertionError as e:
+                print(p.stdout)
+                print(e)
+                exit()
+            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
+            # subprocess.run(["bibtex", fl_tex])
+            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
+            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
