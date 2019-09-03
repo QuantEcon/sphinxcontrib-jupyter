@@ -20,9 +20,6 @@ class MakePdfWriter():
         self.pdfdir = builderSelf.outdir + "/pdf" #pdf directory 
         self.texdir = builderSelf.outdir + "/executed" #latex directory 
 
-        ## setting the working directory
-        os.chdir(builderSelf.outdir)
-
         for path in [self.pdfdir, self.texdir]:
             ensuredir(path)
 
@@ -56,7 +53,7 @@ class MakePdfWriter():
         fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
 
         ## do not convert index and zreferences to latex
-        if filename.find('index') == -1 or filename.find('zreferences') == -1:  
+        if filename.find('index') == -1 and filename.find('zreferences') == -1:  
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
@@ -74,8 +71,6 @@ class MakePdfWriter():
                 assert (p.returncode == 0), 'xelatex exited with %d' % p.returncode
             except OSError as e:
                 print(e)
-                exit()
-                #print >> sys.stderr, 'Failed to run pygmentize: %s' % str(e)
             except AssertionError as e:
                 print(p.stdout)
                 print(e)
