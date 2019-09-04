@@ -41,6 +41,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_list = False
         self.in_math = False
         self.in_math_block = False
+        self.in_image = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -173,12 +174,22 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
+        self.in_image = True
         uri = node.attributes["uri"]
-        self.images.append(uri)             #TODO: list of image files
+        #check if same uri has been processed already for copying asset
+        if uri not in self.images:
+            self.images.append(uri)
+            uri = self.copy_static_asset(uri, "_images")
         if self.jupyter_download_nb_image_urlpath:
             for file_path in self.jupyter_static_file_path:
                 if file_path in uri:
                     uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
+                    break  #don't need to check other matches
+        else:
+            #Update static path to _image location for uri
+            for file_path in self.jupyter_static_file_path:
+                if file_path in uri:
+                    uri = uri.replace(file_path +"/", "_images/")
                     break  #don't need to check other matches
         attrs = node.attributes
         if self.jupyter_images_markdown:
@@ -201,6 +212,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 image += 'align="{}"'.format(attrs["align"])
             image = image.rstrip() + ">\n\n"  #Add double space for html
         self.markdown_lines.append(image)
+
+    def depart_image(self, node):
+        self.in_image = False
 
     # math
     def visit_math(self, node):
@@ -817,6 +831,48 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 self.slide = slide_type
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
+
+    def copy_static_asset(self, uri, target_dir):
+        """
+        copy static assets utility function to support building 
+        a collection of static assets such as images and downloads
+        
+        Parameters
+        ----------
+        uri     provided source uri
+        target  specify target directory in build directory
+
+        Returns
+        -------
+        uri     an updated reference for the URI
+        """
+        source_file = os.path.join(self.builder.srcdir, uri)
+        target_dir = os.path.join(self.builder.outdir, target_dir)
+        source_dir, filename = os.path.split(source_file)
+        if os.path.isfile(source_file):                      #Check Source File
+            target_file = os.path.join(target_dir, filename)
+            #Check if target directory already contains a file with the same name
+            if os.path.isfile(target_file):
+                #-Generate Unique File ID due to name collision-#
+                base, ext = os.path.splitext(filename)
+                while os.path.isfile(target_file):
+                    if re.search("-\d*", base):
+                        base, num = base.split("-")
+                        num = str(int(num) + 1)       #increment value
+                        filename = base+"-"+num+ext
+                        target_file = os.path.join(target_dir, filename)
+                    else:
+                        filename =  base+"-1"+ext
+                        target_file = os.path.join(target_dir, filename)
+                uri_base, uri_filename = os.path.split(uri)
+                uri = os.path.join(uri_base, filename)
+            #Copy File
+            if not os.path.isdir(target_dir):
+                os.makedirs(target_dir)
+            copyfile(source_file, target_file)
+        else:
+            raise ValueError("[copy_static_asset] specified file ({}) is not found".format(source))
+        return uri
 
     @classmethod
     def split_uri_id(cls, uri):
