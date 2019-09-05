@@ -78,6 +78,7 @@ class JupyterBuilder(Builder):
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
+        
         if (self.config["jupyter_execute_notebooks"]):
             self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
             self.execution_vars = {
@@ -89,11 +90,6 @@ class JupyterBuilder(Builder):
                 'delayed_futures': [],
                 'destination': self.executedir
             }
-            # self.dependency_lists = self.config["jupyter_dependency_lists"]
-            # self.executed_notebooks = []
-            # self.delayed_notebooks = dict()
-            # self.futures = []
-            # self.delayed_futures = []
         
         if (self.config["jupyter_download_nb_execute"]):
             if self.client is None:
@@ -147,7 +143,7 @@ class JupyterBuilder(Builder):
         ### print an output for downloading notebooks as well with proper links if variable is set
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
-            outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
+            outfilename = os.path.join(self.downloadsdir, os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
             self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))

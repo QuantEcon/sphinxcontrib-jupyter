@@ -187,7 +187,7 @@ class ExecuteNotebookWriter():
 
         return error_results
 
-    def produce_code_execution_report(self, builderSelf, error_results, fln = "code-execution-results.json"):
+    def produce_code_execution_report(self, builderSelf, error_results, params, fln = "code-execution-results.json"):
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
@@ -260,7 +260,7 @@ class ExecuteNotebookWriter():
         except IOError:
             self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
-    def produce_dask_processing_report(self, builderSelf, fln= "dask-reports.json"):
+    def produce_dask_processing_report(self, builderSelf, params, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
@@ -280,7 +280,7 @@ class ExecuteNotebookWriter():
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
-    def create_coverage_report(self, builderSelf, error_results):
+    def create_coverage_report(self, builderSelf, error_results, params):
         """
         Creates a coverage report of the errors in notebook
         """
