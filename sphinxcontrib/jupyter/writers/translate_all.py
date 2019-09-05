@@ -188,11 +188,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
             uri = os.path.join("_images", filename)
-        attrs = node.attributes
+        #-Parse link updating for jupyter_download_nb_image_urlpath
+        if self.jupyter_download_nb_image_urlpath:
+            if '?' in node['candidates']:
+                pass
+            else:
+                uri = uri.replace("_images/", self.jupyter_download_nb_image_urlpath)
+        #-Write to Markdown-#
         if self.jupyter_images_markdown:
             #-Construct MD image
             image = "![{0}]({0})".format(uri)
         else:
+            attrs = node.attributes
             # Construct HTML image
             image = '<img src="{}" '.format(uri)
             if "alt" in attrs.keys():
