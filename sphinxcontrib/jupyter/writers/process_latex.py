@@ -19,8 +19,6 @@ def func_replace(f, data, filename):
     data = data.replace("\\paragraph", "\\textbf")
     data = data.replace("\\maketitle", "\\maketitle"+"\n"+"    \\parskip 0.090in")
 
-    data = data.replace("\\hypertarget{qe-notebook-header}{}"+"\n"+"\\begin{verbatim}"+"\n"+"    <a href=\"https://quantecon.org/\" title=\"quantecon.org\">"+"\n"+"            <img style=\"width:250px;display:inline;\" width=\"250px\" src=\"https://assets.quantecon.org/img/qe-menubar-logo.svg\" alt=\"QuantEcon\">"+"\n"+"    </a>"+"\n"+"\\end{verbatim}", "")
-
     data = data.replace("\\href{http","\\abchref{http")
 
     data = data.replace("\\href{","\\href{https://lectures.quantecon.org/py/")

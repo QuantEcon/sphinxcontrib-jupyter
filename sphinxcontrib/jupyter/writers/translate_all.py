@@ -572,6 +572,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
             if self.jupyter_target_pdf:
+                for line in self.markdown_lines:
+                    if 'qe-notebook-header' in line or 'qe-menubar-logo' in line or 'div' in line:
+                        self.markdown_lines = []
+                        return
                 if 'equation' in refid:
                     #no html targets when computing notebook to target pdf in labelled math
                     pass
