@@ -206,7 +206,7 @@ class JupyterBuilder(Builder):
                 continue
             src = os.path.join(self.srcdir, uri)
             target = os.path.join(image_path, self.image_library[uri])
-            copyfile(src, target, follow_symlinks=True)
+            copyfile(src, target)
 
 
     def finish(self):

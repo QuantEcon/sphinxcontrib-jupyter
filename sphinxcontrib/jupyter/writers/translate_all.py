@@ -176,7 +176,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.in_image = True
         uri = node.attributes["uri"]
-        
         #add to image libary for builder
         if uri not in self.builder.image_library.keys():
             path, filename = self.check_duplicate_files(uri)
