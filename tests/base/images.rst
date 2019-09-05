@@ -57,3 +57,15 @@ Add a figure of the same name in a different folder
 Most basic image directive
 
 .. image:: _static/level1/hood.jpg
+
+Remote Images
+-------------
+
+Adding a test for remote images specified by url
+
+.. image:: https://s3-ap-southeast-2.amazonaws.com/assets.quantecon.org/img/sloan_logo.png
+
+and using figure directive
+
+.. figure:: https://s3-ap-southeast-2.amazonaws.com/assets.quantecon.org/img/sloan_logo.png
+   :scale: 50 %
