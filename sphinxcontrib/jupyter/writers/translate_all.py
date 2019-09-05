@@ -176,13 +176,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.in_image = True
         uri = node.attributes["uri"]
-        #add to image libary for builder
-        if uri not in self.builder.image_library.keys():
+        if '?' in node['candidates']:
+            # don't rewrite nonlocal image URIs
+            pass
+        elif uri not in self.builder.image_library.keys():
+            #add files to image libary for builder
             path, filename = self.check_duplicate_files(uri)
             self.builder.image_library[uri] = filename
+            uri = os.path.join("_images", filename)
         else:
+            #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
-        uri = os.path.join("_images", filename)
+            uri = os.path.join("_images", filename)
         attrs = node.attributes
         if self.jupyter_images_markdown:
             #-Construct MD image
