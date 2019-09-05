@@ -171,13 +171,13 @@ class JupyterBuilder(Builder):
 
     def copy_static_files(self):
         #copy image objects to _images
-        self.process_image_library()
+        self.process_image_library(self.outdir)
 
         #TODO: review in reference to images
         # copy all static files to build folder  
         self.logger.info(bold("[builder] copying bulk static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
-        if (self.config["jupyter_execute_notebooks"]):
+        if self.config["jupyter_execute_notebooks"]:
             self.logger.info(bold("[builder] copying bulk static files to executed folder... \n"), nonl=True)
             ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
@@ -190,15 +190,16 @@ class JupyterBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
-                if (self.config["jupyter_execute_notebooks"]):
+                if self.config["jupyter_execute_notebooks"]:
+                    self.process_image_library(self.executed_notebook_dir)
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
 
-    def process_image_library(self):
+    def process_image_library(self, context):
         """
         Action self.image_library
         """
-        image_path = os.path.join(self.outdir, "_images")
+        image_path = os.path.join(context, "_images")
         self.logger.info(bold("[builder] copy images to {}".format(image_path)))
         ensuredir(image_path)
         for uri in self.image_library.keys():
