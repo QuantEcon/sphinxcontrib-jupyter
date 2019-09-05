@@ -45,6 +45,10 @@ class MakeSiteWriter():
 
         ## copies all the static files
         shutil.copytree(builderSelf.outdir + "/_static/", self.websitedir + "_static/", symlinks=True)
+        ## copies all the image files
+        image_path = os.path.join(builderSelf.outdir, "_images")
+        if os.path.exists(image_path):
+            shutil.copytree(image_path, self.websitedir + "_images/", symlinks=True)
 
         ## copies all theme files to _static folder 
         if os.path.exists(staticFolder):
@@ -77,7 +81,6 @@ class MakeSiteWriter():
                 shutil.copytree(builderSelf.outdir + "/_downloads", self.downloadipynbdir, symlinks=True)
             else:
                 self.logger.warning("Downloads folder not created during build")
-
 
 
 
