@@ -48,3 +48,12 @@ Testing the **.. figure::** directive
 
 .. figure:: _static/hood.jpg
    :scale: 50 %
+
+File Collisions
+---------------
+
+Add a figure of the same name in a different folder
+
+Most basic image directive
+
+.. image:: _static/level1/hood.jpg

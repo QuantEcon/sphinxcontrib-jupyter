@@ -15,6 +15,7 @@ from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
 from ..writers.utils import copy_dependencies
+from shutil import copyfile
 
 class JupyterBuilder(Builder):
     """
@@ -82,6 +83,10 @@ class JupyterBuilder(Builder):
         self.executedir = self.outdir + '/executed'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
+
+        self.image_library = {
+            'index' : [],
+        }
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -165,26 +170,43 @@ class JupyterBuilder(Builder):
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def copy_static_files(self):
-        # copy all static files
-        self.logger.info(bold("copying static files... "), nonl=True)
+        #copy image objects to _images
+        self.process_image_library()
+
+        #TODO: review in reference to images
+        # copy all static files to build folder  
+        self.logger.info(bold("[builder] copying bulk static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
         if (self.config["jupyter_execute_notebooks"]):
-            self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
+            self.logger.info(bold("[builder] copying bulk static files to executed folder... \n"), nonl=True)
             ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
-
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
             if not os.path.exists(entry):
                 self.logger.warning(
-                    "jupyter_static_path entry {} does not exist"
+                    "[builder] jupyter_static_path entry {} does not exist"
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
                 if (self.config["jupyter_execute_notebooks"]):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
+
+    def process_image_library(self):
+        """
+        Action self.image_library
+        """
+        image_path = os.path.join(self.outdir, "_images")
+        self.logger.info(bold("[builder] copy images to {}".format(image_path)))
+        ensuredir(image_path)
+        for uri in self.image_library.keys():
+            if uri == "index":
+                continue
+            src = os.path.join(self.srcdir, uri)
+            target = os.path.join(image_path, self.image_library[uri])
+            copyfile(src, target, follow_symlinks=True)
 
 
     def finish(self):
