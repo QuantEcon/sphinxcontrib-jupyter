@@ -145,7 +145,7 @@ class ExecuteNotebookWriter():
                 nbformat.write(executed_nb, f)
             
             ## generate html if needed
-            if (builderSelf.config['jupyter_generate_html']):
+            if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
                 builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
@@ -167,7 +167,7 @@ class ExecuteNotebookWriter():
         builderSelf.dask_log['futures'] = []
 
         ## create an instance of the class id config set
-        if (builderSelf.config['jupyter_generate_html']):
+        if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
             builderSelf._convert_class = convertToHtmlWriter(builderSelf)
 
         # this for loop gathers results in the background
