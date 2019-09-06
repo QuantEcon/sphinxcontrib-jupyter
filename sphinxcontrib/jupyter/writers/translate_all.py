@@ -466,7 +466,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """anchor link"""
         self.in_reference = True
         if self.jupyter_target_pdf:
-            if "refid" in node:
+            if "refuri" in node and "http" in node["refuri"]:
+                self.markdown_lines.append("\href{")
+            elif "refid" in node:
                 if 'equation-' in node['refid']:
                     self.markdown_lines.append("\eqref{")
                 elif self.in_topic:
@@ -555,6 +557,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     self.markdown_lines.append(refuri + "}")
                 else:
                     self.markdown_lines.append(refuri + "}{" + labeltext + "}")
+            elif self.jupyter_target_pdf and "http" in node["refuri"]:
+                label = self.markdown_lines.pop()
+                if "\href{" == label:  #no label just a url
+                    self.markdown_lines.append(label + "{" + refuri + "}")
+                else:
+                    self.markdown_lines.append(refuri + "}" + "{" + label + "}")                
             # if self.jupyter_target_pdf and self.in_toctree:
             #     #TODO: this will become an internal link when making a single unified latex file
             #     formatted_text = " \\ref{" + refuri + "}"

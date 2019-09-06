@@ -7,6 +7,8 @@
 This is a test file for pdfs (and a Generalization)
 ***************************************************
 
+This is an external link `to lectures <http://lectures.quantecon.org>`__
+
 .. contents:: :depth: 2
 
 
