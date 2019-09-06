@@ -183,17 +183,18 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #add files to image libary for builder
             path, filename = self.check_duplicate_files(uri)
             self.builder.image_library[uri] = filename
-            uri = os.path.join("_images", filename)
+            uri = os.path.join("/_images", filename)
         else:
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
-            uri = os.path.join("_images", filename)
+            uri = os.path.join("/_images", filename)
         #-Parse link updating for jupyter_download_nb_image_urlpath
         if self.jupyter_download_nb_image_urlpath:
             if '?' in node['candidates']:
                 pass
             else:
-                uri = uri.replace("_images/", self.jupyter_download_nb_image_urlpath)
+                path, filename = os.path.split(uri)
+                uri = os.path.join(self.jupyter_download_nb_image_urlpath, filename)
         #-Write to Markdown-#
         if self.jupyter_images_markdown:
             #-Construct MD image
