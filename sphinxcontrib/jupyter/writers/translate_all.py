@@ -396,7 +396,17 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_download_reference(self, node):
         self.in_download_reference = True
-        html = "<a href={} download>".format(node["reftarget"])
+        sourcefile = node['reftarget']
+        if sourcefile not in self.builder.image_library.keys():
+            #add files to download libary for builder
+            path, filename = self.check_duplicate_files(sourcefile)
+            self.builder.download_library[sourcefile] = filename
+            targetfile = os.path.join("/_downloads", filename)
+        else:
+            #Already added to image libary for builder to copy asset
+            path, filename = os.path.split(sourcefile)
+            targetfile = os.path.join("/_downloads", filename)
+        html = "<a href={} download>".format(targetfile)
         self.markdown_lines.append(html)
 
     def depart_download_reference(self, node):
@@ -841,10 +851,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         Parse URI for duplicate files in catalog
         """
-        path, filename = os.path.split(uri)
-        if self.in_image:
-            #Check for file by the same name in library and increment if found
-            while filename in self.builder.image_library['index']:
+        #Check for file by the same name in library and increment if found
+        def rename_file(filename, library):
+            while filename in library['index']:
                 base, ext = os.path.splitext(filename)
                 if re.search("-\d*", base):
                     base, num = base.split("-")
@@ -852,7 +861,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     filename = base+"-"+num+ext
                 else:
                     filename =  base+"-1"+ext
+            return filename
+
+        path, filename = os.path.split(uri)
+        if self.in_image:
+            filename = rename_file(filename, self.builder.image_library)
             self.builder.image_library['index'].append(filename)
+        elif self.in_download_reference:
+            filename = rename_file(filename, self.builder.download_library)
+            self.builder.download_library['index'].append(filename)
         else:
             raise NotImplementedError
         return path, filename

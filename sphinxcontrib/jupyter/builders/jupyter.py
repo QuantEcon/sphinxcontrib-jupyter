@@ -87,6 +87,9 @@ class JupyterBuilder(Builder):
         self.image_library = {
             'index' : [],
         }
+        self.download_library = {
+            'index' : [],
+        }
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -172,6 +175,7 @@ class JupyterBuilder(Builder):
     def copy_static_files(self):
         #copy image objects to _images
         self.process_image_library(self.outdir)
+        self.process_download_library(self.outdir)
 
         #TODO: review in reference to images
         # copy all static files to build folder  
@@ -192,6 +196,7 @@ class JupyterBuilder(Builder):
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
                 if self.config["jupyter_execute_notebooks"]:
                     self.process_image_library(self.executed_notebook_dir)
+                    self.process_download_library(self.executed_notebook_dir)
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
 
@@ -207,6 +212,20 @@ class JupyterBuilder(Builder):
                 continue
             src = os.path.join(self.srcdir, uri)
             target = os.path.join(image_path, self.image_library[uri])
+            copyfile(src, target)
+
+    def process_download_library(self, context):
+        """
+        Action self.download_library
+        """
+        download_path = os.path.join(context, "_downloads")
+        self.logger.info(bold("[builder] copy downloads to {}".format(download_path)))
+        ensuredir(download_path)
+        for fl in self.download_library.keys():
+            if fl == "index":
+                continue
+            src = os.path.join(self.srcdir, fl)
+            target = os.path.join(download_path, self.download_library[fl])
             copyfile(src, target)
 
 
