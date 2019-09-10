@@ -195,7 +195,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if "height" in attrs.keys():
                 style += "height:{};".format(attrs["height"])
             if "scale" in attrs.keys():
-                style = "width:{0}%;height:{0}%".format(attrs["scale"])
+                style = "width:{0}%;height:auto".format(attrs["scale"])
             image += 'style="{}" '.format(style)
             if "align" in attrs.keys():
                 image += 'align="{}"'.format(attrs["align"])
