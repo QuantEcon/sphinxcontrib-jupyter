@@ -135,6 +135,9 @@ class JupyterBuilder(Builder):
              ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)
 
+        if (self.config["jupyter_download_nb_execute"]):
+            copy_dependencies(self, self.downloadsExecutedir)
+            
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
