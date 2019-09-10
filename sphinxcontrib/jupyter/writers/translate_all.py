@@ -350,6 +350,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_raw(self, node):
         pass
 
+
     def visit_rubric(self, node):
         self.in_rubric = True
         self.add_markdown_cell()
@@ -580,16 +581,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
             if self.jupyter_target_pdf:
-                for line in self.markdown_lines:
-                    if 'qe-notebook-header' in line or 'qe-menubar-logo' in line or 'div' in line:
-                        self.markdown_lines = []
-                        return
                 if 'equation' in refid:
                     #no html targets when computing notebook to target pdf in labelled math
                     pass
                 else:
                     #set hypertargets for non math targets
-                    self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
+                    if self.markdown_lines:
+                        self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
             else:
                 self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
@@ -757,7 +755,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_note = False
 
     def depart_raw(self, node):
+        if self.jupyter_target_pdf:
+            for attr in node.attributes:
+                if attr == 'format' and node.attributes[attr] == 'html':
+                    self.markdown_lines = []
+                    return
         self.markdown_lines.append("\n\n")
+        
 
     # =============
     # Jupyter Nodes

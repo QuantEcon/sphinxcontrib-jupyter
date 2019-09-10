@@ -177,7 +177,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         if self.visit_first_title:
             self.title = node.astext()
         self.visit_first_title = False
-
+        
     # ================
     #  code blocks
     # ================
