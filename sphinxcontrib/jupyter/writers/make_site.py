@@ -63,7 +63,7 @@ class MakeSiteWriter():
             shutil.rmtree(self.website_folder)
 
         # copies html and downloads folder
-        shutil.copytree(self.outdir + "jupyter/html/", self.website_folder, symlinks=True)
+        shutil.copytree(self.outdir + "/jupyter/html/", self.website_folder, symlinks=True)
         self.copy_image_library()
         self.copy_download_library()
         self.copy_theme_assets()
