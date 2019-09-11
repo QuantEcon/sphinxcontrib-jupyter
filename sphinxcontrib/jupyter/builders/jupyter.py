@@ -130,7 +130,7 @@ class JupyterBuilder(Builder):
         ### print an output for downloading notebooks as well with proper links if variable is set
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
-            outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
+            outfilename = os.path.join(self.outdir + "/_download_ipynb", os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
             self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
@@ -173,17 +173,24 @@ class JupyterBuilder(Builder):
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def copy_static_files(self):
-        #copy image objects to _images
+        """
+        Process Static Files including image and download libraries
+        """
         self.process_image_library(self.outdir)
         self.process_download_library(self.outdir)
+        
+        if self.config['jupyter_execute_notebooks']:
+            self.process_image_library(self.executed_notebook_dir)
+            self.process_download_library(self.executed_notebook_dir)
 
-        #TODO: review in reference to images
-        # copy all static files to build folder  
-        self.logger.info(bold("[builder] copying bulk static files... "), nonl=True)
-        ensuredir(os.path.join(self.outdir, '_static'))
+        # copy all static files to build folder
+        target = os.path.join(self.outdir, '_static')
+        self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+        ensuredir(target)
         if self.config["jupyter_execute_notebooks"]:
-            self.logger.info(bold("[builder] copying bulk static files to executed folder... \n"), nonl=True)
-            ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
+            target = os.path.join(self.executed_notebook_dir, '_static')
+            self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+            ensuredir(target)
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -191,14 +198,12 @@ class JupyterBuilder(Builder):
             if not os.path.exists(entry):
                 self.logger.warning(
                     "[builder] jupyter_static_path entry {} does not exist"
-                    .format(entry))
+                    .format(entry)
+                    )
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
                 if self.config["jupyter_execute_notebooks"]:
-                    self.process_image_library(self.executed_notebook_dir)
-                    self.process_download_library(self.executed_notebook_dir)
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
-        self.logger.info("done")
 
     def process_image_library(self, context):
         """
@@ -225,31 +230,26 @@ class JupyterBuilder(Builder):
             if fl == "index":
                 continue
             src = os.path.join(self.srcdir, fl)
-            target = os.path.join(download_path, self.download_library[fl])
-            copyfile(src, target)
-
+            if not os.path.exists(src):
+                self.logger.info(bold("[builder] cannot find download: {}".format(src)))
+            else:
+                target = os.path.join(download_path, self.download_library[fl])
+                copyfile(src, target)
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
 
-        if (self.config["jupyter_execute_notebooks"]):
-            # watch progress of the execution of futures
-            self.logger.info(bold("Starting notebook execution and html conversion(if set in config)..."))
-            #progress(self.futures)
-
-            # save executed notebook
+        #-execute notebooks collection-#
+        if self.config["jupyter_execute_notebooks"]:
+            self.logger.info(bold("[execute_notebooks] Starting notebook execution and html conversion"))
             error_results = self._execute_notebook_class.save_executed_notebook(self)
-
-            ##generate coverage if config value set
+        
+            #-make coverage reports currently requires jupyter_execute_notebooks=True-#
             if self.config['jupyter_make_coverage']:
-                ## produces a JSON file of dask execution
                 self._execute_notebook_class.produce_dask_processing_report(self)
-                
-                ## generate the JSON code execution reports file
                 error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
-
                 self._execute_notebook_class.create_coverage_report(self, error_results)
-
-        ### create a website folder
+        
+        # create a complete website from compiled componenents
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)

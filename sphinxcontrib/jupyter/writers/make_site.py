@@ -6,81 +6,89 @@ from sphinx.util import logging
 
 class MakeSiteWriter():
     """
-    Makes website for each package
+    Compile website from components
     """
     logger = logging.getLogger(__name__)
-    def __init__(self, builderSelf):
-        builddir = builderSelf.outdir
+    
+    def __init__(self, builder):
+        self.builder = builder
 
         ## removing the /jupyter from path to get the top directory
-        index = builddir.rfind('/jupyter')
+        index = self.builder.outdir.rfind('/jupyter')
         if index > 0:
-            builddir = builddir[0:index]    
+            self.builder.outdir = self.builder.outdir[0:index]
         
         ## defining directories
-        self.websitedir = builddir + "/jupyter_html/"
-        self.downloadipynbdir = self.websitedir + "/_downloads/ipynb/"
+        self.website_folder = self.builder.outdir + "/jupyter_html/"
+        self.download_ipynb_folder = self.website_folder + "/_downloads/ipynb/"
 
-    def build_website(self, builderSelf):
-        if os.path.exists(self.websitedir):
-            shutil.rmtree(self.websitedir)
-
-        builderSelf.themePath = builderSelf.config['jupyter_theme_path']
-        themeFolder = builderSelf.config['jupyter_theme']
-    
-        if themeFolder is not None:
-            builderSelf.themePath = builderSelf.themePath + "/" + themeFolder
-
-        if os.path.exists(builderSelf.themePath):
-            pass
+    def copy_theme_assets(self):
+        """ copies theme assets """
+        self.theme_path = self.builder.config['jupyter_theme_path']
+        self.theme_folder = self.builder.config['jupyter_theme']
+        if self.theme_folder is not None:
+            self.theme_path = self.theme_path + "/" + self.theme_folder
+        #-Check Theme Path-#
+        if not os.path.exists(self.theme_path):
+            self.logger.warning("[copy_theme_assets] the theme directory {} is not found".format(self.theme_path))
+            exit(1)
+        #-Copy HTML theme files to self.website_dir-#
+        self.html_assets_source = self.theme_path + "/html/"
+        if os.path.exists(self.html_assets_source):
+            copy_tree(self.html_assets_source, self.website_folder, preserve_symlinks=1)
         else:
-            self.logger.warning("theme directory not found")
-            exit()
+            self.logger.warning("[copy_theme_assets] html folder not present in the themes directory")   #@AAKASH will there always be an html folder required in theme folder?
+        #-Copy other static assets to _static-#
+        self.static_theme_source = self.theme_path + "/static"
+        if os.path.exists(self.static_theme_source):
+            copy_tree(self.static_theme_source, self.website_folder + "_static/", preserve_symlinks=1)
+        else:
+            self.logger.warning("[copy_theme_assets] static folder not present in the themes directory")
 
-        htmlFolder = builderSelf.themePath + "/html/"
-        staticFolder = builderSelf.themePath + "/static"
-
-        ## copies the html and downloads folder
-        shutil.copytree(builderSelf.outdir + "/html/", self.websitedir, symlinks=True)
-
-        ## copies all the static files
-        shutil.copytree(builderSelf.outdir + "/_static/", self.websitedir + "_static/", symlinks=True)
-        ## copies all the image files
-        image_path = os.path.join(builderSelf.outdir, "_images")
+    def copy_image_library(self):
+        """ copies image library """
+        image_path = os.path.join(self.builder.outdir, "_images")
         if os.path.exists(image_path):
-            shutil.copytree(image_path, self.websitedir + "_images/", symlinks=True)
+            shutil.copytree(image_path, self.website_folder + "_images/", symlinks=True)
 
-        ## copies all theme files to _static folder 
-        if os.path.exists(staticFolder):
-            copy_tree(staticFolder, self.websitedir + "_static/", preserve_symlinks=1)
-        else:
-            self.logger.warning("static folder not present in the themes directory")
+    def copy_download_library(self):
+        """ copies download library """
+        download_path = os.path.join(self.builder.outdir, "_downloads")
+        if os.path.exists(download_path):
+            shutil.copytree(download_path, self.website_folder + "_downloads/", symlinks=True)
 
-        ## copies the helper html files 
-        if os.path.exists(htmlFolder):
-            copy_tree(htmlFolder, self.websitedir, preserve_symlinks=1)
-        else:
-            self.logger.warning("html folder not present in the themes directory")
+    def build_website(self):
+        # clean old website
+        if os.path.exists(self.website_folder):
+            shutil.rmtree(self.website_folder)
 
+        # copies html and downloads folder
+        shutil.copytree(self.builder.outdir + "/html/", self.website_folder, symlinks=True)
+        self.copy_image_library()
+        self.copy_download_library()
+        self.copy_theme_assets()
 
-        if "jupyter_coverage_dir" in builderSelf.config and builderSelf.config["jupyter_coverage_dir"]:
-            if os.path.exists(builderSelf.config['jupyter_coverage_dir']):
-                self.coveragedir = builderSelf.config['jupyter_coverage_dir']
+        ## copies all the static files (TODO: disable to debug!)
+        # shutil.copytree(self.builder.outdir + "/_static/", self.website_folder + "_static/", symlinks=True)
+
+        if "jupyter_coverage_dir" in self.builder.config and self.builder.config["jupyter_coverage_dir"]:
+            if os.path.exists(self.builder.config['jupyter_coverage_dir']):
+                self.coveragedir = self.builder.config['jupyter_coverage_dir']
                 ## copies the report of execution results
                 if os.path.exists(self.coveragedir + "/jupyter/reports/code-execution-results.json"):
-                    shutil.copy2(self.coveragedir + "/jupyter/reports/code-execution-results.json", self.websitedir + "_static/")
+                    shutil.copy2(self.coveragedir + "/jupyter/reports/code-execution-results.json", self.website_folder + "_static/")
             else:
-                self.logger.error("coverage directory not found. Please ensure to run coverage build before running website build")
-        else:
-            self.logger.error(" coverage directory nbot specified. Please specify coverage directory for creating website reports ")
+                self.logger.error("[coverage] coverage directory {} not found. Please ensure to run coverage build \
+                                    before running website build".format(self.builder.config['jupyter_coverage_dir'])
+                                )
 
-        
-        ## copies the downloads folder
-        if "jupyter_download_nb" in builderSelf.config and builderSelf.config["jupyter_download_nb"]:
-            if os.path.exists(builderSelf.outdir + "/_downloads"):
-                shutil.copytree(builderSelf.outdir + "/_downloads", self.downloadipynbdir, symlinks=True)
+        ## copies the downloadable ipynb assets to downloads ipynb support folder
+        if "jupyter_download_nb" in self.builder.config and self.builder.config["jupyter_download_nb"]:
+            download_ipynb_source = self.builder.outdir + "/_download_ipynb"
+            if os.path.exists(download_ipynb_source):
+                shutil.copytree(download_ipynb_source, self.download_ipynb_folder, symlinks=True)
             else:
-                self.logger.warning("Downloads folder not created during build")
+                self.logger.warning("[make_site] IPYNB downloads folder {} not created during build".format(download_ipynb_source))
 
 
 
