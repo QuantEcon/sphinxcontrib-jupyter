@@ -402,7 +402,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             path, filename = self.check_duplicate_files(sourcefile)
             self.builder.download_library[sourcefile] = filename
             targetfile = os.path.join("_downloads", filename)
-            import pdb; pdb.set_trace()
         else:
             #Already added to download libary for builder to copy asset
             path, filename = os.path.split(sourcefile)
