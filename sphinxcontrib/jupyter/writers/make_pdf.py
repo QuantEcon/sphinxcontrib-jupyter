@@ -58,28 +58,29 @@ class MakePdfWriter():
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             latexProcessing(self, fl_tex)
-            p = None
             try:
-                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                p.communicate()
-                print("1st")
-                p = subprocess.Popen(('bibtex',filename),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                p.communicate()
-                print("2nd")
-                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                output, error = p.communicate()
-                print("3rd")
-                p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                output, error = p.communicate()
-                print("4th")
-                assert (p.returncode == 0), 'xelatex exited with {} , error encounterd in {} and {}'.format(p.returncode , filename, error)
+                self.subprocessXelatex(fl_tex, filename)
+                self.subprocessBibtex(filename)
+                self.subprocessXelatex(fl_tex, filename)
+                self.subprocessXelatex(fl_tex, filename)
             except OSError as e:
                 print(e)
             except AssertionError as e:
-                print(p.stdout)
-                print(e)
-                exit()
-            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
-            # subprocess.run(["bibtex", fl_tex])
-            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
-            # subprocess.run(["xelatex","-interaction=nonstopmode", fl_tex])
+                pass
+                # exit() - to be used when we want to execution to stop on error
+
+    def subprocessXelatex(self, fl_tex, filename):
+        p = subprocess.Popen(("xelatex", "-interaction=nonstopmode", fl_tex), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        output, error = p.communicate()
+        if (p.returncode != 0):
+            self.logger.warning('xelatex exited with returncode {} , encounterd in {} with error -- {}'.format(p.returncode , filename, error))
+
+        # assert (p.returncode == 0), self.logger.warning('xelatex exited with returncode {} , encounterd in {} with error -- {}'.format(p.returncode , filename, error)) ---- assert statement stops the program, will handle it later
+
+    def subprocessBibtex(self, filename):
+        p = subprocess.Popen(('bibtex',filename), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        output, error = p.communicate()
+        if (p.returncode != 0):
+            self.logger.warning('bibtex exited with returncode {} , encounterd in {} with error -- {} {}'.format(p.returncode , filename, output, error))
+        
+        # assert (p.returncode == 0), self.logger.warning('bibtex exited with returncode {} , encounterd in {} with error -- {} {}'.format(p.returncode , filename, output, error)) ---- assert statement stops the program, will handle it later
