@@ -62,13 +62,17 @@ class MakePdfWriter():
             try:
                 p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate()
-                p = subprocess.Popen(('bibtex',fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                print("1st")
+                p = subprocess.Popen(('bibtex',filename),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 p.communicate()
+                print("2nd")
                 p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                p.communicate()
+                output, error = p.communicate()
+                print("3rd")
                 p = subprocess.Popen(('xelatex',"-interaction=nonstopmode", fl_tex),stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                p.communicate()
-                assert (p.returncode == 0), 'xelatex exited with %d' % p.returncode
+                output, error = p.communicate()
+                print("4th")
+                assert (p.returncode == 0), 'xelatex exited with {} , error encounterd in {} and {}'.format(p.returncode , filename, error)
             except OSError as e:
                 print(e)
             except AssertionError as e:

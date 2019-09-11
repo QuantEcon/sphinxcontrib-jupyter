@@ -192,6 +192,9 @@ class JupyterpdfBuilder(Builder):
             nb_obj['metadata']['latex_metadata']["title"] = self.config['jupyter_pdf_title']
             if "jupyter_pdf_logo" in self.config and self.config['jupyter_pdf_logo']:
                 nb_obj['metadata']['latex_metadata']['logo'] = self.config['jupyter_pdf_logo']
+        
+        if self.config["jupyter_bib_file"]:
+            nb_obj['metadata']['latex_metadata']['bib'] = self.config["jupyter_bib_file"]
 
         nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
         return nb_string
