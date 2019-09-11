@@ -47,13 +47,13 @@ class MakeSiteWriter():
 
     def copy_image_library(self):
         """ copies image library """
-        image_path = os.path.join(self.outdir, "_images")
+        image_path = os.path.join(self.builder.outdir, "_images")
         if os.path.exists(image_path):
             shutil.copytree(image_path, self.website_folder + "_images/", symlinks=True)
 
     def copy_download_library(self):
         """ copies download library """
-        download_path = os.path.join(self.outdir, "_downloads")
+        download_path = os.path.join(self.builder.outdir, "_downloads")
         if os.path.exists(download_path):
             shutil.copytree(download_path, self.website_folder + "_downloads/", symlinks=True)
 
@@ -63,13 +63,13 @@ class MakeSiteWriter():
             shutil.rmtree(self.website_folder)
 
         # copies html and downloads folder
-        shutil.copytree(self.outdir + "/jupyter/html/", self.website_folder, symlinks=True)
+        shutil.copytree(self.builder.outdir + "/html/", self.website_folder, symlinks=True)
         self.copy_image_library()
         self.copy_download_library()
         self.copy_theme_assets()
 
         ## copies all the static files (TODO: disable to debug!)
-        # shutil.copytree(self.outdir + "/_static/", self.website_folder + "_static/", symlinks=True)
+        # shutil.copytree(self.builder.outdir + "/_static/", self.website_folder + "_static/", symlinks=True)
 
         if "jupyter_coverage_dir" in self.builder.config and self.builder.config["jupyter_coverage_dir"]:
             if os.path.exists(self.builder.config['jupyter_coverage_dir']):
