@@ -397,13 +397,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_download_reference(self, node):
         self.in_download_reference = True
         sourcefile = node['reftarget']
-        if sourcefile not in self.builder.image_library.keys():
+        if sourcefile not in self.builder.download_library.keys():
             #add files to download libary for builder
             path, filename = self.check_duplicate_files(sourcefile)
             self.builder.download_library[sourcefile] = filename
             targetfile = os.path.join("_downloads", filename)
+            import pdb; pdb.set_trace()
         else:
-            #Already added to image libary for builder to copy asset
+            #Already added to download libary for builder to copy asset
             path, filename = os.path.split(sourcefile)
             targetfile = os.path.join("_downloads", filename)
         html = "<a href={} download>".format(targetfile)
