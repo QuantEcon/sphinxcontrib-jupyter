@@ -183,11 +183,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #add files to image libary for builder
             path, filename = self.check_duplicate_files(uri)
             self.builder.image_library[uri] = filename
-            uri = os.path.join("/_images", filename)
+            uri = os.path.join("_images", filename)
         else:
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
-            uri = os.path.join("/_images", filename)
+            uri = os.path.join("_images", filename)
         #-Parse link updating for jupyter_download_nb_image_urlpath
         if self.jupyter_download_nb_image_urlpath:
             if '?' in node['candidates']:
@@ -401,11 +401,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #add files to download libary for builder
             path, filename = self.check_duplicate_files(sourcefile)
             self.builder.download_library[sourcefile] = filename
-            targetfile = os.path.join("/_downloads", filename)
+            targetfile = os.path.join("_downloads", filename)
         else:
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(sourcefile)
-            targetfile = os.path.join("/_downloads", filename)
+            targetfile = os.path.join("_downloads", filename)
         html = "<a href={} download>".format(targetfile)
         self.markdown_lines.append(html)
 
