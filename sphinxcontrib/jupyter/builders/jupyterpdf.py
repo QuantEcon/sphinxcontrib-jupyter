@@ -196,6 +196,9 @@ class JupyterpdfBuilder(Builder):
         if self.config["jupyter_bib_file"]:
             nb_obj['metadata']['latex_metadata']['bib'] = self.config["jupyter_bib_file"]
 
+        if self.config["jupyter_pdf_author"]:
+            nb_obj['metadata']['latex_metadata']['author'] = self.config["jupyter_pdf_author"]
+
         nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
         return nb_string
 
