@@ -61,6 +61,7 @@ def setup(app):
     app.add_config_value("jupyter_theme_path", "theme", "jupyter")
     app.add_config_value("jupyter_template_path", "templates", "jupyter")
     app.add_config_value("jupyter_dependencies", None, "jupyter")
+    app.add_config_value("jupyter_download_nb_execute", None, "jupyter")
 
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))

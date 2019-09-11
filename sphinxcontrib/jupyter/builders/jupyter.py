@@ -35,6 +35,16 @@ class JupyterBuilder(Builder):
     logger = logging.getLogger(__name__)
 
     def init(self):
+        ### initializing required classes
+        self._execute_notebook_class = ExecuteNotebookWriter(self)
+        self._make_site_class = MakeSiteWriter(self)
+        self.executedir = self.outdir + '/executed'
+        self.reportdir = self.outdir + '/reports/'
+        self.errordir = self.outdir + "/reports/{}"
+        self.downloadsdir = self.outdir + "/_downloads"
+        self.downloadsExecutedir = self.downloadsdir + "/executed"
+        self.client = None
+
         # Check default language is defined in the jupyter kernels
         def_lng = self.config["jupyter_default_lang"]
         if  def_lng not in self.config["jupyter_kernels"]:
@@ -68,20 +78,31 @@ class JupyterBuilder(Builder):
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        if ("jupyter_make_site" in self.config and self.config["jupyter_execute_notebooks"]):
+        
+        if (self.config["jupyter_execute_notebooks"]):
             self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
-            self.dependency_lists = self.config["jupyter_dependency_lists"]
-            self.executed_notebooks = []
-            self.delayed_notebooks = dict()
-            self.futures = []
-            self.delayed_futures = []
-
-        ### initializing required classes
-        self._execute_notebook_class = ExecuteNotebookWriter(self)
-        self._make_site_class = MakeSiteWriter(self)
-        self.executedir = self.outdir + '/executed'
-        self.reportdir = self.outdir + '/reports/'
-        self.errordir = self.outdir + "/reports/{}"
+            self.execution_vars = {
+                'target': 'website',
+                'dependency_lists': self.config["jupyter_dependency_lists"],
+                'executed_notebooks': [],
+                'delayed_notebooks': dict(),
+                'futures': [],
+                'delayed_futures': [],
+                'destination': self.executedir
+            }
+        
+        if (self.config["jupyter_download_nb_execute"]):
+            if self.client is None:
+                self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
+            self.download_execution_vars = {
+                'target': 'downloads',
+                'dependency_lists': self.config["jupyter_dependency_lists"],
+                'executed_notebooks': [],
+                'delayed_notebooks': dict(),
+                'futures': [],
+                'delayed_futures': [],
+                'destination': self.downloadsExecutedir
+            }
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -114,6 +135,9 @@ class JupyterBuilder(Builder):
              ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)
 
+        if (self.config["jupyter_download_nb_execute"]):
+            copy_dependencies(self, self.downloadsExecutedir)
+            
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
@@ -122,7 +146,7 @@ class JupyterBuilder(Builder):
         ### print an output for downloading notebooks as well with proper links if variable is set
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
-            outfilename = os.path.join(self.outdir + "/_downloads", os_path(docname) + self.out_suffix)
+            outfilename = os.path.join(self.downloadsdir, os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
             self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
@@ -134,6 +158,14 @@ class JupyterBuilder(Builder):
             except (IOError, OSError) as err:
                 self.warn("error writing file %s: %s" % (outfilename, err))
 
+            ### executing downloaded notebooks
+            if (self.config['jupyter_download_nb_execute']):
+                strDocname = str(docname)
+                if strDocname in self.download_execution_vars['dependency_lists'].keys():
+                    self.download_execution_vars['delayed_notebooks'].update({strDocname: self.writer.output})
+                else:        
+                    self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.download_execution_vars, self.download_execution_vars['futures'])
+
         ### output notebooks for executing
         self.writer._set_ref_urlpath(None)
         self.writer._set_jupyter_download_nb_image_urlpath(None)
@@ -142,10 +174,10 @@ class JupyterBuilder(Builder):
         ### execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
             strDocname = str(docname)
-            if strDocname in self.dependency_lists.keys():
-                self.delayed_notebooks.update({strDocname: self.writer.output})
+            if strDocname in self.execution_vars['dependency_lists'].keys():
+                self.execution_vars['delayed_notebooks'].update({strDocname: self.writer.output})
             else:        
-                self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
+                self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.execution_vars, self.execution_vars['futures'])
         else:
             #do not execute
             if (self.config['jupyter_generate_html']):
@@ -188,26 +220,34 @@ class JupyterBuilder(Builder):
 
 
     def finish(self):
-        self.finish_tasks.add_task(self.copy_static_files)
 
         if (self.config["jupyter_execute_notebooks"]):
-            # watch progress of the execution of futures
-            self.logger.info(bold("Starting notebook execution and html conversion(if set in config)..."))
-            #progress(self.futures)
+            self.finish_tasks.add_task(self.copy_static_files)
+            self.save_executed_and_generate_coverage(self.execution_vars,'website', self.config['jupyter_make_coverage'])
 
-            # save executed notebook
-            error_results = self._execute_notebook_class.save_executed_notebook(self)
-
-            ##generate coverage if config value set
-            if self.config['jupyter_make_coverage']:
-                ## produces a JSON file of dask execution
-                self._execute_notebook_class.produce_dask_processing_report(self)
-                
-                ## generate the JSON code execution reports file
-                error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results)
-
-                self._execute_notebook_class.create_coverage_report(self, error_results)
+        if (self.config["jupyter_download_nb_execute"]):
+            self.finish_tasks.add_task(self.copy_static_files)
+            self.save_executed_and_generate_coverage(self.download_execution_vars, 'downloads')
 
         ### create a website folder
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
+
+    def save_executed_and_generate_coverage(self, params, target, coverage = False):
+
+            # watch progress of the execution of futures
+            self.logger.info(bold("Starting notebook execution for %s and html conversion(if set in config)..."), target)
+            #progress(self.futures)
+
+            # save executed notebook
+            error_results = self._execute_notebook_class.save_executed_notebook(self, params)
+
+            ##generate coverage if config value set
+            if coverage:
+                ## produces a JSON file of dask execution
+                self._execute_notebook_class.produce_dask_processing_report(self, params)
+                
+                ## generate the JSON code execution reports file
+                error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
+
+                self._execute_notebook_class.create_coverage_report(self, error_results, params)
