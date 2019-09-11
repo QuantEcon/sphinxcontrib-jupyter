@@ -52,7 +52,7 @@ class JupyterBuilder(Builder):
             instructions = overrides.split(",")
 
         for instruction in instructions:
-            if instruction:
+            if instruction:                                          #TODO: @AAKASH what is this doing?
                 if instruction == 'code_only':
                     self.config["jupyter_conversion_mode"] = "code"
                 else:
@@ -90,6 +90,7 @@ class JupyterBuilder(Builder):
         self.download_library = {
             'index' : [],
         }
+        import pdb; pdb.set_trace()
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -119,7 +120,6 @@ class JupyterBuilder(Builder):
         copy_dependencies(self)
 
         if (self.config["jupyter_execute_notebooks"]):
-             ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)
 
     def write_doc(self, docname, doctree):
@@ -183,27 +183,27 @@ class JupyterBuilder(Builder):
             self.process_image_library(self.executed_notebook_dir)
             self.process_download_library(self.executed_notebook_dir)
 
-        # copy all static files to build folder
-        target = os.path.join(self.outdir, '_static')
-        self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
-        ensuredir(target)
-        if self.config["jupyter_execute_notebooks"]:
-            target = os.path.join(self.executed_notebook_dir, '_static')
-            self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
-            ensuredir(target)
+        # # copy all static files to build folder
+        # target = os.path.join(self.outdir, '_static')
+        # self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+        # ensuredir(target)
+        # if self.config["jupyter_execute_notebooks"]:
+        #     target = os.path.join(self.executed_notebook_dir, '_static')
+        #     self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+        #     ensuredir(target)
 
-        # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
-        for static_path in self.config["jupyter_static_file_path"]:
-            entry = os.path.join(self.confdir, static_path)
-            if not os.path.exists(entry):
-                self.logger.warning(
-                    "[builder] jupyter_static_path entry {} does not exist"
-                    .format(entry)
-                    )
-            else:
-                copy_asset(entry, os.path.join(self.outdir, "_static"))
-                if self.config["jupyter_execute_notebooks"]:
-                    copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
+        # # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
+        # for static_path in self.config["jupyter_static_file_path"]:
+        #     entry = os.path.join(self.confdir, static_path)
+        #     if not os.path.exists(entry):
+        #         self.logger.warning(
+        #             "[builder] jupyter_static_path entry {} does not exist"
+        #             .format(entry)
+        #             )
+        #     else:
+        #         copy_asset(entry, os.path.join(self.outdir, "_static"))
+        #         if self.config["jupyter_execute_notebooks"]:
+        #             copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
 
     def process_image_library(self, context):
         """
