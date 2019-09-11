@@ -16,10 +16,10 @@ class MakeSiteWriter():
         ## removing the /jupyter from path to get the top directory
         index = self.builder.outdir.rfind('/jupyter')
         if index > 0:
-            self.builder.outdir = self.builder.outdir[0:index]
+            self.outdir = self.builder.outdir[0:index]
         
         ## defining directories
-        self.website_folder = self.builder.outdir + "/jupyter_html/"
+        self.website_folder = self.outdir + "/jupyter_html/"
         self.download_ipynb_folder = self.website_folder + "/_downloads/ipynb/"
 
     def copy_theme_assets(self):
@@ -47,13 +47,13 @@ class MakeSiteWriter():
 
     def copy_image_library(self):
         """ copies image library """
-        image_path = os.path.join(self.builder.outdir, "_images")
+        image_path = os.path.join(self.outdir, "_images")
         if os.path.exists(image_path):
             shutil.copytree(image_path, self.website_folder + "_images/", symlinks=True)
 
     def copy_download_library(self):
         """ copies download library """
-        download_path = os.path.join(self.builder.outdir, "_downloads")
+        download_path = os.path.join(self.outdir, "_downloads")
         if os.path.exists(download_path):
             shutil.copytree(download_path, self.website_folder + "_downloads/", symlinks=True)
 
@@ -63,13 +63,13 @@ class MakeSiteWriter():
             shutil.rmtree(self.website_folder)
 
         # copies html and downloads folder
-        shutil.copytree(self.builder.outdir + "/html/", self.website_folder, symlinks=True)
+        shutil.copytree(self.outdir + "/html/", self.website_folder, symlinks=True)
         self.copy_image_library()
         self.copy_download_library()
         self.copy_theme_assets()
 
         ## copies all the static files (TODO: disable to debug!)
-        # shutil.copytree(self.builder.outdir + "/_static/", self.website_folder + "_static/", symlinks=True)
+        # shutil.copytree(self.outdir + "/_static/", self.website_folder + "_static/", symlinks=True)
 
         if "jupyter_coverage_dir" in self.builder.config and self.builder.config["jupyter_coverage_dir"]:
             if os.path.exists(self.builder.config['jupyter_coverage_dir']):
@@ -84,7 +84,7 @@ class MakeSiteWriter():
 
         ## copies the downloadable ipynb assets to downloads ipynb support folder
         if "jupyter_download_nb" in self.builder.config and self.builder.config["jupyter_download_nb"]:
-            download_ipynb_source = self.builder.outdir + "/_download_ipynb"
+            download_ipynb_source = self.outdir + "/_download_ipynb"
             if os.path.exists(download_ipynb_source):
                 shutil.copytree(download_ipynb_source, self.download_ipynb_folder, symlinks=True)
             else:
