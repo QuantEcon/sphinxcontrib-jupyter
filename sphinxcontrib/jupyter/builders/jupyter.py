@@ -90,7 +90,6 @@ class JupyterBuilder(Builder):
         self.download_library = {
             'index' : [],
         }
-        import pdb; pdb.set_trace()
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
