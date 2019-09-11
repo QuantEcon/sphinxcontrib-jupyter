@@ -176,6 +176,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.in_image = True
         uri = node.attributes["uri"]
+        #Adjust for Relative References as spphinx returns uri with subfolders before uri provided in rst file
+        adjust_relative_path = False
+        if "../" in uri:
+            adjust_relative_path = True
+            num_path_steps = uri.count("../")
+            uri = "/".join(uri.split("/")[num_path_steps:])             #remove leading folders added by sphinx
         if '?' in node['candidates']:
             # don't rewrite nonlocal image URIs
             pass
@@ -188,6 +194,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
             uri = os.path.join("_images", filename)
+        if adjust_relative_path:
+            uri = "../"*num_path_steps + uri 
         #-Parse link updating for jupyter_download_nb_image_urlpath
         if self.jupyter_download_nb_image_urlpath:
             if '?' in node['candidates']:
