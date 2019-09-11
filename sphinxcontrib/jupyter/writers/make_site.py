@@ -84,11 +84,11 @@ class MakeSiteWriter():
 
         ## copies the downloadable ipynb assets to downloads ipynb support folder
         if "jupyter_download_nb" in self.builder.config and self.builder.config["jupyter_download_nb"]:
-            download_ipynb_source = self.outdir + "/_download_ipynb"
+            if self.builder.config['jupyter_download_nb_execute']:
+                download_ipynb_source = self.outdir + "/_download_ipynb/executed"
+            else:
+                download_ipynb_source = self.outdir + "/_download_ipynb"
             if os.path.exists(download_ipynb_source):
                 shutil.copytree(download_ipynb_source, self.download_ipynb_folder, symlinks=True)
             else:
                 self.logger.warning("[make_site] IPYNB downloads folder {} not created during build".format(download_ipynb_source))
-
-
-

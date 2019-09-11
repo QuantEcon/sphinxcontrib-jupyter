@@ -20,7 +20,7 @@ class ExecuteNotebookWriter():
     startFlag = 0
     def __init__(self, builderSelf):
         pass
-    def execute_notebook(self, builderSelf, f, filename, futures):
+    def execute_notebook(self, builderSelf, f, filename, params, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
         timeout = execute_nb_config["timeout"]
@@ -43,9 +43,9 @@ class ExecuteNotebookWriter():
 
         # - Parse Directories and execute them - #
         if coverage:
-            self.execution_cases(builderSelf, builderSelf.executedir, False, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, builderSelf.executedir, True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -88,7 +88,7 @@ class ExecuteNotebookWriter():
         computing_time = time_tuple[2] - time_tuple[1]
         return computing_time
 
-    def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name):
+    def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name, params):
         error_result = []
         builderSelf.dask_log['futures'].append(str(future))
         status = 'pass'
@@ -118,19 +118,19 @@ class ExecuteNotebookWriter():
                 executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
             if (futures_name.startswith('delayed') != -1):
                 # adding in executed notebooks list
-                builderSelf.executed_notebooks.append(filename)
+                params['executed_notebooks'].append(filename)
                 key_to_delete = False
-                for nb, arr in builderSelf.dependency_lists.items():
+                for nb, arr in params['dependency_lists'].items():
                     executed = 0
                     for elem in arr:
-                        if elem in builderSelf.executed_notebooks:
+                        if elem in params['executed_notebooks']:
                             executed += 1
                     if (executed == len(arr)):
                         key_to_delete = nb
-                        notebook = builderSelf.delayed_notebooks.get(nb)
-                        builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, builderSelf.delayed_futures)
+                        notebook = params['delayed_notebooks'].get(nb)
+                        builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, params, params['delayed_futures'])
                 if (key_to_delete):
-                    del builderSelf.dependency_lists[str(key_to_delete)]
+                    del params['dependency_lists'][str(key_to_delete)]
                     key_to_delete = False
             notebook_name = "{}.ipynb".format(filename)
             executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
@@ -145,8 +145,8 @@ class ExecuteNotebookWriter():
                 nbformat.write(executed_nb, f)
             
             ## generate html if needed
-            if (builderSelf.config['jupyter_generate_html']):
-                builderSelf._convert_class.convert(executed_nb, filename, language_info, builderSelf.executedir, passed_metadata['path'])
+            if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
+                builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -160,34 +160,34 @@ class ExecuteNotebookWriter():
         results['language'] = language_info
         error_results.append(results)
 
-    def save_executed_notebook(self, builderSelf):
+    def save_executed_notebook(self, builderSelf, params):
         error_results = []
 
         builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
         builderSelf.dask_log['futures'] = []
 
         ## create an instance of the class id config set
-        if (builderSelf.config['jupyter_generate_html']):
+        if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
             builderSelf._convert_class = convertToHtmlWriter(builderSelf)
 
         # this for loop gathers results in the background
-        total_count = len(builderSelf.futures)
+        total_count = len(params['futures'])
         count = 0
         update_count_delayed = 1
-        for future, nb in as_completed(builderSelf.futures, with_results=True, raise_errors=False):
+        for future, nb in as_completed(params['futures'], with_results=True, raise_errors=False):
             count += 1
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
+            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures', params)
 
-        for future, nb in as_completed(builderSelf.delayed_futures, with_results=True, raise_errors=False):
+        for future, nb in as_completed(params['delayed_futures'], with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0
-                total_count += len(builderSelf.delayed_futures)
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
+                total_count += len(params['delayed_futures'])
+            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures', params)
 
         return error_results
 
-    def produce_code_execution_report(self, builderSelf, error_results, fln = "code-execution-results.json"):
+    def produce_code_execution_report(self, builderSelf, error_results, params, fln = "code-execution-results.json"):
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
@@ -260,7 +260,7 @@ class ExecuteNotebookWriter():
         except IOError:
             self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
-    def produce_dask_processing_report(self, builderSelf, fln= "dask-reports.json"):
+    def produce_dask_processing_report(self, builderSelf, params, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
@@ -280,7 +280,7 @@ class ExecuteNotebookWriter():
         except IOError:
             self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
-    def create_coverage_report(self, builderSelf, error_results):
+    def create_coverage_report(self, builderSelf, error_results, params):
         """
         Creates a coverage report of the errors in notebook
         """
