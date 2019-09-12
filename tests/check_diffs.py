@@ -29,11 +29,12 @@ SPHINX_VERSION_EXCLUDE = {
 }
 
 def check_set(PATH):
-    GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/jupyter/*.ipynb")
-    REFERENCE_IPYNB_FILES = [os.path.basename(fl) for fl in glob.glob(PATH + "/ipynb/*.ipynb")]
+    GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/jupyter/**/*.ipynb", recursive=True)
+    ref_files = glob.glob(PATH + "/ipynb/**/*.ipynb", recursive=True)
+    REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
     failed = 0
     for fl in GENERATED_IPYNB_FILES:
-        flname = fl.split("/")[-1]
+        flname = fl.split("jupyter/")[-1]
         #Check for Sphinx Version Specific Excludes
         SKIP = False
         if SPHINX_VERSION[0] in SPHINX_VERSION_EXCLUDE.keys():
