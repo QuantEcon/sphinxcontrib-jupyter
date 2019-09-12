@@ -246,8 +246,15 @@ class JupyterBuilder(Builder):
         for uri in self.image_library.keys():
             if uri == "index":
                 continue
-            src = os.path.join(self.srcdir, uri)
-            target = os.path.join(image_path, self.image_library[uri])
+            file, internal_image = self.image_library[uri]
+            if "../" in uri and internal_image == False:
+                num_steps = uri.count("../")
+                srcdir = "/".join(self.srcdir.split("/")[0:-1*num_steps])
+            else:
+                srcdir = self.srcdir
+            uri = uri.replace("../", "")
+            src = os.path.join(srcdir, uri)
+            target = os.path.join(image_path, file)
             copyfile(src, target)
 
     def process_download_library(self, context):

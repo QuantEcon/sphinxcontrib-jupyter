@@ -176,26 +176,38 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         self.in_image = True
         uri = node.attributes["uri"]
+        internal_image = True
+        file_depth = len(self.source_file_name.split("/")) 
+        #-Adjust Absolute Path-#
+        if file_depth > 2 and "../" not in uri:
+            uri = "../"*(file_depth - 2) + uri
         #Adjust for Relative References as spphinx returns uri with subfolders before uri provided in rst file
         adjust_relative_path = False
         if "../" in uri:
             adjust_relative_path = True
             num_path_steps = uri.count("../")
-            uri = "/".join(uri.split("/")[num_path_steps:])             #remove leading folders added by sphinx
+            #-Determine if local image-#
+            if num_path_steps > (file_depth - 2):
+                internal_image = False
+            #remove leading folders for subdirectories added by sphinx for internal
+            uri = "/".join(uri.split("/")[num_path_steps:])
         if '?' in node['candidates']:
             # don't rewrite nonlocal image URIs
             pass
         elif uri not in self.builder.image_library.keys():
             #add files to image libary for builder
             path, filename = self.check_duplicate_files(uri)
-            self.builder.image_library[uri] = filename
+            self.builder.image_library[uri] = (filename, internal_image)
             uri = os.path.join("_images", filename)
         else:
             #Already added to image libary for builder to copy asset
             path, filename = os.path.split(uri)
             uri = os.path.join("_images", filename)
+        #-Adjustment for nested folders added by sphinx-#
         if adjust_relative_path:
-            uri = "../"*num_path_steps + uri 
+            #Note: A depth of 2 is in the root level of the project directory
+            if file_depth > 2: 
+                uri = "../"*(file_depth-2) + uri
         #-Parse link updating for jupyter_download_nb_image_urlpath
         if self.jupyter_download_nb_image_urlpath:
             if '?' in node['candidates']:
