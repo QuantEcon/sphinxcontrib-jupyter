@@ -417,15 +417,26 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_download_reference(self, node):
         self.in_download_reference = True
         sourcefile = node['reftarget']
+        internal_file = True
+        doc_depth = len(self.source_file_name.split("/"))
+        if sourcefile.startswith("/"):
+            sourcefile = sourcefile[1:]  #this gets evaluated at the root level
+        if "../" in sourcefile:
+            num_path_steps = sourcefile.count("../")
+            if num_path_steps > (doc_depth - 2):
+                internal_file = False
         if sourcefile not in self.builder.download_library.keys():
             #add files to download libary for builder
             path, filename = self.check_duplicate_files(sourcefile)
-            self.builder.download_library[sourcefile] = filename
+            subfolder_depth = doc_depth - 2
+            self.builder.download_library[sourcefile] = (filename, internal_file, subfolder_depth)
             targetfile = os.path.join("_downloads", filename)
         else:
             #Already added to download libary for builder to copy asset
             path, filename = os.path.split(sourcefile)
             targetfile = os.path.join("_downloads", filename)
+        if doc_depth > 2:                                      #Note: A depth of 2 is in the root level of the project directory
+            targetfile = "../"*(doc_depth-2) + targetfile
         html = "<a href={} download>".format(targetfile)
         self.markdown_lines.append(html)
 

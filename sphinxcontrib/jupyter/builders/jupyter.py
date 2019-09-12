@@ -267,11 +267,18 @@ class JupyterBuilder(Builder):
         for fl in self.download_library.keys():
             if fl == "index":
                 continue
-            src = os.path.join(self.srcdir, fl)
+            filename, internal_file, subfolder_depth = self.download_library[fl]
+            if "../" in fl and internal_file == False:
+                num_steps = fl.count("../")
+                srcdir = "/".join(self.srcdir.split("/")[0:-1*(num_steps - subfolder_depth)])
+            else:
+                srcdir = self.srcdir
+            fl = fl.replace("../", "")
+            src = os.path.join(srcdir, fl)
             if not os.path.exists(src):
                 self.logger.info(bold("[builder] cannot find download: {}".format(src)))
             else:
-                target = os.path.join(download_path, self.download_library[fl])
+                target = os.path.join(download_path, filename)
                 copyfile(src, target)
 
     def finish(self):
