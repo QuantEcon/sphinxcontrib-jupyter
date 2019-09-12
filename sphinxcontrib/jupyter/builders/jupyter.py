@@ -42,8 +42,8 @@ class JupyterBuilder(Builder):
         self.executedir = self.outdir + '/executed'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
-        self.downloadsdir = self.outdir + "/_downloads"
-        self.downloadsExecutedir = self.downloadsdir + "/executed"
+        self.download_ipynb_dir = self.outdir + "/_downloads_ipynb"
+        self.downloads_ipynb_executed_dir = self.download_ipynb_dir + "/executed"
         self.client = None
 
         # Check default language is defined in the jupyter kernels
@@ -102,7 +102,7 @@ class JupyterBuilder(Builder):
                 'delayed_notebooks': dict(),
                 'futures': [],
                 'delayed_futures': [],
-                'destination': self.downloadsExecutedir
+                'destination': self.downloads_ipynb_executed_dir
             }
 
         self.image_library = {
@@ -143,7 +143,7 @@ class JupyterBuilder(Builder):
             copy_dependencies(self, self.executedir)
 
         if (self.config["jupyter_download_nb_execute"]):
-            copy_dependencies(self, self.downloadsExecutedir)
+            copy_dependencies(self, self.downloads_ipynb_executed_dir)
             
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
