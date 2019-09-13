@@ -15,6 +15,10 @@ import os
 from nbdime.diffing.notebooks import diff_notebooks, set_notebook_diff_targets
 import sphinx
 import re
+import sys
+if sys.version_info.major == 2:
+    import fnmatch
+
 
 SPHINX_VERSION = sphinx.version_info
 CONFIGSETS = ['base', 'pdf', "no_inline_exercises"]
@@ -28,12 +32,25 @@ SPHINX_VERSION_EXCLUDE = {
     1 : ['index*']
 }
 
+def python27_glob(path, pattern):
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+        for filename in fnmatch.filter(filenames, pattern):
+            matches.append(os.path.join(root, filename))
+    return matches
+
 def check_set(PATH):
-    GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/jupyter/*.ipynb")
-    REFERENCE_IPYNB_FILES = [os.path.basename(fl) for fl in glob.glob(PATH + "/ipynb/*.ipynb")]
+    if sys.version_info.major == 2:
+        GENERATED_IPYNB_FILES = python27_glob(PATH+"/_build/jupyter/", "*.ipynb")
+        ref_files = python27_glob(PATH + "/ipynb/", "*.ipynb")
+        REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files] 
+    else:
+        GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/jupyter/**/*.ipynb", recursive=True)
+        ref_files = glob.glob(PATH + "/ipynb/**/*.ipynb", recursive=True)
+        REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
     failed = 0
     for fl in GENERATED_IPYNB_FILES:
-        flname = fl.split("/")[-1]
+        flname = fl.split("jupyter/")[-1]
         #Check for Sphinx Version Specific Excludes
         SKIP = False
         if SPHINX_VERSION[0] in SPHINX_VERSION_EXCLUDE.keys():
