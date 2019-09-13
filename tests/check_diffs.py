@@ -37,6 +37,7 @@ def python27_glob(path, pattern):
     for root, dirnames, filenames in os.walk(path):
         for filename in fnmatch.filter(filenames, pattern):
             matches.append(os.path.join(root, filename))
+    return matches
 
 def check_set(PATH):
     if sys.version_info.major == 2:
