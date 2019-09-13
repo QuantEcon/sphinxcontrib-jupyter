@@ -153,7 +153,7 @@ class JupyterBuilder(Builder):
         ### print an output for downloading notebooks as well with proper links if variable is set
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
-            outfilename = os.path.join(self.outdir + "/_download_ipynb", os_path(docname) + self.out_suffix)
+            outfilename = os.path.join(self.download_ipynb_dir, os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
             self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
