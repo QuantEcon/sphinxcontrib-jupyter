@@ -179,7 +179,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         internal_image = True
         file_depth = len(self.source_file_name.split("/")) 
         #-Adjust Absolute Path-#
-        if file_depth > 2 and "../" not in uri:
+        if "?" not in node['candidates'] and file_depth > 2 and "../" not in uri:
             uri = "../"*(file_depth - 2) + uri
         #Adjust for Relative References as spphinx returns uri with subfolders before uri provided in rst file
         adjust_relative_path = False
@@ -193,6 +193,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             uri = "/".join(uri.split("/")[num_path_steps:])
         if '?' in node['candidates']:
             # don't rewrite nonlocal image URIs
+            internal_image = False
             pass
         elif uri not in self.builder.image_library.keys():
             #add files to image libary for builder
