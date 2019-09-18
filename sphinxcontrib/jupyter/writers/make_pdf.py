@@ -49,7 +49,6 @@ class MakePdfWriter():
 
         fl_ipynb = builderSelf.executed_notebook_dir + "/" + "{}.ipynb".format(filename)
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
-
         fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
 
         ## do not convert index and zreferences to latex
@@ -58,6 +57,17 @@ class MakePdfWriter():
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             latexProcessing(self, fl_tex)
+
+            ### check if subdirectory
+            subdirectory = ""
+            index = filename.rfind('/')
+            if index > 0:
+                subdirectory = filename[0:index]
+                filename = filename[index + 1:]
+
+            ### set working directory for xelatex processing
+            os.chdir(self.texdir + "/" + subdirectory)
+
             try:
                 self.subprocessXelatex(fl_tex, filename)
                 self.subprocessBibtex(filename)
@@ -67,7 +77,7 @@ class MakePdfWriter():
                 print(e)
             except AssertionError as e:
                 pass
-                # exit() - to be used when we want to execution to stop on error
+                # exit() - to be used when we want the execution to stop on error
 
     def subprocessXelatex(self, fl_tex, filename):
         p = subprocess.Popen(("xelatex", "-interaction=nonstopmode", fl_tex), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)

@@ -27,13 +27,6 @@ class ExecuteNotebookWriter():
         filename = filename
         subdirectory = ''
         full_path = filename
-        # get a NotebookNode object from a string
-        nb = nbformat.reads(f, as_version=4)
-        language = nb.metadata.kernelspec.language
-        if (language.lower().find('python') != -1):
-            language = 'python'
-        elif (language.lower().find('julia') != -1):
-            language = 'julia'
             
         # check if there are subdirectories
         index = filename.rfind('/')
@@ -41,11 +34,51 @@ class ExecuteNotebookWriter():
             subdirectory = filename[0:index]
             filename = filename[index + 1:]
 
+        # get a NotebookNode object from a string
+        nb = nbformat.reads(f, as_version=4)
+        language = nb.metadata.kernelspec.language
+        if (language.lower().find('python') != -1):
+            language = 'python'
+        elif (language.lower().find('julia') != -1):
+            language = 'julia'
+
+        ## adding latex metadata
+        if builderSelf.config["jupyter_target_pdf"]:
+            nb = self.add_latex_metadata(builderSelf, nb, subdirectory)
+
         # - Parse Directories and execute them - #
         if coverage:
             self.execution_cases(builderSelf, builderSelf.executedir, False, subdirectory, language, futures, nb, filename, full_path)
         else:
             self.execution_cases(builderSelf, builderSelf.executedir, True, subdirectory, language, futures, nb, filename, full_path)
+
+    def add_latex_metadata(self, builderSelf, nb, subdirectory):
+
+        ## initialize latex metadata
+        nb['metadata']['latex_metadata'] = {}
+
+        ## check for relative paths
+        path = ''
+        if subdirectory != '':
+            path = "../"
+            slashes = subdirectory.count('/')
+            for i in range(slashes):
+                path += "../"
+
+        ## add check for logo here as well
+        if nb.metadata.title:
+            nb.metadata.latex_metadata.title = nb.metadata.title
+        if "jupyter_pdf_logo" in builderSelf.config and builderSelf.config['jupyter_pdf_logo']:
+            nb.metadata.latex_metadata.logo = path + builderSelf.config['jupyter_pdf_logo']
+        
+        if builderSelf.config["jupyter_bib_file"]:
+            nb.metadata.latex_metadata.bib = path + builderSelf.config["jupyter_bib_file"]
+
+        if builderSelf.config["jupyter_pdf_author"]:
+            nb.metadata.latex_metadata.author = builderSelf.config["jupyter_pdf_author"]
+
+        # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
+        return nb
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -148,6 +181,9 @@ class ExecuteNotebookWriter():
             ## generate html if needed
             if (builderSelf.config['jupyter_generate_html']):
                 builderSelf._convert_class.convert(executed_nb, filename, language_info, builderSelf.executedir, passed_metadata['path'])
+
+            if (builderSelf.config['jupyter_target_pdf']):
+                builderSelf._pdf_class.convertToLatex(builderSelf, filename_with_path)
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -179,8 +215,7 @@ class ExecuteNotebookWriter():
         for future, nb in as_completed(builderSelf.futures, with_results=True, raise_errors=False):
             count += 1
             filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures')
-            if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
-                builderSelf._pdf_class.convertToLatex(builderSelf, filename)
+            
 
         for future, nb in as_completed(builderSelf.delayed_futures, with_results=True, raise_errors=False):
             count += 1
@@ -188,8 +223,6 @@ class ExecuteNotebookWriter():
                 update_count_delayed = 0
                 total_count += len(builderSelf.delayed_futures)
             filename = builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures')
-            if ("jupyter_target_pdf" in builderSelf.config and builderSelf.config['jupyter_target_pdf'] is not False):
-                builderSelf._pdf_class.convertToLatex(builderSelf, filename)
 
         return error_results
 

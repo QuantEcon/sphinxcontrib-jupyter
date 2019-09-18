@@ -126,9 +126,6 @@ class JupyterpdfBuilder(Builder):
         self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 
-        #### add latex specific metadata to notebook
-        self.writer.output = self.add_latex_metadata(self.writer.output)
-
         ### execute the notebook - keep it forcefully on
         strDocname = str(docname)
         if strDocname in self.dependency_lists.keys():
@@ -180,25 +177,4 @@ class JupyterpdfBuilder(Builder):
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self)
-
-    def add_latex_metadata(self, nb_string):
-        nb_obj = json.loads(nb_string)
-
-        ## initialize latex metadata
-        nb_obj['metadata']['latex_metadata'] = {}
-
-        ## add check for logo here as well
-        if "jupyter_pdf_title" in self.config and self.config['jupyter_pdf_title']:
-            nb_obj['metadata']['latex_metadata']["title"] = self.config['jupyter_pdf_title']
-            if "jupyter_pdf_logo" in self.config and self.config['jupyter_pdf_logo']:
-                nb_obj['metadata']['latex_metadata']['logo'] = self.config['jupyter_pdf_logo']
-        
-        if self.config["jupyter_bib_file"]:
-            nb_obj['metadata']['latex_metadata']['bib'] = self.config["jupyter_bib_file"]
-
-        if self.config["jupyter_pdf_author"]:
-            nb_obj['metadata']['latex_metadata']['author'] = self.config["jupyter_pdf_author"]
-
-        nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
-        return nb_string
 
