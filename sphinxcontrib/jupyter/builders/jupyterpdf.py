@@ -33,6 +33,14 @@ class JupyterpdfBuilder(Builder):
     logger = logging.getLogger(__name__)
 
     def init(self):
+        ### initializing required classes
+        self._execute_notebook_class = ExecuteNotebookWriter(self)
+        self._pdf_class = MakePdfWriter(self)
+        self.executedir = self.outdir + '/executed'
+        self.reportdir = self.outdir + '/reports/'
+        self.errordir = self.outdir + "/reports/{}"
+        self.client = None
+
         # Check default language is defined in the jupyter kernels
         def_lng = self.config["jupyter_default_lang"]
         if  def_lng not in self.config["jupyter_kernels"]:
@@ -78,18 +86,15 @@ class JupyterpdfBuilder(Builder):
 
         #### forced execution of notebook
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
-        self.dependency_lists = self.config["jupyter_dependency_lists"]
-        self.executed_notebooks = []
-        self.delayed_notebooks = dict()
-        self.futures = []
-        self.delayed_futures = []
-
-        ### initializing required classes
-        self._execute_notebook_class = ExecuteNotebookWriter(self)
-        self._pdf_class = MakePdfWriter(self)
-        self.executedir = self.outdir + '/executed'
-        self.reportdir = self.outdir + '/reports/'
-        self.errordir = self.outdir + "/reports/{}"
+        self.execution_vars = {
+            'target': 'website',
+            'dependency_lists': self.config["jupyter_dependency_lists"],
+            'executed_notebooks': [],
+            'delayed_notebooks': dict(),
+            'futures': [],
+            'delayed_futures': [],
+            'destination': self.executedir
+        }
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -128,10 +133,10 @@ class JupyterpdfBuilder(Builder):
 
         ### execute the notebook - keep it forcefully on
         strDocname = str(docname)
-        if strDocname in self.dependency_lists.keys():
-            self.delayed_notebooks.update({strDocname: self.writer.output})
+        if strDocname in self.execution_vars['dependency_lists'].keys():
+            self.execution_vars['delayed_notebooks'].update({strDocname: self.writer.output})
         else:        
-            self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.futures)
+            self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.execution_vars, self.execution_vars['futures'])
 
         ### mkdir if the directory does not exist
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
@@ -176,5 +181,5 @@ class JupyterpdfBuilder(Builder):
         #progress(self.futures)
 
         # save executed notebook
-        error_results = self._execute_notebook_class.save_executed_notebook(self)
+        error_results = self._execute_notebook_class.save_executed_notebook(self, self.execution_vars)
 
