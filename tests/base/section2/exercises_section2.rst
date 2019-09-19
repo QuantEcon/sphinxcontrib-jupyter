@@ -1,6 +1,8 @@
 Exercises in section 2
 ======================
 
+This is a link back to the former section: :doc:`base section index <../index>`
+
 This is another file containing exercises.
 
 This text will not be repeated anywhere, however the text in an exercise will.
