@@ -62,14 +62,17 @@ def setup(app):
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
     app.add_config_value("jupyter_target_pdf", False, "jupyter")
     app.add_config_value("jupyter_coverage_dir", None, "jupyter")
-    app.add_config_value("jupyter_latex_template", None, "jupyter")
-    app.add_config_value("jupyter_pdf_logo", None, "jupyter")
-    app.add_config_value("jupyter_bib_file", None, "jupyter")
-    app.add_config_value("jupyter_pdf_author", None, "jupyter")
     app.add_config_value("jupyter_theme", None, "jupyter")
     app.add_config_value("jupyter_theme_path", "theme", "jupyter")
     app.add_config_value("jupyter_template_path", "templates", "jupyter")
     app.add_config_value("jupyter_dependencies", None, "jupyter")
+
+    # Jupyter pdf options
+    app.add_config_value("jupyter_latex_template", None, "jupyter")
+    app.add_config_value("jupyter_pdf_logo", None, "jupyter")
+    app.add_config_value("jupyter_bib_file", None, "jupyter")
+    app.add_config_value("jupyter_pdf_author", None, "jupyter")
+    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
 
     
     # Jupyter Directive

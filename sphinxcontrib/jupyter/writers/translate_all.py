@@ -5,6 +5,7 @@ from docutils import nodes, writers
 from .translate_code import JupyterCodeTranslator
 from .utils import JupyterOutputCellGenerators
 from shutil import copyfile
+import copy
 import os
 
 
@@ -53,6 +54,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.reference_text_start = 0
         self.in_reference = False
         self.list_level = 0
+        self.skip_next_content = False
+        self.content_depth = self.jupyter_pdf_showcontentdepth
+        self.content_depth_to_skip = None
+        self.remove_next_content = False
         self.in_citation = False
         self.math_block_label = None
 
@@ -416,19 +421,39 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # title(section)
     def visit_title(self, node):
         JupyterCodeTranslator.visit_title(self, node)
-        self.add_markdown_cell()
+
+        ### to remove the main title from ipynb as they are already added by metadata
+        if self.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
+            return
+        else:
+            self.add_markdown_cell()
         if self.in_topic:
-            self.markdown_lines.append(
+            ### this prevents from making it a subsection from section
+            if self.jupyter_target_pdf and self.section_level == 1:
+                self.markdown_lines.append(
+                    "{} ".format("#" * (self.section_level)))
+            else:
+                self.markdown_lines.append(
                     "{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.markdown_lines.append(
                 "### {}\n".format(node.astext()))
         else:
-            self.markdown_lines.append(
-                "{} ".format("#" * self.section_level))
+            ### this makes all the sections go up one level to transform subsections to sections
+            if self.jupyter_target_pdf:
+                self.markdown_lines.append(
+                "{} ".format("#" * (self.section_level -1)))
+            else:
+                self.markdown_lines.append(
+                    "{} ".format("#" * self.section_level))
 
     def depart_title(self, node):
         if not self.table_builder:
+
+            ### to remove the main title from ipynb as they are already added by metadata
+            if self.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
+                self.markdown_lines = []
+                return
             self.markdown_lines.append(self.sep_paras)
 
     # emphasis(italic)
@@ -593,7 +618,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # list items
     def visit_bullet_list(self, node):
+        ## trying to return if it is in the topmost depth and it is more than 1 
+        if self.jupyter_target_pdf and (self.content_depth == self.jupyter_pdf_showcontentdepth) and self.content_depth > 1:
+            self.content_depth_to_skip = self.content_depth
+            self.initial_lines = []
+            return
+
         self.list_level += 1
+
         # markdown does not have option changing bullet chars
         self.bullets.append("-")
         self.indents.append(len(self.bullets[-1] * 2))  #add two per level
@@ -604,8 +636,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             self.markdown_lines.append(self.sep_paras)
             if self.in_topic:
                 self.add_markdown_cell()
-        self.bullets.pop()
-        self.indents.pop()
+        if len(self.bullets):
+            self.bullets.pop()
+            self.indents.pop()
 
     def visit_enumerated_list(self, node):
         self.list_level += 1
@@ -621,12 +654,33 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.indents.pop()
 
     def visit_list_item(self, node):
+
+        ## do not add this list item to the list
+        if self.skip_next_content is True:
+           self.markdown_lines = copy.deepcopy(self.initial_lines)
+           self.skip_next_content = False
+        
+        ## if we do not want to add the items in this depth to the list
+        if self.content_depth == self.content_depth_to_skip:
+           self.initial_lines = copy.deepcopy(self.markdown_lines)
+           self.skip_next_content = True
+
+           ## only one item in this content depth to remove 
+           self.content_depth -= 1
+           return
+
+        ## check if there is a list level
+        if self.list_level == 0:
+            return
         self.in_list = True
         head = "{} ".format(self.bullets[-1])
         self.markdown_lines.append(head)
         self.list_item_starts.append(len(self.markdown_lines))
 
     def depart_list_item(self, node):
+        ## check if there is a list level
+        if self.list_level == 0:
+            return
         self.in_list = False
         list_item_start = self.list_item_starts.pop()
         indent = self.indent_char * self.indents[-1]
@@ -821,7 +875,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # ================
     # general methods
     # ================
-    def add_markdown_cell(self, slide_type="slide"):
+    def add_markdown_cell(self, slide_type="slide", title=False):
         """split a markdown cell here
 
         * add the slideshow metadata
@@ -837,6 +891,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.metadata_slide:  # modify the slide metadata on each cell
                 new_md_cell.metadata["slideshow"] = slide_info
                 self.slide = slide_type
+            if title:
+                new_md_cell.metadata["hide-input"] = True
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
 
