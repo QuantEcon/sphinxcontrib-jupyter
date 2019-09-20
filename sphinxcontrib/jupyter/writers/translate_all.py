@@ -618,7 +618,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     # list items
     def visit_bullet_list(self, node):
-        ## trying to return if it is in the topmost depth and it is more than 1 
+        ## trying to return if it is in the topmost depth and it is more than 1
         if self.jupyter_target_pdf and (self.content_depth == self.jupyter_pdf_showcontentdepth) and self.content_depth > 1:
             self.content_depth_to_skip = self.content_depth
             self.initial_lines = []
@@ -664,13 +664,14 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if self.content_depth == self.content_depth_to_skip:
            self.initial_lines = copy.deepcopy(self.markdown_lines)
            self.skip_next_content = True
+           self.content_depth_to_skip = None
 
            ## only one item in this content depth to remove 
            self.content_depth -= 1
            return
 
         ## check if there is a list level
-        if self.list_level == 0:
+        if not len(self.bullets):
             return
         self.in_list = True
         head = "{} ".format(self.bullets[-1])
@@ -679,7 +680,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_list_item(self, node):
         ## check if there is a list level
-        if self.list_level == 0:
+        if len(self.list_item_starts):
             return
         self.in_list = False
         list_item_start = self.list_item_starts.pop()
