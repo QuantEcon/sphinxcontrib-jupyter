@@ -26,7 +26,7 @@ and then you can modify options (set in the ``conf.py`` file) using the `-D` fla
             @$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_target_html=1 -D jupyter_images_markdown=0 -D jupyter_html_template="theme/templates/lectures-nbconvert.tpl" -D jupyter_download_nb_urlpath="https://lectures.quantecon.org/"
 
 this will setup a new folder ``_build/website`` for the new build pathway to 
-store resultant files from the options selected.
+store resultant files from the options selected. See :doc:`builders` for further details.
 
 .. note:: 
 
