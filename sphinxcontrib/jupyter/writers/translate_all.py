@@ -492,7 +492,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """anchor link"""
         self.in_reference = True
         if self.jupyter_target_pdf:
-            if "refuri" in node and "http" in node["refuri"]:
+            if "refuri" in node and ("http" in node["refuri"] or ("internal" in node.attributes and node.attributes["internal"] == True and 'references#' not in node["refuri"])):
                 self.markdown_lines.append("\href{")
             elif "refid" in node:
                 if 'equation-' in node['refid']:
@@ -535,7 +535,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 refuri = node["refuri"]
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    if self.jupyter_target_html:
+                    if self.jupyter_target_html or (self.jupyter_target_pdf and 'references#' not in refuri):
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
                         ## add url path if it is set
                         if self.urlpath is not None:
@@ -588,7 +588,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 if "\href{" == label:  #no label just a url
                     self.markdown_lines.append(label + "{" + refuri + "}")
                 else:
-                    self.markdown_lines.append(refuri + "}" + "{" + label + "}")                
+                    self.markdown_lines.append(refuri + "}" + "{" + label + "}")
             # if self.jupyter_target_pdf and self.in_toctree:
             #     #TODO: this will become an internal link when making a single unified latex file
             #     formatted_text = " \\ref{" + refuri + "}"
