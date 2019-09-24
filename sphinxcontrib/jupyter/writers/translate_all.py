@@ -492,8 +492,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """anchor link"""
         self.in_reference = True
         if self.jupyter_target_pdf:
-            if "refuri" in node and ("http" in node["refuri"] or ("internal" in node.attributes and node.attributes["internal"] == True and 'references#' not in node["refuri"])):
-                self.markdown_lines.append("\href{")
+            if "refuri" in node and "http" in node["refuri"]:
+                self.markdown_lines.append("[")
             elif "refid" in node:
                 if 'equation-' in node['refid']:
                     self.markdown_lines.append("\eqref{")
@@ -501,6 +501,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     pass
                 else:
                     self.markdown_lines.append("\hyperlink{")
+            elif "refuri" in node and "internal" in node.attributes and node.attributes["internal"] == True and 'references#' not in node["refuri"]:
+                self.markdown_lines.append("[")
             else:
                 self.markdown_lines.append("\hyperlink{")
         else:
@@ -535,7 +537,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 refuri = node["refuri"]
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
-                    if self.jupyter_target_html or (self.jupyter_target_pdf and 'references#' not in refuri):
+                    if self.jupyter_target_html:
                         refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
                         ## add url path if it is set
                         if self.urlpath is not None:
@@ -546,6 +548,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                         if "hyperlink" in self.markdown_lines[-1]:
                             self.markdown_lines.pop()
                         refuri = "reference-\\cite{" + label
+                    elif self.jupyter_target_pdf and 'references' not in refuri:
+                        self.markdown_lines.append("]({})".format(self.urlpath + refuri + ".html"))
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
@@ -576,6 +580,15 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 refuri = refuri.replace(")", "%29")
             if self.jupyter_target_pdf and 'reference-' in refuri:
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
+            elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
+                pass
+            elif "refuri" in node.attributes and self.jupyter_target_pdf and "http" in node["refuri"]:
+                self.markdown_lines.append("]({})".format(refuri))
+                #label = self.markdown_lines.pop()
+                # if "\href{" == label:  #no label just a url
+                #     self.markdown_lines.append(label + "{" + refuri + "}")
+                # else:
+                #     self.markdown_lines.append(refuri + "}" + "{" + label + "}")
             elif self.jupyter_target_pdf and self.in_inpage_reference:
                 labeltext = self.markdown_lines.pop()
                 # Check for Equations as they do not need labetext
@@ -583,12 +596,6 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     self.markdown_lines.append(refuri + "}")
                 else:
                     self.markdown_lines.append(refuri + "}{" + labeltext + "}")
-            elif self.jupyter_target_pdf and "http" in node["refuri"]:
-                label = self.markdown_lines.pop()
-                if "\href{" == label:  #no label just a url
-                    self.markdown_lines.append(label + "{" + refuri + "}")
-                else:
-                    self.markdown_lines.append(refuri + "}" + "{" + label + "}")
             # if self.jupyter_target_pdf and self.in_toctree:
             #     #TODO: this will become an internal link when making a single unified latex file
             #     formatted_text = " \\ref{" + refuri + "}"
