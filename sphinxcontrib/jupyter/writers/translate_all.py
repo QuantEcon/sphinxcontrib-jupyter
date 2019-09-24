@@ -581,8 +581,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf and 'reference-' in refuri:
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
+                ### handling inter notebook links
                 pass
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "http" in node["refuri"]:
+                ### handling extrernal links
                 self.markdown_lines.append("]({})".format(refuri))
                 #label = self.markdown_lines.pop()
                 # if "\href{" == label:  #no label just a url
@@ -687,7 +689,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_list_item(self, node):
         ## check if there is a list level
-        if len(self.list_item_starts):
+        if not len(self.list_item_starts):
             return
         self.in_list = False
         list_item_start = self.list_item_starts.pop()
