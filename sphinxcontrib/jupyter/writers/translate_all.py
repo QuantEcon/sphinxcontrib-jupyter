@@ -549,7 +549,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                             self.markdown_lines.pop()
                         refuri = "reference-\\cite{" + label
                     elif self.jupyter_target_pdf and 'references' not in refuri:
-                        self.markdown_lines.append("]({})".format(self.urlpath + refuri + ".html"))
+                        hashIndex = refuri.rfind("#")
+                        if hashIndex > 0:
+                            refuri = refuri[0:hashIndex] + ".html" + refuri[hashIndex:]
+                        else:
+                            refuri = refuri + ".html"
+                        self.markdown_lines.append("]({})".format(self.urlpath + refuri))
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
