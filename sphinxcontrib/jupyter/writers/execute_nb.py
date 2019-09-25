@@ -1,6 +1,7 @@
 import nbformat
 from sphinx.util.osutil import ensuredir
 import os.path
+import shutil
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
@@ -185,6 +186,7 @@ class ExecuteNotebookWriter():
             ## generate pdfs if set to true
             if (builderSelf.config['jupyter_target_pdf']):
                 builderSelf._pdf_class.convertToLatex(builderSelf, filename_with_path)
+                builderSelf._pdf_class.movePdf(builderSelf)
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             

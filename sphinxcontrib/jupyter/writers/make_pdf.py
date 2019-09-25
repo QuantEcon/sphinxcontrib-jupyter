@@ -3,6 +3,8 @@ from nbconvert import PDFExporter
 from nbconvert import LatexExporter
 import os
 import sys
+import shutil
+import glob
 from io import open
 import subprocess
 from sphinx.util.osutil import ensuredir
@@ -25,6 +27,32 @@ class MakePdfWriter():
 
         self.pdf_exporter = PDFExporter()
         self.tex_exporter = LatexExporter()
+    
+    def movePdf(self, builderSelf):
+        dirLists = []
+        movefiles = True
+        for root, dirs, files in os.walk(self.texdir, topdown=True):
+            if movefiles:
+                for f in files:
+                    if ".pdf" in f:
+                        source = root + "/" + f
+                        shutil.move(source, self.pdfdir)
+                movefiles = False
+            for name in dirs:
+                presentdir = os.path.join(root, name)
+                source = root + "/" + name
+                subdirectory = source.replace(self.texdir, "")
+                destination = self.pdfdir + subdirectory
+                pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
+                if subdirectory in dirLists:
+                    continue
+                if len(pdfs):
+                    ensuredir(destination)
+                    dirLists.append(subdirectory)
+                else:
+                    continue
+                for pdf in pdfs:
+                    shutil.move(pdf, destination)
 
     def convertToLatex(self, builderSelf, filename):
         """

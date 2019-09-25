@@ -14,6 +14,7 @@ from ..writers.execute_nb import ExecuteNotebookWriter
 from ..writers.make_pdf import MakePdfWriter
 from sphinx.util import logging
 import pdb
+import shutil
 
 class JupyterpdfBuilder(Builder):
     """
@@ -170,7 +171,17 @@ class JupyterpdfBuilder(Builder):
                 if (self.config["jupyter_execute_notebooks"]):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
+        self.copy_static_folder_to_subfolders(self.executedir)
 
+    ## copying static folder to subfolders - will remove this later
+    def copy_static_folder_to_subfolders(self, sourcedir):
+        dirs = os.listdir(sourcedir)
+        sourcefolder = sourcedir + "/_static"
+        for folder in dirs:
+            if "_static" not in folder and "." not in folder:
+                destination = sourcedir + "/" + folder + "/_static"
+                if not os.path.exists(destination):
+                    shutil.copytree(sourcefolder , destination)
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
