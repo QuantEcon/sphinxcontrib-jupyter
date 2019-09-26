@@ -15,6 +15,7 @@ from ..writers.make_pdf import MakePdfWriter
 from sphinx.util import logging
 import pdb
 import shutil
+from distutils.spawn import find_executable
 
 class JupyterpdfBuilder(Builder):
     """
@@ -34,6 +35,11 @@ class JupyterpdfBuilder(Builder):
     logger = logging.getLogger(__name__)
 
     def init(self):
+        if not find_executable('xelatex'):
+            self.logger.warning(
+                "Cannot find xelatex executable for pdf compilation"
+            )
+            exit(1)
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
         self._pdf_class = MakePdfWriter(self)
