@@ -128,7 +128,7 @@ class JupyterpdfBuilder(Builder):
         destination = docutils.io.StringOutput(encoding="utf-8")
 
         ### output notebooks for executing for single pdfs, the urlpath should be set to website url
-        self.writer._set_ref_urlpath("https://lectures.quantecon.org/py/")
+        self.writer._set_ref_urlpath(self.config["jupyter_pdf_urlpath"])
         self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 

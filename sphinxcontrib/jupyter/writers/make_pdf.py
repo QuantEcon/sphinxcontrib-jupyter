@@ -79,8 +79,9 @@ class MakePdfWriter():
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
         fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
 
-        ## do not convert index and zreferences to latex
-        if filename.find('index') == -1 and filename.find('zreferences') == -1:  
+        ## do not convert excluded patterns to latex
+        excludedFileArr = [x in filename for x in builderSelf.config['jupyter_pdf_excludepatterns']]
+        if not True in excludedFileArr:  
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
