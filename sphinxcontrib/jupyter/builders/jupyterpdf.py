@@ -189,6 +189,12 @@ class JupyterpdfBuilder(Builder):
                 if not os.path.exists(destination):
                     shutil.copytree(sourcefolder , destination)
 
+    def add_bib_to_latex(self, nb, bool):
+        # get a NotebookNode object from a string
+        if 'latex_metadata' not in nb.metadata:
+            nb.metadata['latex_metadata'] = {}
+        nb.metadata['latex_metadata']['bib_include'] = bool
+
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
 

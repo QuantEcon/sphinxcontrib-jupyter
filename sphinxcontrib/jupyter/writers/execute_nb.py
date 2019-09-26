@@ -56,7 +56,8 @@ class ExecuteNotebookWriter():
     def add_latex_metadata(self, builderSelf, nb, subdirectory):
 
         ## initialize latex metadata
-        nb['metadata']['latex_metadata'] = {}
+        if 'latex_metadata' not in nb['metadata']:
+            nb['metadata']['latex_metadata'] = {}
 
         ## check for relative paths
         path = ''
@@ -78,6 +79,8 @@ class ExecuteNotebookWriter():
         if builderSelf.config["jupyter_pdf_author"]:
             nb.metadata.latex_metadata.author = builderSelf.config["jupyter_pdf_author"]
 
+        ## default bib file inclusion is false
+            nb.metadata.latex_metadata.bib_include = False
         # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
         return nb
 

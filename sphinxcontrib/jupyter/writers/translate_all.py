@@ -209,6 +209,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 image += 'align="{}"'.format(attrs["align"])
             image = image.rstrip() + ">\n\n"  #Add double space for html
         self.markdown_lines.append(image)
+    
+    def depart_image(self, node):
+        if self.jupyter_target_pdf:
+            self.markdown_lines.append("\n")
 
     # math
     def visit_math(self, node):
@@ -548,6 +552,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                         if "hyperlink" in self.markdown_lines[-1]:
                             self.markdown_lines.pop()
                         refuri = "reference-\\cite{" + label
+                        self.add_bib_to_latex(self.output, True)
                     elif self.jupyter_target_pdf and 'references' not in refuri:
                         hashIndex = refuri.rfind("#")
                         if hashIndex > 0:
