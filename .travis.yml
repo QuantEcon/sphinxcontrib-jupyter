@@ -46,4 +46,4 @@ install:
   - python setup.py install
 
 script:
-  - cd tests && make rst-test && make no-inline-test
+  - cd tests && make test && make no-inline-test

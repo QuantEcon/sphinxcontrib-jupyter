@@ -26,10 +26,7 @@ help:
 
 .PHONY: help Makefile pdf rst-test
 
-rst-test: clean clean-pdf jupyter pdf
-	python check_diffs.py
-
-pdf-test: clean-pdf pdf
+test: clean clean-pdf jupyter pdf
 	python check_diffs.py
 
 no-inline:

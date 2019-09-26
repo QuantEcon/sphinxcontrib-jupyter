@@ -21,7 +21,11 @@ if sys.version_info.major == 2:
 
 
 SPHINX_VERSION = sphinx.version_info
-CONFIGSETS = ['base', 'pdf', "no_inline_exercises"]
+CONFIGSETS = {
+    'base'  : "jupyter", 
+    'pdf'   : "jupyterpdf",
+    'no_inline_exercises' : "jupyter",
+}
 
 #-Diff Configuration-#
 NB_VERSION = 4
@@ -39,13 +43,15 @@ def python27_glob(path, pattern):
             matches.append(os.path.join(root, filename))
     return matches
 
-def check_set(PATH):
+def check_set(PATH, BUILDER):
     if sys.version_info.major == 2:
-        GENERATED_IPYNB_FILES = python27_glob(PATH+"/_build/jupyter/", "*.ipynb")
+        GENERATED_IPYNB_FILES = python27_glob(PATH+"/_build/" + BUILDER + "/", "*.ipynb")
+        GENERATED_IPYNB_FILES = [fl for fl in GENERATED_IPYNB_FILES if "/executed/" not in fl]      #Only compare Generated Versions (not Executed)
         ref_files = python27_glob(PATH + "/ipynb/", "*.ipynb")
         REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files] 
     else:
-        GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/jupyter/**/*.ipynb", recursive=True)
+        GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/" + BUILDER + "/**/*.ipynb", recursive=True)
+        GENERATED_IPYNB_FILES = [fl for fl in GENERATED_IPYNB_FILES if "/executed/" not in fl]      #Only compare Generated Versions (not Executed)
         ref_files = glob.glob(PATH + "/ipynb/**/*.ipynb", recursive=True)
         REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
     failed = 0
@@ -81,6 +87,7 @@ def check_set(PATH):
 #-Main-#
 for configset in CONFIGSETS:
     print("Testing Configuration Set: {}".format(configset))
-    failed = check_set(configset)
+    builder = CONFIGSETS[configset]
+    failed = check_set(configset, builder)
     if failed != 0:
         exit(failed)

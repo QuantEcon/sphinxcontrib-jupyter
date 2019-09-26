@@ -4,5 +4,5 @@
 References
 **********
 
-.. bibliography:: ./test.bib
+.. bibliography:: _static/test.bib
 	:cited:
