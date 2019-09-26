@@ -70,3 +70,30 @@ Specify which depth of the local contents directives to add to generated pdf fil
 
     this shows second level contents by default as the pdf document adds the page 
     or document title to the top of the article format.
+
+jupyter_pdf_urlpath
+-------------------
+
+Enable local links within the project to link a hosted located via a urlprefix and 
+link modification.
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_pdf_urlpath  = "https://lectures.quantecon.org/"
+
+
+jupyter_pdf_excludepatterns
+---------------------------
+
+Exclude certainly documents from getting compiled as pdf files. 
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_pdf_excludepatterns = ["index", "404", "search"]
+
+This can be useful for `make site` when `pdf` construction is part of 
+a broader project that supports `html` targets.
