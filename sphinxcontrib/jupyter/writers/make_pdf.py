@@ -62,6 +62,7 @@ class MakePdfWriter():
         tex_data = ''
         tex_build_path = self.texdir + relative_path
         pdf_build_path = self.pdfdir + relative_path
+        templateFolder = builderSelf.config['jupyter_template_path']
 
         ensuredir(tex_build_path)
         ensuredir(pdf_build_path)
@@ -77,7 +78,7 @@ class MakePdfWriter():
 
         fl_ipynb = builderSelf.executed_notebook_dir + "/" + "{}.ipynb".format(filename)
         fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
-        fl_tex_template = builderSelf.confdir + "/" + builderSelf.config['jupyter_latex_template']
+        fl_tex_template = builderSelf.confdir + "/" + templateFolder + "/" + builderSelf.config['jupyter_latex_template']
 
         ## do not convert excluded patterns to latex
         excludedFileArr = [x in filename for x in builderSelf.config['jupyter_pdf_excludepatterns']]
