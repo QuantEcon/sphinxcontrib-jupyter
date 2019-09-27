@@ -186,7 +186,7 @@ class ExecuteNotebookWriter():
             
             ## generate pdfs if set to true
             if (builderSelf.config['jupyter_target_pdf']):
-                builderSelf._pdf_class.convertToLatex(builderSelf, filename_with_path)
+                builderSelf._pdf_class.convertToLatex(builderSelf, filename_with_path, executed_nb['metadata']['latex_metadata'])
                 builderSelf._pdf_class.movePdf(builderSelf)
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))

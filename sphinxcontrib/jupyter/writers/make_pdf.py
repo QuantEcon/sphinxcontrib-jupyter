@@ -54,7 +54,7 @@ class MakePdfWriter():
                 for pdf in pdfs:
                     shutil.move(pdf, destination)
 
-    def convertToLatex(self, builderSelf, filename):
+    def convertToLatex(self, builderSelf, filename, latex_metadata):
         """
         function to convert notebooks to latex
         """
@@ -99,7 +99,8 @@ class MakePdfWriter():
 
             try:
                 self.subprocessXelatex(fl_tex, filename)
-                self.subprocessBibtex(filename)
+                if 'bib_include' in latex_metadata:
+                    self.subprocessBibtex(filename)
                 self.subprocessXelatex(fl_tex, filename)
                 self.subprocessXelatex(fl_tex, filename)
             except OSError as e:

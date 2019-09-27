@@ -193,7 +193,7 @@ class JupyterpdfBuilder(Builder):
         # get a NotebookNode object from a string
         if 'latex_metadata' not in nb.metadata:
             nb.metadata['latex_metadata'] = {}
-        print(bool," bool")
+
         nb.metadata['latex_metadata']['bib_include'] = bool
 
     def finish(self):
