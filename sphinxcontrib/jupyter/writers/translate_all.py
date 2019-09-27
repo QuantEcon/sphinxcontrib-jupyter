@@ -77,6 +77,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """at start
         """
         JupyterCodeTranslator.visit_document(self, node)
+        self.add_bib_to_latex(self.output, False)
 
     def depart_document(self, node):
         """at end
