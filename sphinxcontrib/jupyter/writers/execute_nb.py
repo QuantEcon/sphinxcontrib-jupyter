@@ -28,7 +28,6 @@ class ExecuteNotebookWriter():
         filename = filename
         subdirectory = ''
         full_path = filename
-            
         # check if there are subdirectories
         index = filename.rfind('/')
         if index > 0:

@@ -72,12 +72,12 @@ class MakePdfWriter():
 
         ## copies all theme folder images to static folder
         if os.path.exists(builderSelf.confdir + "/theme/static/img"):
-            copy_tree(builderSelf.confdir + "/theme/static/img", builderSelf.executed_notebook_dir + "/_static/img/", preserve_symlinks=1)
+            copy_tree(builderSelf.confdir + "/theme/static/img", self.texdir + "/_static/img/", preserve_symlinks=1)
         else:
-            self.logger.warning("Theme folder not present. Consider creating a theme folder for static assets")
+            self.logger.warning("Image folder not present inside the theme folder")
 
-        fl_ipynb = builderSelf.executed_notebook_dir + "/" + "{}.ipynb".format(filename)
-        fl_tex = builderSelf.executed_notebook_dir + "/" + "{}.tex".format(filename)
+        fl_ipynb = self.texdir + "/" + "{}.ipynb".format(filename)
+        fl_tex = self.texdir + "/" + "{}.tex".format(filename)
         fl_tex_template = builderSelf.confdir + "/" + templateFolder + "/" + builderSelf.config['jupyter_latex_template']
 
         ## do not convert excluded patterns to latex
