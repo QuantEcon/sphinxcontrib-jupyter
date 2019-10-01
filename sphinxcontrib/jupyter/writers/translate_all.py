@@ -505,7 +505,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                     pass
                 else:
                     self.markdown_lines.append("\hyperlink{")
-            elif "refuri" in node and "internal" in node.attributes and node.attributes["internal"] == True and 'references#' not in node["refuri"]:
+            elif "refuri" in node and 'references#' not in node["refuri"]:
                 self.markdown_lines.append("[")
             else:
                 self.markdown_lines.append("\hyperlink{")
@@ -514,6 +514,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.reference_text_start = len(self.markdown_lines)
 
     def depart_reference(self, node):
+        subdirectory = False
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
@@ -531,6 +532,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                                 r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–"]
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
+                    uri_text = uri_text.replace("--","-")
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
             else:
                 formatted_text = "](#{})".format(uri_text)
@@ -554,6 +556,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                         refuri = "reference-\\cite{" + label
                         self.add_bib_to_latex(self.output, True)
                     elif self.jupyter_target_pdf and 'references' not in refuri:
+                        if self.source_file_name.split('/')[-2] and 'rst' not in self.source_file_name.split('/')[-2]:
+                            subdirectory = self.source_file_name.split('/')[-2]
+                        if subdirectory: refuri = subdirectory + "/" + refuri
                         hashIndex = refuri.rfind("#")
                         if hashIndex > 0:
                             refuri = refuri[0:hashIndex] + ".html" + refuri[hashIndex:]

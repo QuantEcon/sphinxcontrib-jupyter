@@ -186,7 +186,7 @@ class JupyterpdfBuilder(Builder):
         for folder in dirs:
             if "_static" not in folder and "." not in folder:
                 destination = sourcedir + "/" + folder + "/_static"
-                if os.path.exists(sourcefolder):                            #ensure source exists and copy to destination to ensure latest version
+                if os.path.exists(sourcefolder) and not os.path.exists(destination):                            #ensure source exists and copy to destination to ensure latest version
                     shutil.copytree(sourcefolder , destination)
 
     def add_bib_to_latex(self, nb, bool):
