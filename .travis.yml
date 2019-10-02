@@ -45,7 +45,7 @@ install:
   - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
       pip install sphinxcontrib-bibtex==0.4.2;
     else
-      pip install sphinxcontrib-bibtex
+      pip install sphinxcontrib-bibtex;
     fi
   - python setup.py install
 
