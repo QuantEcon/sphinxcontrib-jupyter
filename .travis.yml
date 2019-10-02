@@ -12,6 +12,11 @@ env:
   - SPHINX_VERSION=2.1.2
 
 matrix:
+  include:
+    -python: 2.7
+      env: sphinxcontrib-bibtex=0.4.2
+
+matrix:
   exclude:
   - python: 2.7
     env: SPHINX_VERSION=2.1.2
