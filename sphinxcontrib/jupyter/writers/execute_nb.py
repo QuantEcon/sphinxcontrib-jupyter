@@ -20,15 +20,14 @@ class ExecuteNotebookWriter():
     startFlag = 0
     def __init__(self, builderSelf):
         pass
-    def execute_notebook(self, builderSelf, f, filename, params, futures):
+    def execute_notebook(self, builderSelf, nb, filename, params, futures):
         execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
         timeout = execute_nb_config["timeout"]
         filename = filename
         subdirectory = ''
         full_path = filename
-        # get a NotebookNode object from a string
-        nb = nbformat.reads(f, as_version=4)
+        
         language = nb.metadata.kernelspec.language
         if (language.lower().find('python') != -1):
             language = 'python'
@@ -72,6 +71,7 @@ class ExecuteNotebookWriter():
         if (self.startFlag == 0):
             self.startFlag = 1
             builderSelf.client.get_task_stream()
+
 
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
 
