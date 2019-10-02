@@ -36,6 +36,7 @@ class MakePdfWriter():
                 for f in files:
                     if ".pdf" in f:
                         source = root + "/" + f
+                        self.checkAndRemoveDestFile(self.pdfdir, f)
                         shutil.move(source, self.pdfdir)
                 movefiles = False
             for name in dirs:
@@ -52,7 +53,15 @@ class MakePdfWriter():
                 else:
                     continue
                 for pdf in pdfs:
+                    filename = pdf.split('/')[-1]
+                    self.checkAndRemoveDestFile(destination, filename)
                     shutil.move(pdf, destination)
+
+    def checkAndRemoveDestFile(self, destination, filename):
+        print(filename, "filename")
+        destinationFile = destination + "/"  + filename
+        if os.path.exists(destinationFile):
+            os.remove(destinationFile)
 
     def convertToLatex(self, builderSelf, filename, latex_metadata):
         """
