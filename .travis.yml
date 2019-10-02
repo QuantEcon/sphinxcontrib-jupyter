@@ -12,13 +12,6 @@ env:
   - SPHINX_VERSION=2.1.2
 
 matrix:
-  include:
-    - python: 2.7
-      env: SPHINXCONTRIB_BIBTEX_VERSION=0.4.2
-    - python: 3.7
-      env: SPHINXCONTRIB_BIBTEX_VERSION=1.0.0
-
-matrix:
   exclude:
   - python: 2.7
     env: SPHINX_VERSION=2.1.2
@@ -49,7 +42,11 @@ before_install:
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat dask distributed
   - pip install nbdime
-  - pip install sphinxcontrib-bibtex==$SPHINXCONTRIB_BIBTEX_VERSION
+  - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
+      pip install sphinxcontrib-bibtex==0.4.2;
+    else
+      pip install sphinxcontrib-bibtex
+    fi
   - python setup.py install
 
 script:
