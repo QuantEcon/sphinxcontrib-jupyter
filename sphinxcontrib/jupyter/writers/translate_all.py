@@ -564,7 +564,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                             refuri = refuri[0:hashIndex] + ".html" + refuri[hashIndex:]
                         else:
                             refuri = refuri + ".html"
-                        self.markdown_lines.append("]({})".format(self.urlpath + refuri))
+                        if self.urlpath:
+                            self.markdown_lines.append("]({})".format(self.urlpath + refuri))
+                        else:
+                            self.markdown_lines.append("]({})".format(refuri))
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
