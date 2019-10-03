@@ -15,7 +15,6 @@ from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
-from .process_latex import main as latexProcessing 
 from .utils import python27_glob
 
 class MakePDFWriter():
@@ -106,7 +105,6 @@ class MakePDFWriter():
                 subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             else:
                 subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
-            latexProcessing(self, fl_tex)
 
             ### check if subdirectory
             subdirectory = ""
