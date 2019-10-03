@@ -94,7 +94,10 @@ class MakePdfWriter():
         if not True in excludedFileArr:  
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
-            subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+            if sys.version_info[0] < 3:
+                subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+            else:
+                subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
             latexProcessing(self, fl_tex)
 
             ### check if subdirectory
