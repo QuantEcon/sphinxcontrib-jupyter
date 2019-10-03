@@ -170,3 +170,10 @@ def copy_dependencies(builderSelf, outdir = None):
                 for dep in deps:
                     copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
 
+
+def python27_glob(path, pattern):
+    matches = []
+    for root, dirnames, filenames in os.walk(path):
+        for filename in fnmatch.filter(filenames, pattern):
+            matches.append(os.path.join(root, filename))
+    return matches

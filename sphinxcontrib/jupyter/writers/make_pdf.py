@@ -16,6 +16,7 @@ from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
 from .process_latex import main as latexProcessing 
+from .utils import python27_glob
 
 class MakePDFWriter():
     """
@@ -48,7 +49,10 @@ class MakePDFWriter():
                 source = root + "/" + name
                 subdirectory = source.replace(self.texdir, "")
                 destination = self.pdfdir + subdirectory
-                pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
+                if sys.version_info[0] < 3:
+                    pdfs = python27_glob(presentdir +"/", "*.pdf")
+                else:
+                    pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
                 if subdirectory in dir_lists:
                     continue
                 if len(pdfs):
