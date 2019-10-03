@@ -1,3 +1,7 @@
+"""
+PDF Converter from IPYNB to TEX to PDF
+"""
+
 import nbformat
 from nbconvert import PDFExporter
 from nbconvert import LatexExporter
@@ -13,14 +17,14 @@ from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
 from .process_latex import main as latexProcessing 
 
-class MakePdfWriter():
+class MakePDFWriter():
     """
     Makes pdf for each notebook
     """
     logger = logging.getLogger(__name__)
-    def __init__(self, builderSelf):
-        self.pdfdir = builderSelf.outdir + "/pdf" #pdf directory 
-        self.texdir = builderSelf.outdir + "/executed" #latex directory 
+    def __init__(self, builder):
+        self.pdfdir = builder.outdir + "/pdf" #pdf directory 
+        self.texdir = builder.outdir + "/executed" #latex directory 
 
         for path in [self.pdfdir, self.texdir]:
             ensuredir(path)
@@ -28,42 +32,42 @@ class MakePdfWriter():
         self.pdf_exporter = PDFExporter()
         self.tex_exporter = LatexExporter()
     
-    def movePdf(self, builderSelf):
-        dirLists = []
-        movefiles = True
+    def move_pdf(self, builder):
+        dir_lists = []
+        move_files = True
         for root, dirs, files in os.walk(self.texdir, topdown=True):
-            if movefiles:
+            if move_files:
                 for f in files:
                     if ".pdf" in f:
                         source = root + "/" + f
-                        self.checkAndRemoveDestFile(self.pdfdir, f)
+                        self.check_remove_destination_file(self.pdfdir, f)
                         shutil.move(source, self.pdfdir)
-                movefiles = False
+                move_files = False
             for name in dirs:
                 presentdir = os.path.join(root, name)
                 source = root + "/" + name
                 subdirectory = source.replace(self.texdir, "")
                 destination = self.pdfdir + subdirectory
                 pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
-                if subdirectory in dirLists:
+                if subdirectory in dir_lists:
                     continue
                 if len(pdfs):
                     ensuredir(destination)
-                    dirLists.append(subdirectory)
+                    dir_lists.append(subdirectory)
                 else:
                     continue
                 for pdf in pdfs:
                     filename = pdf.split('/')[-1]
-                    self.checkAndRemoveDestFile(destination, filename)
+                    self.check_remove_destination_file(destination, filename)
                     shutil.move(pdf, destination)
 
-    def checkAndRemoveDestFile(self, destination, filename):
+    def check_remove_destination_file(self, destination, filename):
         print(filename, "filename")
         destinationFile = destination + "/"  + filename
         if os.path.exists(destinationFile):
             os.remove(destinationFile)
 
-    def convertToLatex(self, builderSelf, filename, latex_metadata):
+    def convert_to_latex(self, builder, filename, latex_metadata):
         """
         function to convert notebooks to latex
         """
@@ -71,7 +75,7 @@ class MakePdfWriter():
         tex_data = ''
         tex_build_path = self.texdir + relative_path
         pdf_build_path = self.pdfdir + relative_path
-        templateFolder = builderSelf.config['jupyter_template_path']
+        template_folder = builder.config['jupyter_template_path']
 
         ensuredir(tex_build_path)
         ensuredir(pdf_build_path)
@@ -80,18 +84,18 @@ class MakePdfWriter():
         os.chdir(self.texdir)
 
         ## copies all theme folder images to static folder
-        if os.path.exists(builderSelf.confdir + "/theme/static/img"):
-            copy_tree(builderSelf.confdir + "/theme/static/img", self.texdir + "/_static/img/", preserve_symlinks=1)
+        if os.path.exists(builder.confdir + "/theme/static/img"):
+            copy_tree(builder.confdir + "/theme/static/img", self.texdir + "/_static/img/", preserve_symlinks=1)
         else:
             self.logger.warning("Image folder not present inside the theme folder")
 
         fl_ipynb = self.texdir + "/" + "{}.ipynb".format(filename)
         fl_tex = self.texdir + "/" + "{}.tex".format(filename)
-        fl_tex_template = builderSelf.confdir + "/" + templateFolder + "/" + builderSelf.config['jupyter_latex_template']
+        fl_tex_template = builder.confdir + "/" + template_folder + "/" + builder.config['jupyter_latex_template']
 
         ## do not convert excluded patterns to latex
-        excludedFileArr = [x in filename for x in builderSelf.config['jupyter_pdf_excludepatterns']]
-        if not True in excludedFileArr:  
+        excluded_files = [x in filename for x in builder.config['jupyter_pdf_excludepatterns']]
+        if not True in excluded_files:  
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             if sys.version_info[0] < 3:
@@ -111,18 +115,18 @@ class MakePdfWriter():
             os.chdir(self.texdir + "/" + subdirectory)
 
             try:
-                self.subprocessXelatex(fl_tex, filename)
+                self.subprocess_xelatex(fl_tex, filename)
                 if 'bib_include' in latex_metadata:
-                    self.subprocessBibtex(filename)
-                self.subprocessXelatex(fl_tex, filename)
-                self.subprocessXelatex(fl_tex, filename)
+                    self.subprocess_bibtex(filename)
+                self.subprocess_xelatex(fl_tex, filename)
+                self.subprocess_xelatex(fl_tex, filename)
             except OSError as e:
                 print(e)
             except AssertionError as e:
                 pass
                 # exit() - to be used when we want the execution to stop on error
 
-    def subprocessXelatex(self, fl_tex, filename):
+    def subprocess_xelatex(self, fl_tex, filename):
         p = subprocess.Popen(("xelatex", "-interaction=nonstopmode", fl_tex), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         output, error = p.communicate()
         if (p.returncode != 0):
@@ -130,7 +134,7 @@ class MakePdfWriter():
 
         # assert (p.returncode == 0), self.logger.warning('xelatex exited with returncode {} , encounterd in {} with error -- {}'.format(p.returncode , filename, error)) ---- assert statement stops the program, will handle it later
 
-    def subprocessBibtex(self, filename):
+    def subprocess_bibtex(self, filename):
         p = subprocess.Popen(('bibtex',filename), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         output, error = p.communicate()
         if (p.returncode != 0):
