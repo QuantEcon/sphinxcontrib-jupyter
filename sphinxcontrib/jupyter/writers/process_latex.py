@@ -84,6 +84,8 @@ def make_changes(f, filename):
     data = func_replace(f, data, filename)
     data = func_delete("vbnmc", "jhgbnm", f, False)
     data = func_delete("aghdwmz", "}", f)
+    if sys.version_info[0] < 3:
+        data = unicode(data)
     f.write(data)
 
 def main(self, filename):
