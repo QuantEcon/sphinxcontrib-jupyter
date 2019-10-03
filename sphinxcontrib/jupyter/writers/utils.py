@@ -6,6 +6,9 @@ from enum import Enum
 from sphinx.util.osutil import ensuredir
 from shutil import copy
 
+if sys.version_info.major == 2:
+    import fnmatch
+
 class LanguageTranslator:
     """
     Simple extensible translator for programming language names between Sphinx
