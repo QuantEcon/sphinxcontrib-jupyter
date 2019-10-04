@@ -14,6 +14,7 @@ that are available in this extension:
    config-extension-html
    config-extension-coverage
    config-extension-exercise
+   config-extension-pdf
 
 This extension also offers additional directives that can be used while writing your documents
 
