@@ -1,6 +1,7 @@
 import nbformat
 from sphinx.util.osutil import ensuredir
 import os.path
+import shutil
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
@@ -27,6 +28,12 @@ class ExecuteNotebookWriter():
         filename = filename
         subdirectory = ''
         full_path = filename
+        # check if there are subdirectories
+        index = filename.rfind('/')
+        if index > 0:
+            subdirectory = filename[0:index]
+            filename = filename[index + 1:]
+
         # get a NotebookNode object from a string
         nb = nbformat.reads(f, as_version=4)
         language = nb.metadata.kernelspec.language
@@ -34,18 +41,45 @@ class ExecuteNotebookWriter():
             language = 'python'
         elif (language.lower().find('julia') != -1):
             language = 'julia'
-            
-        # check if there are subdirectories
-        index = filename.rfind('/')
-        if index > 0:
-            subdirectory = filename[0:index]
-            filename = filename[index + 1:]
+
+        ## adding latex metadata
+        if builderSelf.config["jupyter_target_pdf"]:
+            nb = self.add_latex_metadata(builderSelf, nb, subdirectory)
 
         # - Parse Directories and execute them - #
         if coverage:
             self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
         else:
             self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
+
+    def add_latex_metadata(self, builderSelf, nb, subdirectory):
+
+        ## initialize latex metadata
+        if 'latex_metadata' not in nb['metadata']:
+            nb['metadata']['latex_metadata'] = {}
+
+        ## check for relative paths
+        path = ''
+        if subdirectory != '':
+            path = "../"
+            slashes = subdirectory.count('/')
+            for i in range(slashes):
+                path += "../"
+
+        ## add check for logo here as well
+        if nb.metadata.title:
+            nb.metadata.latex_metadata.title = nb.metadata.title
+        if "jupyter_pdf_logo" in builderSelf.config and builderSelf.config['jupyter_pdf_logo']:
+            nb.metadata.latex_metadata.logo = path + builderSelf.config['jupyter_pdf_logo']
+        
+        if builderSelf.config["jupyter_bib_file"]:
+            nb.metadata.latex_metadata.bib = path + builderSelf.config["jupyter_bib_file"]
+
+        if builderSelf.config["jupyter_pdf_author"]:
+            nb.metadata.latex_metadata.author = builderSelf.config["jupyter_pdf_author"]
+
+        # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
+        return nb
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -80,6 +114,7 @@ class ExecuteNotebookWriter():
         builderSelf.futuresInfo[future.key] = future_dict
 
         futures.append(future)
+
 
     def task_execution_time(self, builderSelf):
         ## calculates execution time of each task in client using get task stream
@@ -148,6 +183,11 @@ class ExecuteNotebookWriter():
             if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
                 builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
             
+            ## generate pdfs if set to true
+            if (builderSelf.config['jupyter_target_pdf']):
+                builderSelf._pdf_class.convert_to_latex(builderSelf, filename_with_path, executed_nb['metadata']['latex_metadata'])
+                builderSelf._pdf_class.move_pdf(builderSelf)
+            
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
 
@@ -159,6 +199,7 @@ class ExecuteNotebookWriter():
         results['errors']   = error_result
         results['language'] = language_info
         error_results.append(results)
+        return filename
 
     def save_executed_notebook(self, builderSelf, params):
         error_results = []

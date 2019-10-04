@@ -27,6 +27,7 @@ class convertToHtmlWriter():
 
         self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
 
+        
     def convert(self, nb, filename, language, base_path, path=None):
         fl_nb = ''
         fl_html = ''
