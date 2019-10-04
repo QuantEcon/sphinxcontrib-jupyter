@@ -2,6 +2,7 @@ import yaml
 yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
+from .builders.jupyterpdf import JupyterPDFBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -19,6 +20,9 @@ if SPHINX_VERSION[0] >= 2:
 def _noop(*args, **kwargs):
     pass
 
+def depart_exercise_node(self, node):
+    return HTML.depart_admonition(self, node)
+    
 
 def setup(app):
     execute_nb_obj = {
@@ -32,6 +36,7 @@ def setup(app):
     app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
+    app.add_builder(JupyterPDFBuilder)
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
@@ -63,6 +68,18 @@ def setup(app):
     app.add_config_value("jupyter_dependencies", None, "jupyter")
     app.add_config_value("jupyter_download_nb_execute", None, "jupyter")
 
+    # Jupyter pdf options
+    app.add_config_value("jupyter_latex_template", None, "jupyter")
+    app.add_config_value("jupyter_pdf_logo", None, "jupyter")
+    app.add_config_value("jupyter_bib_file", None, "jupyter")
+    app.add_config_value("jupyter_pdf_author", None, "jupyter")
+    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
+    app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
+
+
+
+    
     # Jupyter Directive
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)

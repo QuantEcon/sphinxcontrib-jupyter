@@ -195,8 +195,23 @@ jupyter_kernels = {
 # Default language for Jupyter notebooks
 jupyter_default_lang = "python3"
 
+jupyter_execute_notebooks = True
+
+## Theme specific variables
+jupyter_theme_path = 'theme'
+jupyter_template_path = 'theme/templates'
+
+# latex template specific to your website needs
+jupyter_latex_template = "latex.tpl"
+
 # Target PDF Construction
 jupyter_target_pdf = True
 
 #Switch Off Notebook Metadata
 jupyter_write_metadata = False
+
+jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"
+
+jupyter_bib_file = "_static/test"
+
+jupyter_pdf_author = "QuantEcon Developers"

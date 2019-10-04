@@ -12,7 +12,7 @@
      echo "Downloading texlive and installing"
      wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
      tar -xzf install-tl-unx.tar.gz
-     ./install-tl-*/install-tl --profile=./utiutillities/texlive.profile
+     ./install-tl-*/install-tl --profile=./util/texlive.profile
 
      echo "Finished install TexLive"
  fi

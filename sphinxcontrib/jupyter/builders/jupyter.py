@@ -14,6 +14,7 @@ from ..writers.convert import convertToHtmlWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
+import time
 from ..writers.utils import copy_dependencies
 from shutil import copyfile
 
@@ -159,8 +160,12 @@ class JupyterBuilder(Builder):
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
             self.writer.write(doctree, destination)
 
+            # get a NotebookNode object from a string
+            nb = nbformat.reads(self.writer.output, as_version=4)
+            nb = self.update_Metadata(nb)
             try:
                 with codecs.open(outfilename, "w", "utf-8") as f:
+                    self.writer.output = nbformat.writes(nb, version=4)
                     f.write(self.writer.output)
             except (IOError, OSError) as err:
                 self.warn("error writing file %s: %s" % (outfilename, err))
@@ -169,26 +174,29 @@ class JupyterBuilder(Builder):
             if (self.config['jupyter_download_nb_execute']):
                 strDocname = str(docname)
                 if strDocname in self.download_execution_vars['dependency_lists'].keys():
-                    self.download_execution_vars['delayed_notebooks'].update({strDocname: self.writer.output})
+                    self.download_execution_vars['delayed_notebooks'].update({strDocname: nb})
                 else:        
-                    self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.download_execution_vars, self.download_execution_vars['futures'])
+                    self._execute_notebook_class.execute_notebook(self, nb, docname, self.download_execution_vars, self.download_execution_vars['futures'])
 
         ### output notebooks for executing
         self.writer._set_ref_urlpath(None)
         self.writer._set_jupyter_download_nb_image_urlpath(None)
         self.writer.write(doctree, destination)
 
+        # get a NotebookNode object from a string
+        nb = nbformat.reads(self.writer.output, as_version=4)
+        nb = self.update_Metadata(nb)
+
         ### execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
             strDocname = str(docname)
             if strDocname in self.execution_vars['dependency_lists'].keys():
-                self.execution_vars['delayed_notebooks'].update({strDocname: self.writer.output})
+                self.execution_vars['delayed_notebooks'].update({strDocname: nb})
             else:        
-                self._execute_notebook_class.execute_notebook(self, self.writer.output, docname, self.execution_vars, self.execution_vars['futures'])
+                self._execute_notebook_class.execute_notebook(self, nb, docname, self.execution_vars, self.execution_vars['futures'])
         else:
             #do not execute
             if (self.config['jupyter_generate_html']):
-                nb = nbformat.reads(self.writer.output, as_version=4)
                 language_info = nb.metadata.kernelspec.language
                 self._convert_class = convertToHtmlWriter(self)
                 self._convert_class.convert(nb, docname, language_info, self.outdir)
@@ -199,9 +207,14 @@ class JupyterBuilder(Builder):
 
         try:
             with codecs.open(outfilename, "w", "utf-8") as f:
+                self.writer.output = nbformat.writes(nb, version=4)
                 f.write(self.writer.output)
         except (IOError, OSError) as err:
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
+
+    def update_Metadata(self, nb):
+        nb.metadata.date = time.time()
+        return nb
 
     def copy_static_files(self):
         """

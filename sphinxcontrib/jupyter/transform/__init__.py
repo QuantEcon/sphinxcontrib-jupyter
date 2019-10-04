@@ -32,7 +32,6 @@ def process_only_nodes(config, document, tags):
                 # something, even if it's just a comment and will lose the id anyway...
                 node.replace_self(nodes.comment())
 
-
 class JupyterOnlyTransform(SphinxTransform):
 
     default_priority = 50

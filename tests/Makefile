@@ -26,16 +26,7 @@ help:
 
 .PHONY: help Makefile pdf rst-test
 
-rst-test: clean clean-pdf jupyter pdf
-	python check_diffs.py
-
-pdf:
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O)
-
-clean-pdf:
-	rm -rf $(BUILDPDF)
-
-pdf-test: clean-pdf pdf
+test: clean clean-pdf jupyter pdf
 	python check_diffs.py
 
 no-inline:
@@ -64,6 +55,9 @@ clean-coverage:
 clean-website:
 	rm -rf $(BUILDWEBSITE)
 
+clean-pdf:
+	rm -rf $(BUILDPDF)
+
 #### TODO - Add these back in once test cases are setup ####
 # coverage:
 # ifneq (,$(filter $(parallel),true True))
@@ -79,6 +73,9 @@ clean-website:
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 # endif
 
+
+pdf:
+	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
