@@ -533,6 +533,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
                     uri_text = uri_text.replace("--","-")
+                    uri_text = uri_text.replace(".-",".")
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
             else:
                 formatted_text = "](#{})".format(uri_text)

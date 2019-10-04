@@ -95,12 +95,12 @@ class ExecuteNotebookWriter():
         if language == 'python':
             if (sys.version_info > (3, 0)):
                 # Python 3 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python3')
+                ep = ExecutePreprocessor(timeout=1, allow_errors=allow_errors, kernel_name='python3')
             else:
                 # Python 2 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python2')
+                ep = ExecutePreprocessor(timeout=1, allow_errors=allow_errors, kernel_name='python2')
         elif language == 'julia':
-            ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors)
+            ep = ExecutePreprocessor(timeout=1, allow_errors=allow_errors)
 
         ### calling this function before starting work to ensure it starts recording
         if (self.startFlag == 0):

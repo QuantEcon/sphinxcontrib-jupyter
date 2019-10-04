@@ -167,7 +167,6 @@ class JupyterPDFBuilder(Builder):
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
-            print(entry," the entry path")
             if not os.path.exists(entry):
                 self.logger.warning(
                     "jupyter_static_path entry {} does not exist"
