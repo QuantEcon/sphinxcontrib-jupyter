@@ -5,8 +5,10 @@ from setuptools import setup, find_packages
 VERSION = 'v0.5.0'
 
 LONG_DESCRIPTION = """
-This package contains a `Sphinx <http://www.sphinx-doc.org/en/master/>`_ for compiling 
-RST to Jupyter notebooks. It contains two primary builders:
+This package contains a `Sphinx <http://www.sphinx-doc.org/en/master/>`_ extension 
+for compiling RST to Jupyter notebooks. 
+
+It contains two primary builders:
 
 1. jupyter
 2. jupyterpdf
