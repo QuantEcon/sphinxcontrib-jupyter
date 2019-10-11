@@ -11,13 +11,13 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from dask.distributed import Client, progress
 from ..writers.execute_nb import ExecuteNotebookWriter
-from ..writers.make_pdf import MakePdfWriter
+from ..writers.make_pdf import MakePDFWriter
 from sphinx.util import logging
 import pdb
 import shutil
 from distutils.spawn import find_executable
 
-class JupyterpdfBuilder(Builder):
+class JupyterPDFBuilder(Builder):
     """
     Builds pdf notebooks
     """
@@ -42,7 +42,7 @@ class JupyterpdfBuilder(Builder):
             exit(1)
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
-        self._pdf_class = MakePdfWriter(self)
+        self._pdf_class = MakePDFWriter(self)
         self.executedir = self.outdir + '/executed'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
@@ -167,7 +167,6 @@ class JupyterpdfBuilder(Builder):
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
             entry = os.path.join(self.confdir, static_path)
-            print(entry," the entry path")
             if not os.path.exists(entry):
                 self.logger.warning(
                     "jupyter_static_path entry {} does not exist"

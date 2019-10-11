@@ -56,7 +56,7 @@ def check_set(PATH, BUILDER):
         REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
     failed = 0
     for fl in GENERATED_IPYNB_FILES:
-        flname = fl.split("jupyter/")[-1]
+        flname = fl.split(BUILDER + "/")[-1]
         #Check for Sphinx Version Specific Excludes
         SKIP = False
         if SPHINX_VERSION[0] in SPHINX_VERSION_EXCLUDE.keys():

@@ -533,6 +533,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
                     uri_text = uri_text.replace("--","-")
+                    uri_text = uri_text.replace(".-",".")
                 formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
             else:
                 formatted_text = "](#{})".format(uri_text)
@@ -564,7 +565,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                             refuri = refuri[0:hashIndex] + ".html" + refuri[hashIndex:]
                         else:
                             refuri = refuri + ".html"
-                        self.markdown_lines.append("]({})".format(self.urlpath + refuri))
+                        if self.urlpath:
+                            self.markdown_lines.append("]({})".format(self.urlpath + refuri))
+                        else:
+                            self.markdown_lines.append("]({})".format(refuri))
                     else:
                         refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:

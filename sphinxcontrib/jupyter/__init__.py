@@ -2,7 +2,7 @@ import yaml
 yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
-from .builders.jupyterpdf import JupyterpdfBuilder
+from .builders.jupyterpdf import JupyterPDFBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -36,7 +36,7 @@ def setup(app):
     app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
-    app.add_builder(JupyterpdfBuilder)
+    app.add_builder(JupyterPDFBuilder)
     app.add_builder(JupyterBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
