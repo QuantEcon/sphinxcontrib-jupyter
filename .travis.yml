@@ -40,7 +40,8 @@ before_install:
 
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat dask distributed
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat
+  - conda install --yes dask distributed
   - pip install nbdime
   - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
       pip install sphinxcontrib-bibtex==0.4.2;
