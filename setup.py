@@ -20,7 +20,7 @@ and run coverage tests, which uses `ipynb` as an intermediate format.
 
 The `jupyterpdf` builder is focused on building `pdf` files (via an intermediate ipynb format).
 
-This project is maintained and supported by `QuantEcon <http://quantecon.org/>`.
+This project is maintained and supported by `QuantEcon <http://quantecon.org/>`_.
 
 
 Status
@@ -33,7 +33,7 @@ Status
    :alt: Documentation Status
 
 .. |status-travis| image:: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter.svg?branch=master
-    :target: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter
+   :target: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter
 
 """
 
@@ -67,6 +67,6 @@ setup(
     platforms='any',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['docutils', 'nbformat', 'sphinx', 'dask[distributed]', 'ipython', 'nbconvert', 'jupyter_client'],
+    install_requires=['docutils', 'nbformat', 'sphinx', 'dask', 'dask[distributed]', 'ipython', 'nbconvert', 'jupyter_client'],
     namespace_packages=['sphinxcontrib'],
 )
