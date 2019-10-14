@@ -30,19 +30,12 @@ branches:
     - master
 
 before_install:
-  - wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p /home/travis/miniconda
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda update --yes conda
   - travis_wait 45 bash ./util/setup_latex.sh
   - export PATH="/tmp/texlive/bin/x86_64-linux:$PATH"
 
 
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION sphinx=$SPHINX_VERSION nbconvert nbformat
-  - conda install --yes dask distributed
-  - pip install nbdime
+  - pip install sphinx==$SPHINX_VERSION nbconvert nbformat dask[distributed] nbdime
   - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
       pip install sphinxcontrib-bibtex==0.4.2;
     else
