@@ -65,7 +65,6 @@ class MakePDFWriter():
                     shutil.move(pdf, destination)
 
     def check_remove_destination_file(self, destination, filename):
-        print(filename, "filename")
         destinationFile = destination + "/"  + filename
         if os.path.exists(destinationFile):
             os.remove(destinationFile)
