@@ -68,6 +68,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         # Slideshow option
         self.metadata_slide = False  #False is the value by default for all the notebooks
         self.slide = "slide" #value by default
+        
+        ## pdf book options
+        self.in_index_toc = False
+        self.index_toc_previous_links_latex = []
+        self.markdown_lines_trimmed = []
 
 
     # specific visit and depart methods
@@ -77,6 +82,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """at start
         """
         JupyterCodeTranslator.visit_document(self, node)
+
+        ## if the source file parsed is index_toc and target is pdf
+        if "index_toc" in self.source_file_name and self.jupyter_target_pdf:
+            self.in_index_toc = True
+
+
+
 
     def depart_document(self, node):
         """at end
@@ -101,7 +113,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 print("Copying {} to {}".format(src_fl, out_fl))
                 copyfile(src_fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
-
+    
     # =========
     # Sections
     # =========
@@ -600,8 +612,33 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf and 'reference-' in refuri:
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
-                ### handling inter notebook links
-                pass
+                
+                ##### Below code, constructs an index file for the book
+                if self.in_index_toc:
+                    if self.markdown_lines_trimmed != [] and (all(x in self.markdown_lines for x in self.markdown_lines_trimmed)): 
+                        ### when the list is not empty and when the list contains chapters or heading from the topic already
+                        ## the path executed/*.tex needs to be changed and used as a variable
+                        self.markdown_lines_trimmed = self.markdown_lines[len(self.index_toc_previous_links_latex) + 2:] ### +2 to preserve '/n's
+                        if '- ' in self.markdown_lines[len(self.index_toc_previous_links_latex) + 1:]:
+                            text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(),"executed/" + node["refuri"] + ".tex")
+                        else:
+                            text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
+                        self.markdown_lines = self.markdown_lines[:len(self.markdown_lines) - len(self.markdown_lines_trimmed)]
+                        self.markdown_lines.append(text)
+                        self.markdown_lines_trimmed = []
+                        self.markdown_lines_trimmed.append(text)
+                    else:
+                        ### when the list is empty the first entry is the topic
+                        text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
+                        self.markdown_lines = []
+                        self.markdown_lines.append(text)
+                        self.markdown_lines_trimmed = copy.deepcopy(self.markdown_lines)
+                    self.index_toc_previous_links_latex = copy.deepcopy(self.markdown_lines)
+
+                    ## check to remove any '- ' left behind during the above operation
+                    if "- " in self.markdown_lines:
+                        self.markdown_lines.remove("- ")
+
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "http" in node["refuri"]:
                 ### handling extrernal links
                 self.markdown_lines.append("]({})".format(refuri))
@@ -667,6 +704,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if len(self.bullets):
             self.bullets.pop()
             self.indents.pop()
+        
 
     def visit_enumerated_list(self, node):
         self.list_level += 1

@@ -75,9 +75,11 @@ class MakePDFWriter():
         """
         relative_path = ''
         tex_data = ''
+        allow_index_toc = False
         tex_build_path = self.texdir + relative_path
         pdf_build_path = self.pdfdir + relative_path
         template_folder = builder.config['jupyter_template_path']
+
 
         ensuredir(tex_build_path)
         ensuredir(pdf_build_path)
@@ -97,7 +99,10 @@ class MakePDFWriter():
 
         ## do not convert excluded patterns to latex
         excluded_files = [x in filename for x in builder.config['jupyter_pdf_excludepatterns']]
-        if not True in excluded_files:  
+
+        if builder.config["jupyter_pdf_book"] and 'index_toc' in filename:
+            allow_index_toc = True
+        if not True in excluded_files or allow_index_toc:    
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             if sys.version_info[0] < 3:

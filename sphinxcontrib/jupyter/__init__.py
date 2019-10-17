@@ -76,6 +76,7 @@ def setup(app):
     app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
     app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
+    app.add_config_value("jupyter_pdf_book", None, "jupyter")
 
 
 
