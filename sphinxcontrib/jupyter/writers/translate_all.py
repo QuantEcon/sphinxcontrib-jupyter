@@ -42,6 +42,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.in_list = False
         self.in_math = False
         self.in_math_block = False
+        self.in_image = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -181,18 +182,54 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
+        self.in_image = True
         uri = node.attributes["uri"]
-        self.images.append(uri)             #TODO: list of image files
+        internal_image = True
+        file_depth = len(self.source_file_name.split("/")) 
+        #-Adjust Absolute Path-#
+        if "?" not in node['candidates'] and file_depth > 2 and "../" not in uri:
+            uri = "../"*(file_depth - 2) + uri
+        #Adjust for Relative References as spphinx returns uri with subfolders before uri provided in rst file
+        adjust_relative_path = False
+        if "../" in uri:
+            adjust_relative_path = True
+            num_path_steps = uri.count("../")
+            #-Determine if local image-#
+            if num_path_steps > (file_depth - 2):
+                internal_image = False
+            #remove leading folders for subdirectories added by sphinx for internal
+            uri = "/".join(uri.split("/")[num_path_steps:])
+        if '?' in node['candidates']:
+            # don't rewrite nonlocal image URIs
+            internal_image = False
+            pass
+        elif uri not in self.builder.image_library.keys():
+            #add files to image libary for builder
+            path, filename = self.check_duplicate_files(uri)
+            self.builder.image_library[uri] = (filename, internal_image)
+            uri = os.path.join("_images", filename)
+        else:
+            #Already added to image libary for builder to copy asset
+            path, filename = os.path.split(uri)
+            uri = os.path.join("_images", filename)
+        #-Adjustment for nested folders added by sphinx-#
+        if adjust_relative_path:
+            #Note: A depth of 2 is in the root level of the project directory
+            if file_depth > 2: 
+                uri = "../"*(file_depth-2) + uri
+        #-Parse link updating for jupyter_download_nb_image_urlpath
         if self.jupyter_download_nb_image_urlpath:
-            for file_path in self.jupyter_static_file_path:
-                if file_path in uri:
-                    uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
-                    break  #don't need to check other matches
-        attrs = node.attributes
+            if '?' in node['candidates']:
+                pass
+            else:
+                path, filename = os.path.split(uri)
+                uri = os.path.join(self.jupyter_download_nb_image_urlpath, filename)
+        #-Write to Markdown-#
         if self.jupyter_images_markdown:
             #-Construct MD image
             image = "![{0}]({0})".format(uri)
         else:
+            attrs = node.attributes
             # Construct HTML image
             image = '<img src="{}" '.format(uri)
             if "alt" in attrs.keys():
@@ -213,6 +250,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def depart_image(self, node):
         if self.jupyter_target_pdf:
             self.markdown_lines.append("\n")
+
+    def depart_image(self, node):
+        self.in_image = False
 
     # math
     def visit_math(self, node):
@@ -393,7 +433,28 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def visit_download_reference(self, node):
         self.in_download_reference = True
-        html = "<a href={} download>".format(node["reftarget"])
+        sourcefile = node['reftarget']
+        internal_file = True
+        doc_depth = len(self.source_file_name.split("/"))
+        if sourcefile.startswith("/"):
+            sourcefile = sourcefile[1:]  #this gets evaluated at the root level
+        if "../" in sourcefile:
+            num_path_steps = sourcefile.count("../")
+            if num_path_steps > (doc_depth - 2):
+                internal_file = False
+        if sourcefile not in self.builder.download_library.keys():
+            #add files to download libary for builder
+            path, filename = self.check_duplicate_files(sourcefile)
+            subfolder_depth = doc_depth - 2
+            self.builder.download_library[sourcefile] = (filename, internal_file, subfolder_depth)
+            targetfile = os.path.join("_downloads", filename)
+        else:
+            #Already added to download libary for builder to copy asset
+            path, filename = os.path.split(sourcefile)
+            targetfile = os.path.join("_downloads", filename)
+        if doc_depth > 2:                                      #Note: A depth of 2 is in the root level of the project directory
+            targetfile = "../"*(doc_depth-2) + targetfile
+        html = "<a href={} download>".format(targetfile)
         self.markdown_lines.append(html)
 
     def depart_download_reference(self, node):
@@ -924,6 +985,33 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 new_md_cell.metadata["hide-input"] = True
             self.output["cells"].append(new_md_cell)
             self.markdown_lines = []
+
+    def check_duplicate_files(self, uri):
+        """
+        Parse URI for duplicate files in catalog
+        """
+        #Check for file by the same name in library and increment if found
+        def rename_file(filename, library):
+            while filename in library['index']:
+                base, ext = os.path.splitext(filename)
+                if re.search("-\d*", base):
+                    base, num = base.split("-")
+                    num = str(int(num) + 1)       #increment value
+                    filename = base+"-"+num+ext
+                else:
+                    filename =  base+"-1"+ext
+            return filename
+
+        path, filename = os.path.split(uri)
+        if self.in_image:
+            filename = rename_file(filename, self.builder.image_library)
+            self.builder.image_library['index'].append(filename)
+        elif self.in_download_reference:
+            filename = rename_file(filename, self.builder.download_library)
+            self.builder.download_library['index'].append(filename)
+        else:
+            raise NotImplementedError
+        return path, filename
 
     @classmethod
     def split_uri_id(cls, uri):

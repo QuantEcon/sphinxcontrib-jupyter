@@ -13,3 +13,5 @@ This is the index for section2
        exercise_list_sec2_all
        exercise_list_sec2
        exercises_section2
+       images
+       download

@@ -16,6 +16,7 @@ from sphinx.util import logging
 import pdb
 import time
 from ..writers.utils import copy_dependencies
+from shutil import copyfile
 
 class JupyterBuilder(Builder):
     """
@@ -42,8 +43,8 @@ class JupyterBuilder(Builder):
         self.executedir = self.outdir + '/executed'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
-        self.downloadsdir = self.outdir + "/_downloads"
-        self.downloadsExecutedir = self.downloadsdir + "/executed"
+        self.download_ipynb_dir = self.outdir + "/_downloads_ipynb"
+        self.downloads_ipynb_executed_dir = self.download_ipynb_dir + "/executed"
         self.client = None
 
         # Check default language is defined in the jupyter kernels
@@ -62,7 +63,7 @@ class JupyterBuilder(Builder):
             instructions = overrides.split(",")
 
         for instruction in instructions:
-            if instruction:
+            if instruction:                                          #TODO: @AAKASH what is this doing?
                 if instruction == 'code_only':
                     self.config["jupyter_conversion_mode"] = "code"
                 else:
@@ -102,8 +103,15 @@ class JupyterBuilder(Builder):
                 'delayed_notebooks': dict(),
                 'futures': [],
                 'delayed_futures': [],
-                'destination': self.downloadsExecutedir
+                'destination': self.downloads_ipynb_executed_dir
             }
+
+        self.image_library = {
+            'index' : [],
+        }
+        self.download_library = {
+            'index' : [],
+        }
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -133,11 +141,10 @@ class JupyterBuilder(Builder):
         copy_dependencies(self)
 
         if (self.config["jupyter_execute_notebooks"]):
-             ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)
 
         if (self.config["jupyter_download_nb_execute"]):
-            copy_dependencies(self, self.downloadsExecutedir)
+            copy_dependencies(self, self.downloads_ipynb_executed_dir)
             
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
@@ -147,7 +154,7 @@ class JupyterBuilder(Builder):
         ### print an output for downloading notebooks as well with proper links if variable is set
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
 
-            outfilename = os.path.join(self.downloadsdir, os_path(docname) + self.out_suffix)
+            outfilename = os.path.join(self.download_ipynb_dir, os_path(docname) + self.out_suffix)
             ensuredir(os.path.dirname(outfilename))
             self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
             self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
@@ -210,57 +217,103 @@ class JupyterBuilder(Builder):
         return nb
 
     def copy_static_files(self):
-        # copy all static files
-        self.logger.info(bold("copying static files... "), nonl=True)
-        ensuredir(os.path.join(self.outdir, '_static'))
-        if (self.config["jupyter_execute_notebooks"]):
-            self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
-            ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
+        """
+        Process Static Files including image and download libraries
+        """
+        self.process_image_library(self.outdir)
+        self.process_download_library(self.outdir)
+        
+        if self.config['jupyter_execute_notebooks']:
+            self.process_image_library(self.executed_notebook_dir)
+            self.process_download_library(self.executed_notebook_dir)
 
+        # # copy all static files to build folder
+        # target = os.path.join(self.outdir, '_static')
+        # self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+        # ensuredir(target)
+        # if self.config["jupyter_execute_notebooks"]:
+        #     target = os.path.join(self.executed_notebook_dir, '_static')
+        #     self.logger.info(bold("[builder] copying bulk static files to {}\n".format(target)), nonl=True)
+        #     ensuredir(target)
 
-        # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
-        for static_path in self.config["jupyter_static_file_path"]:
-            entry = os.path.join(self.confdir, static_path)
-            if not os.path.exists(entry):
-                self.logger.warning(
-                    "jupyter_static_path entry {} does not exist"
-                    .format(entry))
+        # # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
+        # for static_path in self.config["jupyter_static_file_path"]:
+        #     entry = os.path.join(self.confdir, static_path)
+        #     if not os.path.exists(entry):
+        #         self.logger.warning(
+        #             "[builder] jupyter_static_path entry {} does not exist"
+        #             .format(entry)
+        #             )
+        #     else:
+        #         copy_asset(entry, os.path.join(self.outdir, "_static"))
+        #         if self.config["jupyter_execute_notebooks"]:
+        #             copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
+
+    def process_image_library(self, context):
+        """
+        Action self.image_library
+        """
+        image_path = os.path.join(context, "_images")
+        self.logger.info(bold("[builder] copy images to {}".format(image_path)))
+        ensuredir(image_path)
+        for uri in self.image_library.keys():
+            if uri == "index":
+                continue
+            file, internal_image = self.image_library[uri]
+            if "../" in uri and internal_image == False:
+                num_steps = uri.count("../")
+                srcdir = "/".join(self.srcdir.split("/")[0:-1*num_steps])
             else:
-                copy_asset(entry, os.path.join(self.outdir, "_static"))
-                if (self.config["jupyter_execute_notebooks"]):
-                    copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
-        self.logger.info("done")
+                srcdir = self.srcdir
+            uri = uri.replace("../", "")
+            src = os.path.join(srcdir, uri)
+            target = os.path.join(image_path, file)
+            copyfile(src, target)
 
+    def process_download_library(self, context):
+        """
+        Action self.download_library
+        """
+        download_path = os.path.join(context, "_downloads")
+        self.logger.info(bold("[builder] copy downloads to {}".format(download_path)))
+        ensuredir(download_path)
+        for fl in self.download_library.keys():
+            if fl == "index":
+                continue
+            filename, internal_file, subfolder_depth = self.download_library[fl]
+            if "../" in fl and internal_file == False:
+                num_steps = fl.count("../")
+                srcdir = "/".join(self.srcdir.split("/")[0:-1*(num_steps - subfolder_depth)])
+            else:
+                srcdir = self.srcdir
+            fl = fl.replace("../", "")
+            src = os.path.join(srcdir, fl)
+            if not os.path.exists(src):
+                self.logger.info(bold("[builder] cannot find download: {}".format(src)))
+            else:
+                target = os.path.join(download_path, filename)
+                copyfile(src, target)
 
     def finish(self):
+        self.finish_tasks.add_task(self.copy_static_files)
 
-        if (self.config["jupyter_execute_notebooks"]):
+        if self.config["jupyter_execute_notebooks"]:
             self.finish_tasks.add_task(self.copy_static_files)
             self.save_executed_and_generate_coverage(self.execution_vars,'website', self.config['jupyter_make_coverage'])
 
-        if (self.config["jupyter_download_nb_execute"]):
+        if self.config["jupyter_download_nb_execute"]:
             self.finish_tasks.add_task(self.copy_static_files)
             self.save_executed_and_generate_coverage(self.download_execution_vars, 'downloads')
 
-        ### create a website folder
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
-            self._make_site_class.build_website(self)
+            self._make_site_class.build_website()
 
-    def save_executed_and_generate_coverage(self, params, target, coverage = False):
-
-            # watch progress of the execution of futures
-            self.logger.info(bold("Starting notebook execution for %s and html conversion(if set in config)..."), target)
-            #progress(self.futures)
-
+    def save_executed_and_generate_coverage(self, params, target, coverage=False):
+            self.logger.info(bold("[builder] Starting notebook execution for {} and html conversion...".format(target)))
             # save executed notebook
             error_results = self._execute_notebook_class.save_executed_notebook(self, params)
-
             ##generate coverage if config value set
             if coverage:
-                ## produces a JSON file of dask execution
-                self._execute_notebook_class.produce_dask_processing_report(self, params)
-                
-                ## generate the JSON code execution reports file
+                self._execute_notebook_class.produce_dask_processing_report(self, params) 
                 error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
-
                 self._execute_notebook_class.create_coverage_report(self, error_results, params)

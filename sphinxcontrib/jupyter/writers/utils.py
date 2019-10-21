@@ -143,7 +143,7 @@ def _str_to_lines(x):
 
     return x
 
-def copy_dependencies(builderSelf, outdir = None):
+def copy_dependencies(builderSelf, outdir=None):
     """
     Copies the dependencies of source files or folders specified in the config to their respective output directories
     """
@@ -161,7 +161,7 @@ def copy_dependencies(builderSelf, outdir = None):
                 full_dest_path = outdir + "/" + key
                 ensuredir(full_dest_path)
                 for dep in deps:
-                    copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
+                    copy(full_src_path + "/" + dep, full_dest_path, follow_symlinks=True)
             elif os.path.isfile(full_src_path):
                 ## handling the case of key being a file
                 # removing the filename to get the directory path
@@ -172,7 +172,7 @@ def copy_dependencies(builderSelf, outdir = None):
                 full_src_path = srcdir + "/" + key
                 full_dest_path = outdir + "/" + key
                 for dep in deps:
-                    copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
+                    copy(full_src_path + "/" + dep, full_dest_path, follow_symlinks=True)
 
 
 def python27_glob(path, pattern):
