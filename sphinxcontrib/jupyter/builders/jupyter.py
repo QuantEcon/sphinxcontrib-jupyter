@@ -234,15 +234,14 @@ class JupyterBuilder(Builder):
 
     def finish(self):
 
-        if (self.config["jupyter_execute_notebooks"]):
-            self.finish_tasks.add_task(self.copy_static_files)
+        self.finish_tasks.add_task(self.copy_static_files)
+        
+        if self.config["jupyter_execute_notebooks"]:
             self.save_executed_and_generate_coverage(self.execution_vars,'website', self.config['jupyter_make_coverage'])
 
-        if (self.config["jupyter_download_nb_execute"]):
-            self.finish_tasks.add_task(self.copy_static_files)
+        if self.config["jupyter_download_nb_execute"]:
             self.save_executed_and_generate_coverage(self.download_execution_vars, 'downloads')
 
-        ### create a website folder
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
 
