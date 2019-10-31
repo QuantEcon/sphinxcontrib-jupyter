@@ -19,9 +19,10 @@ Summary
 -------
 
 This sphinx extension can be used to:
-1. build a collection of jupyter notebooks, 
-1. execute the `Jupyter <http://jupyter.org>`__ notebooks,
-1. convert the executed notebooks to html using `nbconvert` with template support.
+
+#. build a collection of jupyter notebooks, 
+#. execute the `Jupyter <http://jupyter.org>`__ notebooks,
+#. convert the executed notebooks to html using `nbconvert` with template support.
 
 **Note:** It has mainly been written to support the use case of
 scientific publishing and hasn't been well tested outside of this
