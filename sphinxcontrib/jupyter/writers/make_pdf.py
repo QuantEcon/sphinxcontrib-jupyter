@@ -239,5 +239,5 @@ class MakePDFWriter():
         self.nbconvert_index(builder)
         os.chdir(self.texbookdir)
         fl_tex = self.texbookdir + "/" + self.index_book + ".tex"
-        filename = + self.index_book
+        filename = self.index_book
         self.create_book_from_latex(fl_tex, filename)
