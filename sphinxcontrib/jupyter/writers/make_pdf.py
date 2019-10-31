@@ -199,20 +199,41 @@ class MakePDFWriter():
             line = line.replace(char + srr, char + srr2)
         return line
 
+    def append_subdirectory_to_images_path(self, fullpath, line):
+        ### function to add subdirectory to individual tex image files - for julia lectures - should be made more robust
+        subdirectory = None
+        imagepathstart = line.rfind("{")
+        imagepathend = line.rfind("}")
 
-    def make_changes_tex(self, data, filename):
+        patha = fullpath.rfind("/")
+        pathb = fullpath[0:patha].rfind("/")
+        folder_name = fullpath[0:patha]
+        if pathb > 1:
+            subdirectory = fullpath[pathb + 1:patha]
+        if subdirectory:
+            srr = line[imagepathstart+1:imagepathend]
+            srr2 = subdirectory + "/" + srr
+        line = line.replace(srr, srr2)
+        return line
+
+
+    def make_changes_tex(self, data, fullpath):
         ## function to do preprocessing to make all section ids and labels unique
         arraylist = data.split('\n')
         alteredarr = []
+        image_exts = ['.jpg', '.png', '.jpeg']
 
-        ## removes extension and path from filename
-        if "." in filename or "/" in filename:
-            index = filename.rfind('/')
-            index1 = filename.rfind('.')
-            filename = filename[index + 1:index1]
+        ## removes extension and path from fullpath
+        if "." in fullpath or "/" in fullpath:
+            index = fullpath.rfind('/')
+            index1 = fullpath.rfind('.')
+            filename = fullpath[index + 1:index1]
 
         ## appends filename at the end of ids to make it unique
         for index, line in enumerate(arraylist):
+            for ext in image_exts:
+                if ext in arraylist[index] and '_static' not in arraylist[index] and 'http' not in arraylist[index] and '_files' in arraylist[index]:
+                    line = self.append_subdirectory_to_images_path(fullpath, line)
             if '\section{' in line or '\section{' in arraylist[index - 1]:
                 line = self.alter(line, filename, '\\label{')
             if len(arraylist) >= (index + 2) and '\section{' in arraylist[index + 1]:

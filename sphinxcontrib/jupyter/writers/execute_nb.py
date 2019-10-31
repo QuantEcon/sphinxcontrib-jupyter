@@ -76,7 +76,7 @@ class ExecuteNotebookWriter():
         if builder.config["jupyter_pdf_author"]:
             nb.metadata.latex_metadata.author = builder.config["jupyter_pdf_author"]
         
-        if filename and builder.config["jupyter_pdf_book_title"] in filename:
+        if filename and builder.config["jupyter_pdf_book_index"] in filename:
             nb.metadata.latex_metadata.jupyter_pdf_book_title = builder.config["jupyter_pdf_book_title"]
 
 
