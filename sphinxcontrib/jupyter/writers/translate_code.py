@@ -49,6 +49,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
         self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]
         self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]
+        self.book_index = builder.config["jupyter_pdf_book_toc"]
         if hasattr(builder, 'add_bib_to_latex'):
             self.add_bib_to_latex = builder.add_bib_to_latex
 

@@ -25,12 +25,14 @@ class MakePDFWriter():
     def __init__(self, builder):
         self.pdfdir = builder.outdir + "/pdf" #pdf directory 
         self.texdir = builder.outdir + "/executed" #latex directory 
+        self.texbookdir = builder.outdir + "/texbook" # tex files for book pdf
 
         for path in [self.pdfdir, self.texdir]:
             ensuredir(path)
 
         self.pdf_exporter = PDFExporter()
         self.tex_exporter = LatexExporter()
+        self.index_book = builder.config['jupyter_pdf_book_toc']
     
     def move_pdf(self, builder):
         dir_lists = []
@@ -75,7 +77,6 @@ class MakePDFWriter():
         """
         relative_path = ''
         tex_data = ''
-        allow_index_toc = False
         tex_build_path = self.texdir + relative_path
         pdf_build_path = self.pdfdir + relative_path
         template_folder = builder.config['jupyter_template_path']
@@ -100,9 +101,7 @@ class MakePDFWriter():
         ## do not convert excluded patterns to latex
         excluded_files = [x in filename for x in builder.config['jupyter_pdf_excludepatterns']]
 
-        if builder.config["jupyter_pdf_book"] and 'index_toc' in filename:
-            allow_index_toc = True
-        if not True in excluded_files or allow_index_toc:    
+        if not True in excluded_files:    
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
             if sys.version_info[0] < 3:
@@ -147,3 +146,98 @@ class MakePDFWriter():
             self.logger.warning('bibtex exited with returncode {} , encounterd in {} with error -- {} {}'.format(p.returncode , filename, output, error))
         
         # assert (p.returncode == 0), self.logger.warning('bibtex exited with returncode {} , encounterd in {} with error -- {} {}'.format(p.returncode , filename, output, error)) ---- assert statement stops the program, will handle it later
+
+
+    ### functions relevant to book pdf
+    def nbconvert_index(self, builder):
+        fl_ipynb = fl_ipynb = self.texbookdir + "/" + self.index_book + ".ipynb"
+        template_folder = builder.config['jupyter_template_path']
+        fl_tex_template = builder.confdir + "/" + template_folder + "/" + builder.config['jupyter_latex_template_book']
+
+
+        if sys.version_info[0] < 3:
+            subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+        else:
+            subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+
+    def create_book_from_latex(self, fl_tex, filename):
+        try:
+            self.subprocess_xelatex(fl_tex, filename)
+            self.subprocess_bibtex(filename)
+            self.subprocess_xelatex(fl_tex, filename)
+            self.subprocess_xelatex(fl_tex, filename)
+        except OSError as e:
+            print(e)
+        except AssertionError as e:
+            pass
+
+    def delete_lines(self,f):
+        edited = []
+        add = False
+        for line in f.readlines():
+            if "% delete-from-here-book %" in line:
+                add = False
+            if add:
+                edited.append(line)
+            if "% delete-till-here-book %" in line:
+                add = True
+        return ''.join(edited)
+
+    def alter(self, line, filename, char):
+        if char in line:
+            indexchar = line.find(char)
+            subline= line[indexchar:]
+            indexa = subline.find('{')
+            indexb = subline.find('}')
+            srr = subline[indexa+1:indexb]
+            srr2 = srr + "-" + filename
+            line = line.replace(char + srr, char + srr2)
+        return line
+
+
+    def make_changes_tex(self, data, filename):
+        arraylist = data.split('\n')
+        alteredarr = []
+
+        if "." in filename or "/" in filename:
+            index = filename.rfind('/')
+            index1 = filename.rfind('.')
+            filename = filename[index + 1:index1]
+
+        for index, line in enumerate(arraylist):
+            if '\section{' in line or '\section{' in arraylist[index - 1]:
+                line = self.alter(line, filename, '\\label{')
+            if len(arraylist) >= (index + 2) and '\section{' in arraylist[index + 1]:
+                line = self.alter(line, filename, "\\hypertarget{")
+            line = self.alter(line, filename, '\\ref{')
+            alteredarr.append(line)
+        return '\n'.join(alteredarr) 
+
+    def copy_tex_for_book(self):
+        if os.path.exists(self.texbookdir):
+            shutil.rmtree(self.texbookdir)
+
+        shutil.copytree(self.texdir, self.texbookdir)
+
+    def process_tex_for_book(self, builder):
+        ## make a separate directory for tex files relevant to book
+        self.copy_tex_for_book()
+
+        path = self.texbookdir + '/*.tex'
+        files = glob.glob(path)
+        for filename in files:
+            with open(filename, 'r', encoding="utf8") as f:
+                data = f.read()
+                f.seek(0)
+                data = self.delete_lines(f)
+                data = self.make_changes_tex(data, filename)
+                output = open(filename, 'w', encoding="utf8")
+                output.write(data)
+                f.close()
+                output.close()
+
+        self.nbconvert_index(builder)
+        os.chdir(self.texbookdir)
+        fl_tex = self.texbookdir + "/" + self.index_book + ".tex"
+        filename = + self.index_book
+        self.create_book_from_latex(fl_tex, filename)

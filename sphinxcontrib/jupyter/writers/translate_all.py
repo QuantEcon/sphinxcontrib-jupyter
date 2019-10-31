@@ -70,8 +70,8 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.slide = "slide" #value by default
         
         ## pdf book options
-        self.in_index_toc = False
-        self.index_toc_previous_links_latex = []
+        self.in_book_index = False
+        self.book_index_previous_links = []
         self.markdown_lines_trimmed = []
 
 
@@ -83,9 +83,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """
         JupyterCodeTranslator.visit_document(self, node)
 
-        ## if the source file parsed is index_toc and target is pdf
-        if "index_toc" in self.source_file_name and self.jupyter_target_pdf:
-            self.in_index_toc = True
+        ## if the source file parsed is book index file and target is pdf
+        if self.book_index in self.source_file_name and self.jupyter_pdf_book:
+            self.in_book_index = True
 
 
 
@@ -541,7 +541,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf:
                 uri_text = uri_text.lower()
                 SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
-                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–"]
+                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–", r"`"]
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
                     uri_text = uri_text.replace("--","-")
@@ -612,15 +612,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf and 'reference-' in refuri:
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
-                
                 ##### Below code, constructs an index file for the book
-                if self.in_index_toc:
+                if self.in_book_index:
                     if self.markdown_lines_trimmed != [] and (all(x in self.markdown_lines for x in self.markdown_lines_trimmed)): 
                         ### when the list is not empty and when the list contains chapters or heading from the topic already
-                        ## the path executed/*.tex needs to be changed and used as a variable
-                        self.markdown_lines_trimmed = self.markdown_lines[len(self.index_toc_previous_links_latex) + 2:] ### +2 to preserve '/n's
-                        if '- ' in self.markdown_lines[len(self.index_toc_previous_links_latex) + 1:]:
-                            text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(),"executed/" + node["refuri"] + ".tex")
+                        self.markdown_lines_trimmed = self.markdown_lines[len(self.book_index_previous_links) + 2:] ### +2 to preserve '/n's
+                        if '- ' in self.markdown_lines[len(self.book_index_previous_links) + 1:]:
+                            text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(), node["refuri"] + ".tex")
                         else:
                             text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
                         self.markdown_lines = self.markdown_lines[:len(self.markdown_lines) - len(self.markdown_lines_trimmed)]
@@ -633,7 +631,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                         self.markdown_lines = []
                         self.markdown_lines.append(text)
                         self.markdown_lines_trimmed = copy.deepcopy(self.markdown_lines)
-                    self.index_toc_previous_links_latex = copy.deepcopy(self.markdown_lines)
+                    self.book_index_previous_links = copy.deepcopy(self.markdown_lines)
 
                     ## check to remove any '- ' left behind during the above operation
                     if "- " in self.markdown_lines:
@@ -987,3 +985,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 return "{}{}#{}".format(uri, ext, id_)
 
         return uri
+
+    @classmethod
+    def get_filename(cls,path):
+        if "." in path and "/" in path:
+            index = path.rfind('/')
+            index1 = path.rfind('.')
+            return path[index + 1:index1]
+        else:
+            return path
