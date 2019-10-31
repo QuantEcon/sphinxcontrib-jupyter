@@ -15,7 +15,7 @@ from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
-from .utils import python27_glob
+from .utils import python27_glob, get_list_of_files
 
 class MakePDFWriter():
     """
@@ -32,7 +32,7 @@ class MakePDFWriter():
 
         self.pdf_exporter = PDFExporter()
         self.tex_exporter = LatexExporter()
-        self.index_book = builder.config['jupyter_pdf_book_toc']
+        self.index_book = builder.config['jupyter_pdf_book_index']
     
     def move_pdf(self, builder):
         dir_lists = []
@@ -148,9 +148,11 @@ class MakePDFWriter():
         # assert (p.returncode == 0), self.logger.warning('bibtex exited with returncode {} , encounterd in {} with error -- {} {}'.format(p.returncode , filename, output, error)) ---- assert statement stops the program, will handle it later
 
 
-    ### functions relevant to book pdf
+    #### functions relevant to book pdf ####
+
     def nbconvert_index(self, builder):
-        fl_ipynb = fl_ipynb = self.texbookdir + "/" + self.index_book + ".ipynb"
+        ## converts index ipynb file of book to tex with the help of the specified template
+        fl_ipynb = self.texbookdir + "/" + self.index_book + ".ipynb"
         template_folder = builder.config['jupyter_template_path']
         fl_tex_template = builder.confdir + "/" + template_folder + "/" + builder.config['jupyter_latex_template_book']
 
@@ -160,7 +162,8 @@ class MakePDFWriter():
         else:
             subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
 
-    def create_book_from_latex(self, fl_tex, filename):
+    def create_pdf_from_latex(self, fl_tex, filename):
+        ## parses the latex file to create pdf
         try:
             self.subprocess_xelatex(fl_tex, filename)
             self.subprocess_bibtex(filename)
@@ -172,6 +175,7 @@ class MakePDFWriter():
             pass
 
     def delete_lines(self,f):
+        ## deletes all the lines except between the given comments
         edited = []
         add = False
         for line in f.readlines():
@@ -184,6 +188,7 @@ class MakePDFWriter():
         return ''.join(edited)
 
     def alter(self, line, filename, char):
+        ## alters the character to have a -{filename} attached to it 
         if char in line:
             indexchar = line.find(char)
             subline= line[indexchar:]
@@ -196,14 +201,17 @@ class MakePDFWriter():
 
 
     def make_changes_tex(self, data, filename):
+        ## function to do preprocessing to make all section ids and labels unique
         arraylist = data.split('\n')
         alteredarr = []
 
+        ## removes extension and path from filename
         if "." in filename or "/" in filename:
             index = filename.rfind('/')
             index1 = filename.rfind('.')
             filename = filename[index + 1:index1]
 
+        ## appends filename at the end of ids to make it unique
         for index, line in enumerate(arraylist):
             if '\section{' in line or '\section{' in arraylist[index - 1]:
                 line = self.alter(line, filename, '\\label{')
@@ -214,30 +222,33 @@ class MakePDFWriter():
         return '\n'.join(alteredarr) 
 
     def copy_tex_for_book(self):
+        ## make a separate directory for tex files relevant to book
         if os.path.exists(self.texbookdir):
             shutil.rmtree(self.texbookdir)
 
         shutil.copytree(self.texdir, self.texbookdir)
 
     def process_tex_for_book(self, builder):
-        ## make a separate directory for tex files relevant to book
+        ## does all the preprocessing of latex files before calling them from the index file
+        ## of the book and converting them to pdf.
+        ## converts the index ipynb of the book and converts it to pdf via latex
         self.copy_tex_for_book()
 
-        path = self.texbookdir + '/*.tex'
-        files = glob.glob(path)
+        files = get_list_of_files(self.texbookdir)
         for filename in files:
-            with open(filename, 'r', encoding="utf8") as f:
-                data = f.read()
-                f.seek(0)
-                data = self.delete_lines(f)
-                data = self.make_changes_tex(data, filename)
-                output = open(filename, 'w', encoding="utf8")
-                output.write(data)
-                f.close()
-                output.close()
+            if ".tex" in filename:
+                with open(filename, 'r', encoding="utf8") as f:
+                    data = f.read()
+                    f.seek(0)
+                    data = self.delete_lines(f)
+                    data = self.make_changes_tex(data, filename)
+                    output = open(filename, 'w', encoding="utf8")
+                    output.write(data)
+                    f.close()
+                    output.close()
 
         self.nbconvert_index(builder)
         os.chdir(self.texbookdir)
         fl_tex = self.texbookdir + "/" + self.index_book + ".tex"
         filename = self.index_book
-        self.create_book_from_latex(fl_tex, filename)
+        self.create_pdf_from_latex(fl_tex, filename)

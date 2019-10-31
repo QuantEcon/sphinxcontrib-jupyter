@@ -140,7 +140,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # Inline elements
     #=================
     def visit_Text(self, node):
+
         text = node.astext()
+
+        ## removing references from index file book
+        if self.in_book_index and 'references' in text.lower():
+            return
+
         #Escape Special markdown chars except in code block
         if self.in_code_block == False:
             text = text.replace("$", "\$")
@@ -193,6 +199,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
+        ### preventing image from the index file at the moment
+        if self.in_book_index:
+            return
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_download_nb_image_urlpath:
@@ -506,6 +515,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # reference
     def visit_reference(self, node):
         """anchor link"""
+        ## removing zreferences from the index file
+        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+            return
+
         self.in_reference = True
         if self.jupyter_target_pdf:
             if "refuri" in node and "http" in node["refuri"]:
@@ -527,6 +540,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_reference(self, node):
         subdirectory = False
+
+        ## removing zreferences from the index file
+        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+            return
+
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(

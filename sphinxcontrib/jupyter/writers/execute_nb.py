@@ -42,7 +42,7 @@ class ExecuteNotebookWriter():
 
         ## adding latex metadata
         if builderSelf.config["jupyter_target_pdf"]:
-            nb = self.add_latex_metadata(builderSelf, nb, subdirectory)
+            nb = self.add_latex_metadata(builderSelf, nb, subdirectory, filename)
 
         # - Parse Directories and execute them - #
         if coverage:
@@ -50,7 +50,7 @@ class ExecuteNotebookWriter():
         else:
             self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
 
-    def add_latex_metadata(self, builderSelf, nb, subdirectory):
+    def add_latex_metadata(self, builder, nb, subdirectory, filename=""):
 
         ## initialize latex metadata
         if 'latex_metadata' not in nb['metadata']:
@@ -67,14 +67,19 @@ class ExecuteNotebookWriter():
         ## add check for logo here as well
         if nb.metadata.title:
             nb.metadata.latex_metadata.title = nb.metadata.title
-        if "jupyter_pdf_logo" in builderSelf.config and builderSelf.config['jupyter_pdf_logo']:
-            nb.metadata.latex_metadata.logo = path + builderSelf.config['jupyter_pdf_logo']
+        if "jupyter_pdf_logo" in builder.config and builder.config['jupyter_pdf_logo']:
+            nb.metadata.latex_metadata.logo = path + builder.config['jupyter_pdf_logo']
         
-        if builderSelf.config["jupyter_bib_file"]:
-            nb.metadata.latex_metadata.bib = path + builderSelf.config["jupyter_bib_file"]
+        if builder.config["jupyter_bib_file"]:
+            nb.metadata.latex_metadata.bib = path + builder.config["jupyter_bib_file"]
 
-        if builderSelf.config["jupyter_pdf_author"]:
-            nb.metadata.latex_metadata.author = builderSelf.config["jupyter_pdf_author"]
+        if builder.config["jupyter_pdf_author"]:
+            nb.metadata.latex_metadata.author = builder.config["jupyter_pdf_author"]
+        
+        if filename and builder.config["jupyter_pdf_book_title"] in filename:
+            nb.metadata.latex_metadata.jupyter_pdf_book_title = builder.config["jupyter_pdf_book_title"]
+
+
 
         # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
         return nb

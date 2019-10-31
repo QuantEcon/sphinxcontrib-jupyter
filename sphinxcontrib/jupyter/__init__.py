@@ -78,7 +78,8 @@ def setup(app):
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
     app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
     app.add_config_value("jupyter_pdf_book", None, "jupyter")
-    app.add_config_value("jupyter_pdf_book_toc", None, "jupyter")
+    app.add_config_value("jupyter_pdf_book_index", None, "jupyter")
+    app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
 
 
 

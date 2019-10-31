@@ -43,7 +43,7 @@ class JupyterPDFBuilder(Builder):
             exit(1)
 
         ### we should write a separate function/class to check configs
-        if "jupyter_pdf_book_toc" not in self.config or not self.config["jupyter_pdf_book_toc"]:
+        if "jupyter_pdf_book_index" not in self.config or not self.config["jupyter_pdf_book_index"]:
             self.logger.warning(
                 "You have switched on the book conversion option but not specified an index/contents file for book pdf"
             )
