@@ -43,7 +43,7 @@ class JupyterPDFBuilder(Builder):
             exit(1)
 
         ### we should write a separate function/class to check configs
-        if "jupyter_pdf_book_index" not in self.config or not self.config["jupyter_pdf_book_index"]:
+        if  self.config["jupyter_pdf_book"] and ("jupyter_pdf_book_index" not in self.config or not self.config["jupyter_pdf_book_index"]):
             self.logger.warning(
                 "You have switched on the book conversion option but not specified an index/contents file for book pdf"
             )
@@ -228,6 +228,6 @@ class JupyterPDFBuilder(Builder):
 
         ### making book pdf
         #self.copy_static_folder_to_subfolders(self.texbookdir, False)
-        if "jupyter_target_pdf" in self.config and self.config["jupyter_target_pdf"]:
+        if "jupyter_target_pdf" in self.config and self.config["jupyter_target_pdf"] and self.config["jupyter_pdf_book"]:
             self._pdf_class.process_tex_for_book(self)
 

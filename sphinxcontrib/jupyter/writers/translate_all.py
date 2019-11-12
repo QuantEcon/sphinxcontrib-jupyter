@@ -84,7 +84,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         JupyterCodeTranslator.visit_document(self, node)
 
         ## if the source file parsed is book index file and target is pdf
-        if self.book_index in self.source_file_name and self.jupyter_pdf_book:
+        if self.book_index is not None and self.book_index in self.source_file_name and self.jupyter_pdf_book:
             self.in_book_index = True
 
 
