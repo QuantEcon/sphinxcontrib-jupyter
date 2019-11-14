@@ -80,6 +80,7 @@ def setup(app):
     app.add_config_value("jupyter_pdf_book", False, "jupyter")
     app.add_config_value("jupyter_pdf_book_index", None, "jupyter")
     app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
+    app.add_config_value("jupyter_pdf_book_name", None, "jupyter")
 
 
 

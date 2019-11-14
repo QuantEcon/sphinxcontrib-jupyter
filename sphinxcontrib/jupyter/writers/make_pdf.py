@@ -132,7 +132,7 @@ class MakePDFWriter():
                 # exit() - to be used when we want the execution to stop on error
 
     def subprocess_xelatex(self, fl_tex, filename):
-        p = subprocess.Popen(("xelatex", "-interaction=nonstopmode", fl_tex), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+        p = subprocess.Popen(("xelatex", "-interaction=nonstopmode","-jobname=" + filename, fl_tex), stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
         output, error = p.communicate()
         if (p.returncode != 0):
             self.logger.warning('xelatex exited with returncode {} , encounterd in {} with error -- {}'.format(p.returncode , filename, error))
@@ -202,6 +202,8 @@ class MakePDFWriter():
     def append_subdirectory_to_images_path(self, fullpath, line):
         ### function to add subdirectory to individual tex image files - for julia lectures - should be made more robust
         subdirectory = None
+        srr = ''
+        srr2 = ''
         imagepathstart = line.rfind("{")
         imagepathend = line.rfind("}")
 
@@ -210,7 +212,7 @@ class MakePDFWriter():
         folder_name = fullpath[0:patha]
         if pathb > 1:
             subdirectory = fullpath[pathb + 1:patha]
-        if subdirectory:
+        if subdirectory and "texbook" not in subdirectory:
             srr = line[imagepathstart+1:imagepathend]
             srr2 = subdirectory + "/" + srr
         line = line.replace(srr, srr2)
@@ -236,8 +238,7 @@ class MakePDFWriter():
                     line = self.append_subdirectory_to_images_path(fullpath, line)
             if '\section{' in line or '\section{' in arraylist[index - 1]:
                 line = self.alter(line, filename, '\\label{')
-            if len(arraylist) >= (index + 2) and '\section{' in arraylist[index + 1]:
-                line = self.alter(line, filename, "\\hypertarget{")
+            line = self.alter(line, filename, "\\hypertarget{")
             line = self.alter(line, filename, '\\ref{')
             alteredarr.append(line)
         return '\n'.join(alteredarr) 
@@ -267,9 +268,13 @@ class MakePDFWriter():
                     output.write(data)
                     f.close()
                     output.close()
-
-        self.nbconvert_index(builder)
+                    
         os.chdir(self.texbookdir)
+        self.nbconvert_index(builder)
         fl_tex = self.texbookdir + "/" + self.index_book + ".tex"
         filename = self.index_book
+
+        ## checking if an explicit output filename is specified in the config file
+        if "jupyter_pdf_book_name" in builder.config and builder.config["jupyter_pdf_book_name"]:
+            filename = builder.config["jupyter_pdf_book_name"]
         self.create_pdf_from_latex(fl_tex, filename)
