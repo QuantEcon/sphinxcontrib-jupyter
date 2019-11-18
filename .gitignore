@@ -9,6 +9,8 @@ __pycache__
 *.egg-info/
 tests/base/_build/
 tests/pdf/_build/
+tests/pdf/_static/
+tests/pdf/theme/
 tests/no_inline_exercises/_build
 tests/ipynb/*checkpoints
 *.pyc

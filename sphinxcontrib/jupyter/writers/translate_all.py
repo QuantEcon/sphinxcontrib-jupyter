@@ -68,6 +68,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         # Slideshow option
         self.metadata_slide = False  #False is the value by default for all the notebooks
         self.slide = "slide" #value by default
+        
+        ## pdf book options
+        self.in_book_index = False
+        self.book_index_previous_links = []
+        self.markdown_lines_trimmed = []
 
 
     # specific visit and depart methods
@@ -77,6 +82,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         """at start
         """
         JupyterCodeTranslator.visit_document(self, node)
+
+        ## if the source file parsed is book index file and target is pdf
+        if self.book_index is not None and self.book_index in self.source_file_name and self.jupyter_pdf_book:
+            self.in_book_index = True
+
+
+
 
     def depart_document(self, node):
         """at end
@@ -101,7 +113,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 print("Copying {} to {}".format(src_fl, out_fl))
                 copyfile(src_fl, out_fl)
         JupyterCodeTranslator.depart_document(self, node)
-
+    
     # =========
     # Sections
     # =========
@@ -128,7 +140,13 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # Inline elements
     #=================
     def visit_Text(self, node):
+
         text = node.astext()
+
+        ## removing references from index file book
+        if self.in_book_index and 'references' in text.lower():
+            return
+
         #Escape Special markdown chars except in code block
         if self.in_code_block == False:
             text = text.replace("$", "\$")
@@ -181,6 +199,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
+        ### preventing image from the index file at the moment
+        if self.in_book_index:
+            return
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_download_nb_image_urlpath:
@@ -494,6 +515,10 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     # reference
     def visit_reference(self, node):
         """anchor link"""
+        ## removing zreferences from the index file
+        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+            return
+
         self.in_reference = True
         if self.jupyter_target_pdf:
             if "refuri" in node and "http" in node["refuri"]:
@@ -515,6 +540,11 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_reference(self, node):
         subdirectory = False
+
+        ## removing zreferences from the index file
+        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+            return
+
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
@@ -529,7 +559,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf:
                 uri_text = uri_text.lower()
                 SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
-                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–"]
+                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–", r"`"]
                 for CHAR in SPECIALCHARS:
                     uri_text = uri_text.replace(CHAR,"")
                     uri_text = uri_text.replace("--","-")
@@ -600,8 +630,31 @@ class JupyterTranslator(JupyterCodeTranslator, object):
             if self.jupyter_target_pdf and 'reference-' in refuri:
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
-                ### handling inter notebook links
-                pass
+                ##### Below code, constructs an index file for the book
+                if self.in_book_index:
+                    if self.markdown_lines_trimmed != [] and (all(x in self.markdown_lines for x in self.markdown_lines_trimmed)): 
+                        ### when the list is not empty and when the list contains chapters or heading from the topic already
+                        self.markdown_lines_trimmed = self.markdown_lines[len(self.book_index_previous_links) + 2:] ### +2 to preserve '/n's
+                        if '- ' in self.markdown_lines[len(self.book_index_previous_links) + 1:]:
+                            text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(), node["refuri"] + ".tex")
+                        else:
+                            text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
+                        self.markdown_lines = self.markdown_lines[:len(self.markdown_lines) - len(self.markdown_lines_trimmed)]
+                        self.markdown_lines.append(text)
+                        self.markdown_lines_trimmed = []
+                        self.markdown_lines_trimmed.append(text)
+                    else:
+                        ### when the list is empty the first entry is the topic
+                        text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
+                        self.markdown_lines = []
+                        self.markdown_lines.append(text)
+                        self.markdown_lines_trimmed = copy.deepcopy(self.markdown_lines)
+                    self.book_index_previous_links = copy.deepcopy(self.markdown_lines)
+
+                    ## check to remove any '- ' left behind during the above operation
+                    if "- " in self.markdown_lines:
+                        self.markdown_lines.remove("- ")
+
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "http" in node["refuri"]:
                 ### handling extrernal links
                 self.markdown_lines.append("]({})".format(refuri))
@@ -667,6 +720,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if len(self.bullets):
             self.bullets.pop()
             self.indents.pop()
+        
 
     def visit_enumerated_list(self, node):
         self.list_level += 1
@@ -949,3 +1003,12 @@ class JupyterTranslator(JupyterCodeTranslator, object):
                 return "{}{}#{}".format(uri, ext, id_)
 
         return uri
+
+    @classmethod
+    def get_filename(cls,path):
+        if "." in path and "/" in path:
+            index = path.rfind('/')
+            index1 = path.rfind('.')
+            return path[index + 1:index1]
+        else:
+            return path

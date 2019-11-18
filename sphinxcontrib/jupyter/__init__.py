@@ -70,12 +70,17 @@ def setup(app):
 
     # Jupyter pdf options
     app.add_config_value("jupyter_latex_template", None, "jupyter")
+    app.add_config_value("jupyter_latex_template_book", None, "jupyter")
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
     app.add_config_value("jupyter_bib_file", None, "jupyter")
     app.add_config_value("jupyter_pdf_author", None, "jupyter")
     app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
     app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
+    app.add_config_value("jupyter_pdf_book", False, "jupyter")
+    app.add_config_value("jupyter_pdf_book_index", None, "jupyter")
+    app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
+    app.add_config_value("jupyter_pdf_book_name", None, "jupyter")
 
 
 

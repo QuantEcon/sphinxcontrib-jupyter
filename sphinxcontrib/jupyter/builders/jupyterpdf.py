@@ -41,12 +41,20 @@ class JupyterPDFBuilder(Builder):
                 "Cannot find xelatex executable for pdf compilation"
             )
             exit(1)
+
+        ### we should write a separate function/class to check configs
+        if  self.config["jupyter_pdf_book"] and ("jupyter_pdf_book_index" not in self.config or not self.config["jupyter_pdf_book_index"]):
+            self.logger.warning(
+                "You have switched on the book conversion option but not specified an index/contents file for book pdf"
+            )
+            exit(1)
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
         self._pdf_class = MakePDFWriter(self)
         self.executedir = self.outdir + '/executed'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
+        self.texbookdir = self.outdir + '/texbook'
         self.client = None
 
         # Check default language is defined in the jupyter kernels
@@ -186,14 +194,16 @@ class JupyterPDFBuilder(Builder):
                 if (self.config["jupyter_execute_notebooks"]):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
-        self.copy_static_folder_to_subfolders(self.executedir)
+        self.copy_static_folder_to_subfolders(self.executedir, True)
 
     ## copying static folder to subfolders - will remove this later
-    def copy_static_folder_to_subfolders(self, sourcedir):
+    def copy_static_folder_to_subfolders(self, sourcedir, skiptopdir):
         dirs = os.listdir(sourcedir)
         sourcefolder = sourcedir + "/_static"
         for folder in dirs:
-            if "_static" not in folder and "." not in folder:
+            if skiptopdir and "." in folder:
+                continue
+            if "_static" not in folder:
                 destination = sourcedir + "/" + folder + "/_static"
                 if os.path.exists(sourcefolder) and not os.path.exists(destination): #ensure source exists and copy to destination to ensure latest version
                     shutil.copytree(sourcefolder , destination)
@@ -215,4 +225,9 @@ class JupyterPDFBuilder(Builder):
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self, self.execution_vars)
+
+        ### making book pdf
+        #self.copy_static_folder_to_subfolders(self.texbookdir, False)
+        if "jupyter_target_pdf" in self.config and self.config["jupyter_target_pdf"] and self.config["jupyter_pdf_book"]:
+            self._pdf_class.process_tex_for_book(self)
 

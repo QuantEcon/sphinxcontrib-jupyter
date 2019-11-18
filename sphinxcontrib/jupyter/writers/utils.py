@@ -181,3 +181,19 @@ def python27_glob(path, pattern):
         for filename in fnmatch.filter(filenames, pattern):
             matches.append(os.path.join(root, filename))
     return matches
+
+def get_list_of_files(dirName):
+    # create a list of file and sub directories 
+    # names in the given directory 
+    list_of_file = os.listdir(dirName)
+    all_files = list()
+    # Iterate over all the entries
+    for entry in list_of_file:
+        # Create full path
+        full_path = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory 
+        if os.path.isdir(full_path):
+            all_files = all_files + get_list_of_files(full_path)
+        else:
+            all_files.append(full_path)
+    return all_files
