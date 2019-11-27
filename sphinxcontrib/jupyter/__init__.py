@@ -3,6 +3,7 @@ yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
 from .builders.jupyterpdf import JupyterPDFBuilder
+from .builders.jupytercode import JupyterCodeBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -38,6 +39,7 @@ def setup(app):
     # Jupyter Builder and Options
     app.add_builder(JupyterPDFBuilder)
     app.add_builder(JupyterBuilder)
+    app.add_builder(JupyterCodeBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")

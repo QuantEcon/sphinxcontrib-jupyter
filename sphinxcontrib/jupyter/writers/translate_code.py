@@ -44,14 +44,17 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
         self.jupyter_target_html = builder.config["jupyter_target_html"]
-        self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
         self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
         self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
         self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]
         self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]
         self.book_index = builder.config["jupyter_pdf_book_index"]
+        
         if hasattr(builder, 'add_bib_to_latex'):
             self.add_bib_to_latex = builder.add_bib_to_latex
+
+        if hasattr(builder, 'jupyter_download_nb_image_urlpath'):
+            self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
 
         # set the value of the cell metadata["slideshow"] to slide as the default option
         self.slide = "slide" 

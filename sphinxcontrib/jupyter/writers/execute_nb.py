@@ -9,6 +9,7 @@ from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
+from hashlib import md5
 import sys
 
 
@@ -44,11 +45,23 @@ class ExecuteNotebookWriter():
         if builderSelf.config["jupyter_target_pdf"]:
             nb = self.add_latex_metadata(builderSelf, nb, subdirectory, filename)
 
+        self.create_hash(nb)
+
         # - Parse Directories and execute them - #
         if coverage:
             self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
         else:
             self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
+
+    def normalize_cell(self, cell):
+        cell = cell.strip('\n')
+        return cell
+        
+
+    def create_hash(self, nb):
+        for cell in nb.cells:
+            cell = self.normalize_cell(cell)
+            hashcode = md5(cell.source.encode()).hexdigest()
 
     def add_latex_metadata(self, builder, nb, subdirectory, filename=""):
 
