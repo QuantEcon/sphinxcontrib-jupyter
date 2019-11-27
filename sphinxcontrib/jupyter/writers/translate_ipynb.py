@@ -1,3 +1,7 @@
+"""
+Translators for RST to IPYNB Conversion
+"""
+
 from __future__ import unicode_literals
 import re
 import nbformat.v4
@@ -11,7 +15,7 @@ import os
 
 class JupyterTranslator(JupyterCodeTranslator):
     """ 
-    Jupyter Translator for Text and Code
+    Jupyter Translator for RST to IPYNB
     """
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")

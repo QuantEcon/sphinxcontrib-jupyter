@@ -2,11 +2,16 @@ import docutils.writers
 import nbformat
 
 from .translate_code import JupyterCodeTranslator
-from .translate_all import JupyterTranslator
+from .translate_ipynb import JupyterTranslator
 
 
 class JupyterWriter(docutils.writers.Writer):
+<<<<<<< HEAD
     def __init__(self, builder):
+=======
+
+    def __init__(self, builder, c_only=False):
+>>>>>>> ea24051... setup new translators and naming convetions
         docutils.writers.Writer.__init__(self)
 
         self.output = None
