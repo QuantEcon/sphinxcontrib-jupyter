@@ -10,7 +10,7 @@ from shutil import copy
 if sys.version_info.major == 2:
     import fnmatch
 
-class LanguageTranslator:
+class LanguageTranslator(object):
     """
     Simple extensible translator for programming language names between Sphinx
     and Jupyter.
@@ -143,17 +143,17 @@ def _str_to_lines(x):
 
     return x
 
-def copy_dependencies(builderSelf, outdir = None):
+def copy_dependencies(builder, outdir = None):
     """
     Copies the dependencies of source files or folders specified in the config to their respective output directories
     """
     if outdir is None:
-        outdir = builderSelf.outdir
+        outdir = builder.outdir
     else:
         outdir = outdir
-    srcdir = builderSelf.srcdir
-    if 'jupyter_dependencies' in builderSelf.config and builderSelf.config['jupyter_dependencies'] is not None:
-        depenencyObj = builderSelf.config['jupyter_dependencies']
+    srcdir = builder.srcdir
+    if 'jupyter_dependencies' in builder.config and builder.config['jupyter_dependencies'] is not None:
+        depenencyObj = builder.config['jupyter_dependencies']
         for key, deps in depenencyObj.items():
             full_src_path = srcdir + "/" + key
             if full_src_path.find('.') == -1:
@@ -182,15 +182,15 @@ def python27_glob(path, pattern):
             matches.append(os.path.join(root, filename))
     return matches
 
-def get_list_of_files(dirName):
+def get_list_of_files(dirname):
     # create a list of file and sub directories 
     # names in the given directory 
-    list_of_file = os.listdir(dirName)
+    list_of_file = os.listdir(dirname)
     all_files = list()
     # Iterate over all the entries
     for entry in list_of_file:
         # Create full path
-        full_path = os.path.join(dirName, entry)
+        full_path = os.path.join(dirname, entry)
         # If entry is a directory then get the list of files in this directory 
         if os.path.isdir(full_path):
             all_files = all_files + get_list_of_files(full_path)

@@ -9,8 +9,9 @@ import copy
 import os
 
 
-class JupyterTranslator(JupyterCodeTranslator, object):
-    """ Jupyter Translator for Text and Code
+class JupyterTranslator(JupyterCodeTranslator):
+    """ 
+    Jupyter Translator for Text and Code
     """
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")

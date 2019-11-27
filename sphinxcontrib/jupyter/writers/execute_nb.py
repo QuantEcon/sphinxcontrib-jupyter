@@ -5,7 +5,7 @@ import shutil
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
-from ..writers.convert import convertToHtmlWriter
+from ..writers.convert import ConvertToHTMLWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
@@ -13,17 +13,16 @@ import sys
 
 
 class ExecuteNotebookWriter():
-    
     """
-    Executes jupyter notebook written in python or julia
+    Executes jupyter notebook
     """
     logger = logging.getLogger(__name__)
     startFlag = 0
-    def __init__(self, builderSelf):
+    def __init__(self, builder):
         pass
-    def execute_notebook(self, builderSelf, nb, filename, params, futures):
-        execute_nb_config = builderSelf.config["jupyter_execute_nb"]
-        coverage = builderSelf.config["jupyter_make_coverage"]
+    def execute_notebook(self, builder, nb, filename, params, futures):
+        execute_nb_config = builder.config["jupyter_execute_nb"]
+        coverage = builder.config["jupyter_make_coverage"]
         timeout = execute_nb_config["timeout"]
         filename = filename
         subdirectory = ''
@@ -41,14 +40,14 @@ class ExecuteNotebookWriter():
             language = 'julia'
 
         ## adding latex metadata
-        if builderSelf.config["jupyter_target_pdf"]:
-            nb = self.add_latex_metadata(builderSelf, nb, subdirectory, filename)
+        if builder.config["jupyter_target_pdf"]:
+            nb = self.add_latex_metadata(builder, nb, subdirectory, filename)
 
         # - Parse Directories and execute them - #
         if coverage:
-            self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builder, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builder, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
 
     def add_latex_metadata(self, builder, nb, subdirectory, filename=""):
 
@@ -82,15 +81,15 @@ class ExecuteNotebookWriter():
         # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
         return nb
 
-    def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
+    def execution_cases(self, builder, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
         if subdirectory != '':
-            builderSelf.executed_notebook_dir = directory + "/" + subdirectory
+            builder.executed_notebook_dir = directory + "/" + subdirectory
         else:
-            builderSelf.executed_notebook_dir = directory
+            builder.executed_notebook_dir = directory
 
         ## ensure that executed notebook directory
-        ensuredir(builderSelf.executed_notebook_dir)
+        ensuredir(builder.executed_notebook_dir)
 
         ## specifying kernels
         if language == 'python':
@@ -106,37 +105,37 @@ class ExecuteNotebookWriter():
         ### calling this function before starting work to ensure it starts recording
         if (self.startFlag == 0):
             self.startFlag = 1
-            builderSelf.client.get_task_stream()
+            builder.client.get_task_stream()
 
 
-        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
+        future = builder.client.submit(ep.preprocess, nb, {"metadata": {"path": builder.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
 
         ### dictionary to store info for errors in future
         future_dict = { "filename": full_path, "filename_with_path": full_path, "language_info": nb['metadata']['kernelspec']}
-        builderSelf.futuresInfo[future.key] = future_dict
+        builder.futuresInfo[future.key] = future_dict
 
         futures.append(future)
 
 
-    def task_execution_time(self, builderSelf):
+    def task_execution_time(self, builder):
         ## calculates execution time of each task in client using get task stream
-        task_Info_latest = builderSelf.client.get_task_stream()[-1]
+        task_Info_latest = builder.client.get_task_stream()[-1]
         time_tuple = task_Info_latest['startstops'][0]
         computing_time = time_tuple[2] - time_tuple[1]
         return computing_time
 
-    def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name, params):
+    def check_execution_completion(self, builder, future, nb, error_results, count, total_count, futures_name, params):
         error_result = []
-        builderSelf.dask_log['futures'].append(str(future))
+        builder.dask_log['futures'].append(str(future))
         status = 'pass'
 
         # computing time for each task 
-        computing_time = self.task_execution_time(builderSelf)
+        computing_time = self.task_execution_time(builder)
 
         # store the exceptions in an error result array
         if future.status == 'error':
             status = 'fail'
-            for key,val in builderSelf.futuresInfo.items():
+            for key,val in builder.futuresInfo.items():
                 if key == future.key:
                     filename_with_path = val['filename_with_path']
                     filename = val['filename']
@@ -150,9 +149,9 @@ class ExecuteNotebookWriter():
             executed_nb = nb[0]
             language_info = executed_nb['metadata']['kernelspec']
             executed_nb['metadata']['filename_with_path'] = filename_with_path
-            executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
-            if (builderSelf.config['jupyter_download_nb']):
-                executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
+            executed_nb['metadata']['download_nb'] = builder.config['jupyter_download_nb']
+            if (builder.config['jupyter_download_nb']):
+                executed_nb['metadata']['download_nb_path'] = builder.config['jupyter_download_nb_urlpath']
             if (futures_name.startswith('delayed') != -1):
                 # adding in executed notebooks list
                 params['executed_notebooks'].append(filename)
@@ -165,7 +164,7 @@ class ExecuteNotebookWriter():
                     if (executed == len(arr)):
                         key_to_delete = nb
                         notebook = params['delayed_notebooks'].get(nb)
-                        builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, params, params['delayed_futures'])
+                        builder._execute_notebook_class.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
                 if (key_to_delete):
                     del params['dependency_lists'][str(key_to_delete)]
                     key_to_delete = False
@@ -182,13 +181,13 @@ class ExecuteNotebookWriter():
                 nbformat.write(executed_nb, f)
             
             ## generate html if needed
-            if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-                builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
+            if (builder.config['jupyter_generate_html'] and params['target'] == 'website'):
+                builder._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
             
             ## generate pdfs if set to true
-            if (builderSelf.config['jupyter_target_pdf']):
-                builderSelf._pdf_class.convert_to_latex(builderSelf, filename_with_path, executed_nb['metadata']['latex_metadata'])
-                builderSelf._pdf_class.move_pdf(builderSelf)
+            if (builder.config['jupyter_target_pdf']):
+                builder._pdf_class.convert_to_latex(builder, filename_with_path, executed_nb['metadata']['latex_metadata'])
+                builder._pdf_class.move_pdf(builder)
             
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -203,15 +202,15 @@ class ExecuteNotebookWriter():
         error_results.append(results)
         return filename
 
-    def save_executed_notebook(self, builderSelf, params):
+    def save_executed_notebook(self, builder, params):
         error_results = []
 
-        builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
-        builderSelf.dask_log['futures'] = []
+        builder.dask_log['scheduler_info'] = builder.client.scheduler_info()
+        builder.dask_log['futures'] = []
 
         ## create an instance of the class id config set
-        if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-            builderSelf._convert_class = convertToHtmlWriter(builderSelf)
+        if (builder.config['jupyter_generate_html'] and params['target'] == 'website'):
+            builder._convert_class = ConvertToHTMLWriter(builder)
 
         # this for loop gathers results in the background
         total_count = len(params['futures'])
@@ -219,23 +218,23 @@ class ExecuteNotebookWriter():
         update_count_delayed = 1
         for future, nb in as_completed(params['futures'], with_results=True, raise_errors=False):
             count += 1
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures', params)
+            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count, 'futures', params)
 
         for future, nb in as_completed(params['delayed_futures'], with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0
                 total_count += len(params['delayed_futures'])
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures', params)
+            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count,  'delayed_futures', params)
 
         return error_results
 
-    def produce_code_execution_report(self, builderSelf, error_results, params, fln = "code-execution-results.json"):
+    def produce_code_execution_report(self, builder, error_results, params, fln = "code-execution-results.json"):
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
-        ensuredir(builderSelf.reportdir)
-        json_filename = builderSelf.reportdir + fln
+        ensuredir(builder.reportdir)
+        json_filename = builder.reportdir + fln
 
         if os.path.isfile(json_filename):
             with open(json_filename, encoding="UTF-8") as json_file:
@@ -301,36 +300,36 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builder.reportdir))
 
-    def produce_dask_processing_report(self, builderSelf, params, fln= "dask-reports.json"):
+    def produce_dask_processing_report(self, builder, params, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
-        ensuredir(builderSelf.reportdir)
-        json_filename = builderSelf.reportdir + fln
+        ensuredir(builder.reportdir)
+        json_filename = builder.reportdir + fln
 
         try:
             if (sys.version_info > (3, 0)):
                 with open(json_filename, "w") as json_file:
-                    json.dump(builderSelf.dask_log, json_file)
+                    json.dump(builder.dask_log, json_file)
             else:
                with open(json_filename, "w") as json_file:
-                    x = json.dumps(builderSelf.dask_log, ensure_ascii=False)
+                    x = json.dumps(builder.dask_log, ensure_ascii=False)
                     if isinstance(x,str):
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builder.reportdir))
 
-    def create_coverage_report(self, builderSelf, error_results, params):
+    def create_coverage_report(self, builder, error_results, params):
         """
         Creates a coverage report of the errors in notebook
         """
         errors = []
         error_results = []
         errors_by_language = dict()
-        produce_text_reports = builderSelf.config["jupyter_execute_nb"]["text_reports"]
+        produce_text_reports = builder.config["jupyter_execute_nb"]["text_reports"]
         
         #Parse Error Set
         for full_error_set in error_results:
@@ -351,8 +350,8 @@ class ExecuteNotebookWriter():
                 errors_by_language[language_name]['files'][filename] = error_result
 
         # Create the error report from the HTML template, if it exists.
-        templateFolder = builderSelf.config['jupyter_template_path']
-        error_report_template_file = templateFolder + "/" + builderSelf.config["jupyter_template_coverage_file_path"]
+        template_folder = builder.config['jupyter_template_path']
+        error_report_template_file = template_folder + "/" + builder.config["jupyter_template_coverage_file_path"]
 
         error_report_template = []
         if not os.path.isfile(error_report_template_file):
@@ -367,7 +366,7 @@ class ExecuteNotebookWriter():
             language_display_name = errors_by_language[lang_ext]['display_name']
             language = errors_by_language[lang_ext]['language']
             errors_by_file = errors_by_language[lang_ext]['files']
-            error_dir = builderSelf.errordir.format(lang_ext)
+            error_dir = builder.errordir.format(lang_ext)
 
             if produce_text_reports:
                 # set specific language output file

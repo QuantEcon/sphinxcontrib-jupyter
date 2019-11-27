@@ -4,28 +4,27 @@ import os
 from io import open
 from sphinx.util.osutil import ensuredir
 
-class convertToHtmlWriter():
-    
+class ConvertToHTMLWriter():
     """
     Convert IPYNB to HTML using nbconvert and QuantEcon Template
     """
-    def __init__(self, builderSelf):
+    def __init__(self, builder):
         
-        self.htmldir = builderSelf.outdir + "/html" #html directory 
+        self.htmldir = builder.outdir + "/html" #html directory 
 
         for path in [self.htmldir]:
             ensuredir(path)
         self.html_exporter = HTMLExporter()
         
-        templateFolder = builderSelf.config['jupyter_template_path']
+        template_folder = builder.config['jupyter_template_path']
 
-        if os.path.exists(templateFolder):
+        if os.path.exists(template_folder):
             pass
         else:
-            builderSelf.logger.warning("template directory not found")
+            builder.logger.warning("template directory not found")
             exit()
 
-        self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
+        self.html_exporter.template_file = template_folder + "/" + builder.config["jupyter_html_template"]
 
         
     def convert(self, nb, filename, language, base_path, path=None):
@@ -47,9 +46,4 @@ class convertToHtmlWriter():
             html, resources = self.html_exporter.from_notebook_node(nb)
             f.write(html)
 
-        nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble
-
-        # #Write Executed Notebook as File
-        # if (nb['metadata']['download_nb'] == True):
-        #     with open(download_nb, "wt", encoding="UTF-8") as f:
-        #             nbformat.write(nb, f)
+        nb['cells'] = nb['cells'][1:] #skip first code-cell as preamble, TODO: remove this

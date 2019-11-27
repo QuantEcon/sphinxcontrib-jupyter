@@ -10,7 +10,7 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from ..writers.make_site import MakeSiteWriter
-from ..writers.convert import convertToHtmlWriter
+from ..writers.convert import ConvertToHTMLWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 import pdb
@@ -191,7 +191,7 @@ class JupyterBuilder(Builder):
             #do not execute
             if (self.config['jupyter_generate_html']):
                 language_info = nb.metadata.kernelspec.language
-                self._convert_class = convertToHtmlWriter(self)
+                self._convert_class = ConvertToHTMLWriter(self)
                 self._convert_class.convert(nb, docname, language_info, self.outdir)
 
         ### mkdir if the directory does not exist
