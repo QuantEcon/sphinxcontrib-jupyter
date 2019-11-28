@@ -1,14 +1,73 @@
-import docutils.nodes
 import re
 import nbformat.v4
 import os.path
 import datetime
+import docutils
 
+from docutils.nodes import SparseNodeVisitor, GenericNodeVisitor   #https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/nodes.py#L1922
 from .utils import LanguageTranslator, JupyterOutputCellGenerators, get_source_file_name
 
-#TODO: should we use https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/nodes.py#L1922
+from sphinx.util.docutils import SphinxTranslator
 
-class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
+from .notebook import JupyterNotebook
+
+class JupyterCodeBlockTranslator(SphinxTranslator):
+    def __init__(self, builder, document):
+        super().__init__(builder, document)  #add document, builder, config and settings to object
+        self.warn = self.document.reporter.warning
+        self.error = self.document.reporter.error
+        #-Jupyter Settings-#
+        self.lang = builder.config["jupyter_default_lang"]
+        self.jupyter_kernels = builder.config["jupyter_kernels"]
+        self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
+        self.notebook = JupyterNotebook()
+
+    def visit_document(self, node):
+        pass
+
+    def depart_document(self, node):
+        #Set Jupyter Kernel Metadata
+        if self.jupyter_kernels is not None:
+            try:
+                self.output.metadata.kernelspec = self.jupyter_kernels[self.lang]["kernelspec"]
+            except:
+                self.warn(
+                    "Invalid jupyter kernels. "
+                    "jupyter_kernels: {}, lang: {}"
+                    .format(self.jupyter_kernels, self.lang))
+
+    def visit_literal_block(self, node):
+        "Parse Literal Blocks (Code Blocks)"
+        self.in_literal_block = True
+        self.code_lines = []
+        try:
+            self.nodelang = node.attributes["language"].strip()
+        except KeyError:
+            self.nodelang = self.lang
+        if self.nodelang == 'default':
+            self.nodelang = self.lang
+
+    def depart_literal_block(self, node):
+        sourcecode = "".join(self.code_lines)
+        self.notebook.add_code_cell(sourcecode)
+        self.in_literal_block = False
+
+    def visit_Text(self, node):
+        text = node.astext()
+        if self.in_literal_block:
+            self.code_lines.append(text)
+
+    def depart_Text(self, node):
+        pass
+
+
+
+
+
+
+
+
+class JupyterCodeTranslator(GenericNodeVisitor):
     """
     Jupyter Code Translator
     
@@ -20,7 +79,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
     URI_SPACE_REPLACE_TO = "-"
 
     def __init__(self, builder, document):
-        docutils.nodes.NodeVisitor.__init__(self, document)                         #TODO: is this needed?
+        super(GenericNodeVisitor, self).__init__(document)
 
         self.lang = None
         self.nodelang = None

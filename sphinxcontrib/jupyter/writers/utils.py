@@ -1,14 +1,17 @@
 import os.path
 import os
 import sys
-import nbformat.v4
 from xml.etree.ElementTree import ElementTree
 from enum import Enum
 from sphinx.util.osutil import ensuredir
 from shutil import copy
 
+import nbformat.v4
+
+
 if sys.version_info.major == 2:
     import fnmatch
+
 
 class LanguageTranslator(object):
     """
