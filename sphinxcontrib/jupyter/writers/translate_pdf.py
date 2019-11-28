@@ -10,7 +10,7 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate_code import JupyterCodeTranslator
+from .translate_ipynb import JupyterTranslator
 from .utils import JupyterOutputCellGenerators
 
 

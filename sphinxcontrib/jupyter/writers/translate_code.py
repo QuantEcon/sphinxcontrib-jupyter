@@ -46,29 +46,12 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         # Variables defined in conf.py
         self.jupyter_kernels = builder.config["jupyter_kernels"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
-<<<<<<< HEAD
-        self.jupyter_target_html = builder.config["jupyter_target_html"]
-        self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
-        self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
-        self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
-        self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]
-        self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]
-        self.book_index = builder.config["jupyter_pdf_book_index"]
-        if hasattr(builder, 'add_bib_to_latex'):
-            self.add_bib_to_latex = builder.add_bib_to_latex
-
-        # set the value of the cell metadata["slideshow"] to slide as the default option
-        self.slide = "slide" 
-        self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
-
-=======
         self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
         self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
         self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]         #solutions = code-block solutions
         
         self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]   #not used in current class? However relate to execution
         self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]     #not used in current class? However relate to execution
->>>>>>> 874983b... work in progress
 
         # Header Block
         template_paths = builder.config["templates_path"]
