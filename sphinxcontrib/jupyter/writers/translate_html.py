@@ -122,6 +122,7 @@ class JupyterHTMLTranslator(JupyterTranslator):
                     os.makedirs(out_dir)
                 print("Copying {} to {}".format(src_fl, out_fl))
                 copyfile(src_fl, out_fl)
+        #Run Parent Method
         JupyterCodeTranslator.depart_document(self, node)
     
     # =========

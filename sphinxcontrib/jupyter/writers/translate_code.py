@@ -93,6 +93,10 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.in_code_block = False  # if False, it means in markdown_cell
         self.output_cell_type = None
         self.code_lines = []
+        
+        # set the value of the cell metadata["slideshow"] to slide as the default option
+        self.slide = "slide" 
+        self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
 
     # generic visit and depart methods
     # --------------------------------

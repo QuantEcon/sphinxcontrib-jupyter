@@ -7,6 +7,9 @@ SHELL := bash
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
+#JupyterCodeTranslator (Code Only)
+SOURCECODE     = code/
+BUILDCODE      = code/_build
 #BASE
 SOURCEDIR     = base/
 BUILDDIR      = base/_build
@@ -24,7 +27,7 @@ CORES 		  = 4
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile pdf rst-test
+.PHONY: help Makefile pdf rst-test code
 
 test: clean clean-pdf jupyter pdf
 	python check_diffs.py
@@ -73,9 +76,11 @@ clean-pdf:
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 # endif
 
-
 pdf:
 	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
+
+code:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCECODE)" "$(BUILDCODE)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
