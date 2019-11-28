@@ -21,7 +21,7 @@ class LanguageTranslator(object):
 
     The data itself is stored in an XML file within the templates directory configured
     in conf.py; deciding whether this is the most appropriate place to store that
-    information is a @todo
+    information is a @TODO
 
     By default, if there is no entry in the XML file for a given language, the translator
     will return the language it was given; this decision was predicated on the fact that

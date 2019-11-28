@@ -3,21 +3,30 @@ import re
 import nbformat.v4
 import os.path
 import datetime
+
 from .utils import LanguageTranslator, JupyterOutputCellGenerators, get_source_file_name
 
+#TODO: should we use https://github.com/docutils-mirror/docutils/blob/e88c5fb08d5cdfa8b4ac1020dd6f7177778d5990/docutils/nodes.py#L1922
+
 class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
+    """
+    Jupyter Code Translator
+    
+    Provides infrastructure for extracting code-blocks from RST files
+    and serves as the BASE class for all other Translators
+    """
 
     URI_SPACE_REPLACE_FROM = re.compile(r"\s")
     URI_SPACE_REPLACE_TO = "-"
 
     def __init__(self, builder, document):
-        docutils.nodes.NodeVisitor.__init__(self, document)
+        docutils.nodes.NodeVisitor.__init__(self, document)                         #TODO: is this needed?
 
         self.lang = None
         self.nodelang = None
         self.visit_first_title = True
 
-        self.langTranslator = LanguageTranslator(builder.config["templates_path"])
+        self.lang_translator = LanguageTranslator(builder.config["templates_path"])
 
         # Reporter
         self.warn = self.document.reporter.warning
@@ -35,14 +44,9 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.output = nbformat.v4.new_notebook()
 
         # Variables defined in conf.py
-        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
         self.jupyter_kernels = builder.config["jupyter_kernels"]
-        self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
-        self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]
-        self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
-        self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]
-        self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
+<<<<<<< HEAD
         self.jupyter_target_html = builder.config["jupyter_target_html"]
         self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
         self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
@@ -57,6 +61,14 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.slide = "slide" 
         self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
 
+=======
+        self.jupyter_drop_tests = builder.config["jupyter_drop_tests"]
+        self.jupyter_write_metadata = builder.config["jupyter_write_metadata"]
+        self.jupyter_drop_solutions = builder.config["jupyter_drop_solutions"]         #solutions = code-block solutions
+        
+        self.jupyter_ignore_no_execute = builder.config["jupyter_ignore_no_execute"]   #not used in current class? However relate to execution
+        self.jupyter_ignore_skip_test = builder.config["jupyter_ignore_skip_test"]     #not used in current class? However relate to execution
+>>>>>>> 874983b... work in progress
 
         # Header Block
         template_paths = builder.config["templates_path"]
@@ -200,7 +212,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             self.nodelang = self.lang
 
         # Translate the language name across from the Sphinx to the Jupyter namespace
-        self.nodelang = self.langTranslator.translate(self.nodelang)
+        self.nodelang = self.lang_translator.translate(self.nodelang)
 
         self.in_code_block = True
         self.code_lines = []
@@ -208,7 +220,7 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         # If the cell being processed contains code written in a language other than the one that
         # was specified as the default language, do not create a code block for it - turn it into
         # markup instead.
-        if self.nodelang != self.langTranslator.translate(self.lang):
+        if self.nodelang != self.lang_translator.translate(self.lang):
             if self.nodelang in self.jupyter_lang_synonyms:
                 pass
             else:

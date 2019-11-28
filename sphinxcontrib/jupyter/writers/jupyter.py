@@ -3,6 +3,8 @@ import nbformat
 
 from .translate_code import JupyterCodeTranslator
 from .translate_ipynb import JupyterTranslator
+from .translate_html import JupyterHTMLTranslator
+from .translate_pdf import JupyterPDFTranslator
 
 
 class JupyterWriter(docutils.writers.Writer):

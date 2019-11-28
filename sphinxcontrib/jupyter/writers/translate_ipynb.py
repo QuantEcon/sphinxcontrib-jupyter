@@ -6,16 +6,19 @@ from __future__ import unicode_literals
 import re
 import nbformat.v4
 from docutils import nodes, writers
-from .translate_code import JupyterCodeTranslator
-from .utils import JupyterOutputCellGenerators
 from shutil import copyfile
 import copy
 import os
+
+from .translate_code import JupyterCodeTranslator
+from .utils import JupyterOutputCellGenerators
 
 
 class JupyterTranslator(JupyterCodeTranslator):
     """ 
     Jupyter Translator for RST to IPYNB
+
+    Base Translator for HTML and PDF
     """
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
@@ -79,6 +82,24 @@ class JupyterTranslator(JupyterCodeTranslator):
         self.book_index_previous_links = []
         self.markdown_lines_trimmed = []
 
+        #set options from conf.py
+        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
+        self.jupyter_target_html = builder.config["jupyter_target_html"]
+        self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
+        self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
+        self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]
+        self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]
+        self.book_index = builder.config["jupyter_pdf_book_index"]
+
+        if hasattr(builder, 'add_bib_to_latex'):
+            self.add_bib_to_latex = builder.add_bib_to_latex
+
+        if hasattr(builder, 'jupyter_download_nb_image_urlpath'):
+            self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
+
+        # set the value of the cell metadata["slideshow"] to slide as the default option
+        self.slide = "slide" 
+        self.metadata_slide = False  #value by default for all the notebooks, we change it for those we want
 
     # specific visit and depart methods
     # ---------------------------------
