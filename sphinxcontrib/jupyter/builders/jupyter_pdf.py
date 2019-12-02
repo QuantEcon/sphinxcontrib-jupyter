@@ -18,7 +18,7 @@ import shutil
 from distutils.spawn import find_executable
 import time
 
-class JupyterPDFBuilder(Builder):
+class JupyterPdfBuilder(Builder):
     """
     Builds pdf notebooks
     """
@@ -231,3 +231,46 @@ class JupyterPDFBuilder(Builder):
         if "jupyter_target_pdf" in self.config and self.config["jupyter_target_pdf"] and self.config["jupyter_pdf_book"]:
             self._pdf_class.process_tex_for_book(self)
 
+####### pdf code from execute_nb writer
+
+## adding latex metadata
+# if builderSelf.config["jupyter_target_pdf"]:
+#     nb = self.add_latex_metadata(builderSelf, nb, subdirectory, filename)
+
+
+# def add_latex_metadata(self, builder, nb, subdirectory, filename=""):
+
+#     ## initialize latex metadata
+#     if 'latex_metadata' not in nb['metadata']:
+#         nb['metadata']['latex_metadata'] = {}
+
+#     ## check for relative paths
+#     path = ''
+#     if subdirectory != '':
+#         path = "../"
+#         slashes = subdirectory.count('/')
+#         for i in range(slashes):
+#             path += "../"
+
+#     ## add check for logo here as well
+#     if nb.metadata.title:
+#         nb.metadata.latex_metadata.title = nb.metadata.title
+#     if "jupyter_pdf_logo" in builder.config and builder.config['jupyter_pdf_logo']:
+#         nb.metadata.latex_metadata.logo = path + builder.config['jupyter_pdf_logo']
+    
+#     if builder.config["jupyter_bib_file"]:
+#         nb.metadata.latex_metadata.bib = path + builder.config["jupyter_bib_file"]
+
+#     if builder.config["jupyter_pdf_author"]:
+#         nb.metadata.latex_metadata.author = builder.config["jupyter_pdf_author"]
+    
+#     if builder.config["jupyter_pdf_book_index"] is not None and (filename and builder.config["jupyter_pdf_book_index"] in filename):
+#         nb.metadata.latex_metadata.jupyter_pdf_book_title = builder.config["jupyter_pdf_book_title"]
+
+#     # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
+#     return nb
+
+ # ## generate pdfs if set to true
+# if (builderSelf.config['jupyter_target_pdf']):
+#     builderSelf._pdf_class.convert_to_latex(builderSelf, filename_with_path, executed_nb['metadata']['latex_metadata'])
+#     builderSelf._pdf_class.move_pdf(builderSelf)

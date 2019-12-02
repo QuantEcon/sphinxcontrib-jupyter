@@ -2,8 +2,9 @@ import yaml
 yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
-from .builders.jupyterpdf import JupyterPDFBuilder
-from .builders.jupytercode import JupyterCodeBuilder
+from .builders.jupyter_pdf import JupyterPdfBuilder
+from .builders.jupyter_code import JupyterCodeBuilder
+from .builders.jupyter_html import JupyterHtmlBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -26,20 +27,14 @@ def depart_exercise_node(self, node):
     
 
 def setup(app):
-    execute_nb_obj = {
-        "no-text": True,
-        "timeout": 600,
-        "text_reports": True,
-        "coverage": False,
-    }
-
     #Add Sphinx Version to ENV Configuration
     app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
-    app.add_builder(JupyterPDFBuilder)
+    app.add_builder(JupyterPdfBuilder)
     app.add_builder(JupyterBuilder)
     app.add_builder(JupyterCodeBuilder)
+    app.add_builder(JupyterHtmlBuilder)
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")
@@ -52,7 +47,6 @@ def setup(app):
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
-    app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
     app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter")
     app.add_config_value("jupyter_generate_html", False, "jupyter")
     app.add_config_value("jupyter_html_template", None, "jupyter")

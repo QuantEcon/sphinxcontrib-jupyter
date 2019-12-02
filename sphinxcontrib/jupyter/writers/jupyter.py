@@ -6,12 +6,14 @@ from .translate_all import JupyterTranslator
 
 
 class JupyterWriter(docutils.writers.Writer):
-    def __init__(self, builder, c_only=False):
+    def __init__(self, builder):
         docutils.writers.Writer.__init__(self)
 
         self.output = None
         self.builder = builder
-        self.translator_class = self._identify_translator(builder, c_only)
+        self.translator_class = self._identify_translator(builder)
+        self.builder.urlpath = None
+        self.builder.jupyter_download_nb_image_urlpath = None
 
     def translate(self):
         self.document.settings.newlines = \
@@ -35,7 +37,7 @@ class JupyterWriter(docutils.writers.Writer):
         """
         self.builder.jupyter_download_nb_image_urlpath = urlpath
 
-    def _identify_translator(self, builder, c_only=False):
+    def _identify_translator(self, builder):
         """
         Determine which translator class to apply to this translation. The choices are 'code' and 'all'; all converts
         the entire sphinx RST file to a Jupyter notebook, whereas 'code' only translates the code cells, and
@@ -47,7 +49,6 @@ class JupyterWriter(docutils.writers.Writer):
         The default translator to use is set in conf.py, but this value can be overridden on the command line.
 
         :param builder: The builder object provided by the Sphinx run-time
-        :param c_only: passing the code_only flag explicity during function call, rather then via config
         :return: The translator class object to instantiate.
         """
         code_only = False
@@ -58,7 +59,7 @@ class JupyterWriter(docutils.writers.Writer):
                 "Set conversion_mode as default(code)")
             code_only = True
         else:
-            if builder.config["jupyter_conversion_mode"] == "code" or c_only:
+            if builder.config["jupyter_conversion_mode"] == "code":
                 code_only = True
             elif builder.config["jupyter_conversion_mode"] != "all":
                 builder.warn(

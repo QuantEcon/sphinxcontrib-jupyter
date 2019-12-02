@@ -5,7 +5,6 @@ import shutil
 import time
 import json
 from nbconvert.preprocessors import ExecutePreprocessor
-from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
@@ -23,9 +22,7 @@ class ExecuteNotebookWriter():
     def __init__(self, builderSelf):
         pass
     def execute_notebook(self, builderSelf, nb, filename, params, futures):
-        execute_nb_config = builderSelf.config["jupyter_execute_nb"]
         coverage = builderSelf.config["jupyter_make_coverage"]
-        timeout = execute_nb_config["timeout"]
         filename = filename
         subdirectory = ''
         full_path = filename
@@ -41,59 +38,11 @@ class ExecuteNotebookWriter():
         elif (language.lower().find('julia') != -1):
             language = 'julia'
 
-        ## adding latex metadata
-        if builderSelf.config["jupyter_target_pdf"]:
-            nb = self.add_latex_metadata(builderSelf, nb, subdirectory, filename)
-
-        self.create_hash(nb)
-
         # - Parse Directories and execute them - #
         if coverage:
             self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
         else:
             self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
-
-    def normalize_cell(self, cell):
-        cell = cell.strip('\n')
-        return cell
-        
-
-    def create_hash(self, nb):
-        for cell in nb.cells:
-            cell = self.normalize_cell(cell)
-            hashcode = md5(cell.source.encode()).hexdigest()
-
-    def add_latex_metadata(self, builder, nb, subdirectory, filename=""):
-
-        ## initialize latex metadata
-        if 'latex_metadata' not in nb['metadata']:
-            nb['metadata']['latex_metadata'] = {}
-
-        ## check for relative paths
-        path = ''
-        if subdirectory != '':
-            path = "../"
-            slashes = subdirectory.count('/')
-            for i in range(slashes):
-                path += "../"
-
-        ## add check for logo here as well
-        if nb.metadata.title:
-            nb.metadata.latex_metadata.title = nb.metadata.title
-        if "jupyter_pdf_logo" in builder.config and builder.config['jupyter_pdf_logo']:
-            nb.metadata.latex_metadata.logo = path + builder.config['jupyter_pdf_logo']
-        
-        if builder.config["jupyter_bib_file"]:
-            nb.metadata.latex_metadata.bib = path + builder.config["jupyter_bib_file"]
-
-        if builder.config["jupyter_pdf_author"]:
-            nb.metadata.latex_metadata.author = builder.config["jupyter_pdf_author"]
-        
-        if builder.config["jupyter_pdf_book_index"] is not None and (filename and builder.config["jupyter_pdf_book_index"] in filename):
-            nb.metadata.latex_metadata.jupyter_pdf_book_title = builder.config["jupyter_pdf_book_title"]
-
-        # nb_string = json.dumps(nb_obj, indent=2, sort_keys=True)
-        return nb
 
     def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -190,19 +139,14 @@ class ExecuteNotebookWriter():
                 if cell['cell_type'] == "code":
                     if cell['metadata']['hide-output']:
                         cell['outputs'] = []
-            #Write Executed Notebook as File
-            with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
-                nbformat.write(executed_nb, f)
-            
-            ## generate html if needed
-            if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-                builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
-            
-            ## generate pdfs if set to true
-            if (builderSelf.config['jupyter_target_pdf']):
-                builderSelf._pdf_class.convert_to_latex(builderSelf, filename_with_path, executed_nb['metadata']['latex_metadata'])
-                builderSelf._pdf_class.move_pdf(builderSelf)
-            
+            # #Write Executed Notebook as File
+            # with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
+            #     nbformat.write(executed_nb, f)
+
+        #### processing the notebook and saving it in codetree
+        builderSelf.create_codetree(executed_nb)
+        #builderSelf.create_codetree_files(nb_with_hash)
+
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
 
@@ -222,9 +166,9 @@ class ExecuteNotebookWriter():
         builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
         builderSelf.dask_log['futures'] = []
 
-        ## create an instance of the class id config set
-        if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-            builderSelf._convert_class = convertToHtmlWriter(builderSelf)
+        # ## create an instance of the class id config set
+        # if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
+        #     builderSelf._convert_class = convertToHtmlWriter(builderSelf)
 
         # this for loop gathers results in the background
         total_count = len(params['futures'])
@@ -343,7 +287,7 @@ class ExecuteNotebookWriter():
         errors = []
         error_results = []
         errors_by_language = dict()
-        produce_text_reports = builderSelf.config["jupyter_execute_nb"]["text_reports"]
+        produce_text_reports = True
         
         #Parse Error Set
         for full_error_set in error_results:
