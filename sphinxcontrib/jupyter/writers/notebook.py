@@ -19,16 +19,14 @@ import nbformat
 import nbformat.v4 as nbapi
 from jupyter_client.kernelspec import get_kernel_spec, find_kernel_specs
 
-class JupyterKernelNotFound(Exception):
-    pass
-
 class JupyterNotebook:
 
-    def __init__(self):
+    def __init__(self, language="python"):
         """
         A simple object that represents a Jupyter notebook
         """
         self.notebook = nbapi.new_notebook()
+        self.add_kernelspec(language)
 
     def add_code_cell(self, source, metadata=None, **kwargs):
         """
@@ -75,7 +73,11 @@ class JupyterNotebook:
         """
         https://jupyter-client.readthedocs.io/en/stable/api/kernelspec.html
         """
-        self.kernelspec = get_kernel_spec(language)
+        try:
+            self.kernelspec = get_kernel_spec(language)
+        except:
+            msg = "Requested Jupyter Kernel for language: {language} is not found"
+            raise JupyterKernelNotFound(msg)
         kernelspec = {
                 "display_name": self.kernelspec.display_name,
                 "language": self.kernelspec.language,
@@ -100,3 +102,8 @@ class JupyterNotebook:
         for k,v in metadata.items():
             cell.metadata[k] = v
         return cell
+
+#Custom Exceptions
+
+class JupyterKernelNotFound(Exception):
+    pass

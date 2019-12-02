@@ -12,34 +12,32 @@ from sphinx.util.docutils import SphinxTranslator
 from .notebook import JupyterNotebook
 
 class JupyterCodeBlockTranslator(SphinxTranslator):
+    """
+    .. TODO: 
+    
+        1. setup new builder to call this translator
+        2. replace JupyterCodeTranslator once working
+    """
+
     def __init__(self, builder, document):
         super().__init__(builder, document)  #add document, builder, config and settings to object
         self.warn = self.document.reporter.warning
         self.error = self.document.reporter.error
         #-Jupyter Settings-#
-        self.lang = builder.config["jupyter_default_lang"]
-        self.jupyter_kernels = builder.config["jupyter_kernels"]
+        self.language = builder.config["jupyter_default_lang"]
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
-        self.notebook = JupyterNotebook()
 
     def visit_document(self, node):
-        pass
+        self.notebook = JupyterNotebook(language=self.language)
+        #Collector List for Current Cell
+        self.cell = []
 
     def depart_document(self, node):
-        #Set Jupyter Kernel Metadata
-        if self.jupyter_kernels is not None:
-            try:
-                self.output.metadata.kernelspec = self.jupyter_kernels[self.lang]["kernelspec"]
-            except:
-                self.warn(
-                    "Invalid jupyter kernels. "
-                    "jupyter_kernels: {}, lang: {}"
-                    .format(self.jupyter_kernels, self.lang))
+        pass
 
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
         self.in_literal_block = True
-        self.code_lines = []
         try:
             self.nodelang = node.attributes["language"].strip()
         except KeyError:
@@ -48,24 +46,20 @@ class JupyterCodeBlockTranslator(SphinxTranslator):
             self.nodelang = self.lang
 
     def depart_literal_block(self, node):
-        sourcecode = "".join(self.code_lines)
-        self.notebook.add_code_cell(sourcecode)
+        source = "".join(self.cell)
+        self.notebook.add_code_cell(source)
         self.in_literal_block = False
 
     def visit_Text(self, node):
         text = node.astext()
         if self.in_literal_block:
-            self.code_lines.append(text)
+            self.cell.append(text)
 
     def depart_Text(self, node):
         pass
 
 
-
-
-
-
-
+#-Code for Refactoring-#
 
 class JupyterCodeTranslator(GenericNodeVisitor):
     """
