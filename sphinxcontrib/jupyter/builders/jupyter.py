@@ -17,7 +17,7 @@ import pdb
 import time
 import json
 from hashlib import md5
-from ..writers.utils import copy_dependencies
+from .utils import copy_dependencies, create_hashcode, normalize_cell
 from munch import munchify
 
 class JupyterBuilder(Builder):
@@ -205,10 +205,6 @@ class JupyterBuilder(Builder):
     def normalize_cell(self, cell):
         cell.source = cell.source.strip().replace('\n','')
         return cell
-        
-    def create_hashcode(self, cell):
-        hashcode = md5(cell.source.encode()).hexdigest()
-        return hashcode
 
     def finish(self):
 
@@ -234,8 +230,8 @@ class JupyterBuilder(Builder):
             for cell in nb.cells:
                 if cell['cell_type'] == "code":
                     execution_count += 1
-                    cell = self.normalize_cell(cell)
-                    hashcode = self.create_hashcode(cell)
+                    cell = normalize_cell(cell)
+                    hashcode = create_hashcode(cell)
                     output = json_obj[hashcode]['outputs']
                     cell['execution_count'] = execution_count
                     cell['outputs'] = munchify(output)

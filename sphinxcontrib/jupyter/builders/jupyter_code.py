@@ -17,7 +17,7 @@ from docutils import nodes
 from docutils.nodes import Node
 import pdb
 import time
-from ..writers.utils import copy_dependencies
+from .utils import copy_dependencies, create_hash, normalize_cell
 from hashlib import md5
 import json
 
@@ -122,8 +122,8 @@ class JupyterCodeBuilder(Builder):
                     json_obj = json.load(f)
 
                 for cell in nb.cells:
-                    cell = self.normalize_cell(cell)
-                    cell = self.create_hash(cell)
+                    cell = normalize_cell(cell)
+                    cell = create_hash(cell)
                     if cell.metadata.hashcode not in json_obj.keys():
                         return True
             else:
@@ -133,29 +133,11 @@ class JupyterCodeBuilder(Builder):
 
         return False
 
-
-    def create_codetree_ds(self, codetree_ds, cell):
-        codetree_ds[cell.metadata.hashcode] = dict()
-        key = codetree_ds[cell.metadata.hashcode]
-        if hasattr(cell, 'source'): key['source']= cell.source
-        if hasattr(cell, 'outputs'): key['outputs'] = cell.outputs
-        return codetree_ds
-        
-
-    def normalize_cell(self, cell):
-        cell.source = cell.source.strip().replace('\n','')
-        return cell
-        
-    def create_hash(self, cell):
-        hashcode = md5(cell.source.encode()).hexdigest()
-        cell.metadata.hashcode = hashcode
-        return cell
-
     def create_codetree(self, nb):
         codetree_ds = dict()
         for cell in nb.cells:
-            cell = self.normalize_cell(cell)
-            cell = self.create_hash(cell)
+            cell = normalize_cell(cell)
+            cell = create_hash(cell)
             codetree_ds = self.create_codetree_ds(codetree_ds, cell)
 
         filename = self.executedir + "/" + nb.metadata.filename_with_path + self.out_suffix

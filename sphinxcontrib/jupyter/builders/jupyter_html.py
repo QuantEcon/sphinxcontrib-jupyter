@@ -17,7 +17,7 @@ from docutils import nodes
 from docutils.nodes import Node
 import pdb
 import time
-from ..writers.utils import copy_dependencies
+from .utils import copy_dependencies
 from hashlib import md5
 import json
 
