@@ -10,11 +10,19 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate_code import JupyterCodeTranslator
+from .translate import JupyterCodeTranslator, JupyterBaseTranslator
 from .utils import JupyterOutputCellGenerators
 
+class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
+    
+    def __init__(self, document, builder):
+        super().__init__(document, builder)
 
-class JupyterTranslator(JupyterCodeTranslator):
+
+
+#->REFACTOR
+
+class JupyterTranslator(JupyterCodeTranslator):   #->OLD
     """ 
     Jupyter Translator for RST to IPYNB
 

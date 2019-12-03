@@ -19,9 +19,10 @@ from ..writers.utils import copy_dependencies
 
 class JupyterBuilder(Builder):
     """
-    Builds Jupyter Notebook
+    Builds Jupyter Notebook (FOR TESTING PURPOSES ONLY)  @AAKASH is working on BUILDERS
     """
-    name = "jupytercode"
+    # name = "jupytercode"
+    name = "jupyter"
     format = "ipynb"            #TODO: best not to override format
     out_suffix = ".ipynb"
     allow_parallel = True

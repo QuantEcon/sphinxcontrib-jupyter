@@ -38,6 +38,9 @@ def setup(app):
     # Jupyter Builder and Options
     app.add_builder(JupyterPDFBuilder)
     app.add_builder(JupyterBuilder)
+    app.add_config_value("jupyter_language", "python3", "jupyter")
+    app.add_config_value("jupyter_language_synonyms", [], "jupyter")
+    #->REFACTOR
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")

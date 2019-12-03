@@ -1,9 +1,8 @@
 from docutils.writers import Writer
 
-import nbformat
-
-from .translate_code import JupyterCodeTranslator, JupyterCodeBlockTranslator
-from .translate_ipynb import JupyterTranslator
+from .translate import JupyterCodeTranslator
+from .translate_code import JupyterCodeBlockTranslator
+from .translate_ipynb import JupyterTranslator, JupyterIPYNBTranslator
 from .translate_html import JupyterHTMLTranslator
 from .translate_pdf import JupyterPDFTranslator
 
@@ -14,7 +13,7 @@ class JupyterWriter(Writer):
         'jupytercode' : JupyterCodeBlockTranslator,  #JupyterCodeTranslator
         "execute" : JupyterCodeBlockTranslator,
         #RST + Code Translators
-        'jupyter' : JupyterTranslator,
+        'jupyter' : JupyterIPYNBTranslator,
         'jupyterhtml' : JupyterHTMLTranslator,
         'jupyterpdf' : JupyterPDFTranslator
     }
@@ -30,11 +29,8 @@ class JupyterWriter(Writer):
             raise InvalidTranslator(msg)
 
     def translate(self):
-        self.settings = self.document.settings
-
-        #TODO: Investigate the need for these settings here
-        self.document.settings.newlines = True
-        self.document.settings.indents = True
+        self.document.settings.newlines = True   #TODO: Is this required?
+        self.document.settings.indents = True    #TODO: Is this required?
 
         visitor = self.translator(self.document, self.builder)
         self.document.walkabout(visitor)   #TODO: What is this doing?

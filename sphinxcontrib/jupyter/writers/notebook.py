@@ -36,6 +36,16 @@ class JupyterNotebook:
     def notebook_as_string(self):
         return self.writes()
 
+    def add_cell(self, source, cell_type, **kwargs):
+        if cell_type == "markdown":
+            self.add_markdown_cell(source, **kwargs)
+        elif cell_type == "code":
+            self.add_code_cell(source, **kwargs)
+        elif cell_type == "raw":
+            self.add_raw_cell(source, **kwargs)
+        else:
+            raise InvalidJupyterCell("{} is not a valid Jupyter Cell type".format(cell_type))
+
     def add_code_cell(self, source, metadata=None, **kwargs):
         """
         Append a Code Cell to the Notebook
@@ -120,4 +130,7 @@ class JupyterNotebook:
 #Custom Exceptions
 
 class JupyterKernelNotFound(Exception):
+    pass
+
+class InvalidJupyterCell(Exception):
     pass
