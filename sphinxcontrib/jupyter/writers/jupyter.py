@@ -38,7 +38,7 @@ class JupyterWriter(Writer):
 
         visitor = self.translator(self.document, self.builder)
         self.document.walkabout(visitor)   #TODO: What is this doing?
-        self.output = nbformat.writes(visitor.output.notebook)
+        self.output = visitor.output.notebook_as_string   #writers/notebook -> JupyterNotebook
 
     def _set_ref_urlpath(self, urlpath=None):
         """

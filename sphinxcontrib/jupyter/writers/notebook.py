@@ -25,8 +25,16 @@ class JupyterNotebook:
         """
         A simple object that represents a Jupyter notebook
         """
-        self.notebook = nbf.new_notebook()
+        self.nb = nbf.new_notebook()
         self.add_kernelspec(language)
+
+    @property
+    def notebook(self):
+        return self.nb
+
+    @property
+    def notebook_as_string(self):
+        return self.writes()
 
     def add_code_cell(self, source, metadata=None, **kwargs):
         """
@@ -41,7 +49,7 @@ class JupyterNotebook:
         code_cell = nbf.new_code_cell(source, **kwargs)
         if metadata:
             code_cell = self.add_metadata(code_cell, metadata)
-        self.notebook["cells"].append(code_cell)
+        self.nb["cells"].append(code_cell)
 
     def add_markdown_cell(self, formatted_text, metadata=None, **kwargs):
         """
@@ -54,7 +62,7 @@ class JupyterNotebook:
         markdown_cell = nbf.new_markdown_cell(formatted_text, **kwargs)
         if metadata:
             markdown_cell = self.add_metadata(markdown_cell, metadata)
-        self.notebook["cells"].append(markdown_cell)
+        self.nb["cells"].append(markdown_cell)
 
     def add_raw_cell(self, source, metadata=None, **kwargs):
         """        
@@ -67,7 +75,7 @@ class JupyterNotebook:
         raw_cell = nbf.new_raw_cell(source, **kwargs)
         if metadata:
             raw_cell = self.add_metadata(raw_cell, metadata)
-        self.notebook["cells"].append(raw_cell)
+        self.nb["cells"].append(raw_cell)
 
     def add_kernelspec(self, language):
         """
@@ -83,19 +91,25 @@ class JupyterNotebook:
                 "language": self.kernelspec.language,
                 "name" : language
             }
-        self.notebook.metadata.kernelspec = kernelspec
+        self.nb.metadata.kernelspec = kernelspec
 
     def write(self, fl):
         """
         https://nbformat.readthedocs.io/en/latest/api.html#nbformat.write
         """
-        nbformat.write(self.notebook, fl)
+        nbformat.write(self.nb, fl)
+
+    def writes(self):
+        """
+        https://nbformat.readthedocs.io/en/latest/api.html#nbformat.writes
+        """
+        return nbformat.writes(self.nb)
 
     def read(self, fl):
         """
         https://nbformat.readthedocs.io/en/latest/api.html#reading-and-writing
         """
-        self.notebook = nbformat.read(fl)
+        self.nb = nbformat.read(fl)
 
     def add_metadata(self, cell, metadata):
         """ Attach Metadata to a cell """   
