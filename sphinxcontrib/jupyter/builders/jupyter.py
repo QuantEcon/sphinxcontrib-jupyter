@@ -18,6 +18,11 @@ import time
 from ..writers.utils import copy_dependencies
 
 class JupyterBuilder(Builder):
+    pass
+
+#-Old-#
+
+class JupyterBuilderOld(Builder):
     """
     Builds Jupyter Notebook
     """
