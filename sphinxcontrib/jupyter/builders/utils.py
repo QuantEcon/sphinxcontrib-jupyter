@@ -1,27 +1,23 @@
-""""
-Utility functions used primarily in builders
-""""
+"""
+    Utility functions needed primarily in builders
+"""
+import os
+from hashlib import md5
+from sphinx.util.osutil import ensuredir
+from shutil import copy
 
-def create_codetree_ds(self, codetree_ds, cell):
-    codetree_ds[cell.metadata.hashcode] = dict()
-    key = codetree_ds[cell.metadata.hashcode]
-    if hasattr(cell, 'source'): key['source']= cell.source
-    if hasattr(cell, 'outputs'): key['outputs'] = cell.outputs
-    return codetree_ds
-    
-
-def normalize_cell(self, cell):
+def normalize_cell(cell):
     cell.source = cell.source.strip().replace('\n','')
     return cell
-    
-def create_hash(self, cell):
-    hashcode = md5(cell.source.encode()).hexdigest()
-    cell.metadata.hashcode = hashcode
-    return cell
 
-def create_hashcode(self, cell):
+def create_hashcode(cell):
     hashcode = md5(cell.source.encode()).hexdigest()
     return hashcode
+
+def create_hash(cell):
+    hashcode = create_hashcode(cell)
+    cell.metadata.hashcode = hashcode
+    return cell
 
 def copy_dependencies(builderSelf, outdir = None):
     """

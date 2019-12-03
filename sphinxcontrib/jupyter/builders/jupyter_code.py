@@ -3,36 +3,25 @@ import os.path
 import docutils.io
 
 import nbformat
-from sphinx.util.osutil import ensuredir, os_path
 from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
-from sphinx.util.console import bold, darkgreen, brown
-from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
-from ..writers.make_site import MakeSiteWriter
-from ..writers.convert import convertToHtmlWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
-from docutils import nodes
-from docutils.nodes import Node
-import pdb
+from sphinx.util.console import bold
 import time
 from .utils import copy_dependencies, create_hash, normalize_cell
-from hashlib import md5
 import json
 
 class JupyterCodeBuilder(Builder):
     """
     Builds Code Builder
     """
-    name="jupytercode"
+    name="codetree"
     format = "json"
     out_suffix = ".codetree"
     allow_parallel = True
 
-    dask_log = dict()
-    futuresInfo = dict()
-    futures = []
     threads_per_worker = 1
     n_workers = 1
     logger = logging.getLogger(__name__)
@@ -41,12 +30,11 @@ class JupyterCodeBuilder(Builder):
     def init(self):
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
-        self.executedir = self.outdir + '/codetree'
+        self.executedir = self.outdir
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
         self.client = None
-        import pdb;
-        pdb.set_trace()
+
         #threads per worker for dask distributed processing
         if "jupyter_threads_per_worker" in self.config:
             self.threads_per_worker = self.config["jupyter_threads_per_worker"]
@@ -60,7 +48,6 @@ class JupyterCodeBuilder(Builder):
 
         self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
         self.execution_vars = {
-            'target': 'website',
             'dependency_lists': self.config["jupyter_dependency_lists"],
             'executed_notebooks': [],
             'delayed_notebooks': dict(),
@@ -87,11 +74,6 @@ class JupyterCodeBuilder(Builder):
         ## instantiates the writer class with code only config value
         code_only = True
         self.writer = self._writer_class(self, code_only)
-
-        ## copies execution folder static
-        if (self.config["jupyter_execute_notebooks"]):
-             ## copies the dependencies to the executed folder
-            copy_dependencies(self, self.executedir)
 
     def write_doc(self, docname, doctree):
         doctree = doctree.deepcopy()
@@ -144,24 +126,28 @@ class JupyterCodeBuilder(Builder):
         with open(filename, "wt", encoding="UTF-8") as json_file:
             json.dump(codetree_ds, json_file)
 
-    def finish(self):
-        self.save_executed_and_generate_coverage(self.execution_vars,'website', self.config['jupyter_make_coverage'])
+    def create_codetree_ds(self, codetree_ds, cell):
+        codetree_ds[cell.metadata.hashcode] = dict()
+        key = codetree_ds[cell.metadata.hashcode]
+        if hasattr(cell, 'source'): key['source']= cell.source
+        if hasattr(cell, 'outputs'): key['outputs'] = cell.outputs
+        return codetree_ds
 
-    def save_executed_and_generate_coverage(self, params, target, coverage = False):
+    def finish(self):
         # watch progress of the execution of futures
-        self.logger.info(bold("Starting notebook execution"))
-        #progress(self.futures)
+        self.logger.info(bold("Starting notebook execution creating coverage report if set in config"))
 
         # save executed notebook
-        error_results = self._execute_notebook_class.save_executed_notebook(self, params)
+        error_results = self._execute_notebook_class.save_executed_notebook(self, self.execution_vars)
 
 
         ##generate coverage if config value set
-        if coverage:
+        if self.config['jupyter_make_coverage']:
             ## produces a JSON file of dask execution
-            self._execute_notebook_class.produce_dask_processing_report(self, params)
+            self._execute_notebook_class.produce_dask_processing_report(self, self.execution_vars)
             
             ## generate the JSON code execution reports file
-            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
+            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, self.execution_vars)
 
-            self._execute_notebook_class.create_coverage_report(self, error_results, params)
+            ## creates a coverage report
+            self._execute_notebook_class.create_coverage_report(self, error_results, self.execution_vars)

@@ -6,12 +6,12 @@ from .translate_all import JupyterTranslator
 
 
 class JupyterWriter(docutils.writers.Writer):
-    def __init__(self, builder):
+    def __init__(self, builder, c_only = None):
         docutils.writers.Writer.__init__(self)
 
         self.output = None
         self.builder = builder
-        self.translator_class = self._identify_translator(builder)
+        self.translator_class = self._identify_translator(builder, c_only)
         self.builder.urlpath = None
         self.builder.jupyter_download_nb_image_urlpath = None
 
@@ -37,7 +37,7 @@ class JupyterWriter(docutils.writers.Writer):
         """
         self.builder.jupyter_download_nb_image_urlpath = urlpath
 
-    def _identify_translator(self, builder):
+    def _identify_translator(self, builder, c_only = None):
         """
         Determine which translator class to apply to this translation. The choices are 'code' and 'all'; all converts
         the entire sphinx RST file to a Jupyter notebook, whereas 'code' only translates the code cells, and
@@ -59,7 +59,7 @@ class JupyterWriter(docutils.writers.Writer):
                 "Set conversion_mode as default(code)")
             code_only = True
         else:
-            if builder.config["jupyter_conversion_mode"] == "code":
+            if builder.config["jupyter_conversion_mode"] == "code" or c_only:
                 code_only = True
             elif builder.config["jupyter_conversion_mode"] != "all":
                 builder.warn(

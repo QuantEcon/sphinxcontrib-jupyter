@@ -19,6 +19,9 @@ class ExecuteNotebookWriter():
     """
     logger = logging.getLogger(__name__)
     startFlag = 0
+
+    dask_log = dict()
+    futuresInfo = dict()
     def __init__(self, builderSelf):
         pass
     def execute_notebook(self, builderSelf, nb, filename, params, futures):
@@ -75,7 +78,7 @@ class ExecuteNotebookWriter():
 
         ### dictionary to store info for errors in future
         future_dict = { "filename": full_path, "filename_with_path": full_path, "language_info": nb['metadata']['kernelspec']}
-        builderSelf.futuresInfo[future.key] = future_dict
+        self.futuresInfo[future.key] = future_dict
 
         futures.append(future)
 
@@ -89,7 +92,7 @@ class ExecuteNotebookWriter():
 
     def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name, params):
         error_result = []
-        builderSelf.dask_log['futures'].append(str(future))
+        self.dask_log['futures'].append(str(future))
         status = 'pass'
 
         # computing time for each task 
@@ -98,7 +101,7 @@ class ExecuteNotebookWriter():
         # store the exceptions in an error result array
         if future.status == 'error':
             status = 'fail'
-            for key,val in builderSelf.futuresInfo.items():
+            for key,val in self.futuresInfo.items():
                 if key == future.key:
                     filename_with_path = val['filename_with_path']
                     filename = val['filename']
@@ -163,12 +166,8 @@ class ExecuteNotebookWriter():
     def save_executed_notebook(self, builderSelf, params):
         error_results = []
 
-        builderSelf.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
-        builderSelf.dask_log['futures'] = []
-
-        # ## create an instance of the class id config set
-        # if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-        #     builderSelf._convert_class = convertToHtmlWriter(builderSelf)
+        self.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
+        self.dask_log['futures'] = []
 
         # this for loop gathers results in the background
         total_count = len(params['futures'])
@@ -270,10 +269,10 @@ class ExecuteNotebookWriter():
         try:
             if (sys.version_info > (3, 0)):
                 with open(json_filename, "w") as json_file:
-                    json.dump(builderSelf.dask_log, json_file)
+                    json.dump(self.dask_log, json_file)
             else:
                with open(json_filename, "w") as json_file:
-                    x = json.dumps(builderSelf.dask_log, ensure_ascii=False)
+                    x = json.dumps(self.dask_log, ensure_ascii=False)
                     if isinstance(x,str):
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)

@@ -149,7 +149,6 @@ class JupyterPdfBuilder(Builder):
 
         # get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
-        nb = self.update_Metadata(nb)
 
         ### execute the notebook - keep it forcefully on
         strDocname = str(docname)
@@ -168,10 +167,6 @@ class JupyterPdfBuilder(Builder):
                 f.write(self.writer.output)
         except (IOError, OSError) as err:
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
-
-    def update_Metadata(self, nb):
-        nb.metadata.date = time.time()
-        return nb
 
     def copy_static_files(self):
         # copy all static files

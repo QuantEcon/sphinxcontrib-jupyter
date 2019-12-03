@@ -17,7 +17,7 @@ from docutils import nodes
 from docutils.nodes import Node
 import pdb
 import time
-from .utils import copy_dependencies
+from .utils import copy_dependencies, create_hash, normalize_cell
 from hashlib import md5
 import json
 
@@ -79,7 +79,7 @@ class JupyterHtmlBuilder(Builder):
 
             # get a NotebookNode object from a string
             nb = nbformat.reads(self.writer.output, as_version=4)
-            nb = self.update_Metadata(nb)
+
             try:
                 with codecs.open(outfilename, "w", "utf-8") as f:
                     self.writer.output = nbformat.writes(nb, version=4)
@@ -94,11 +94,6 @@ class JupyterHtmlBuilder(Builder):
                     self.download_execution_vars['delayed_notebooks'].update({strDocname: nb})
                 else:        
                     self._execute_notebook_class.execute_notebook(self, nb, docname, self.download_execution_vars, self.download_execution_vars['futures'])
-
-
-    def update_Metadata(self, nb):
-        nb.metadata.date = time.time()
-        return nb
 
     def copy_static_files(self):
         # copy all static files
