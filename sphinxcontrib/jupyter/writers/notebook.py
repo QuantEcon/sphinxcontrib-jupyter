@@ -16,7 +16,7 @@ nb.write("test.ipynb")
 
 
 import nbformat
-import nbformat.v4 as nbapi
+import nbformat.v4 as nbf
 from jupyter_client.kernelspec import get_kernel_spec, find_kernel_specs
 
 class JupyterNotebook:
@@ -25,7 +25,7 @@ class JupyterNotebook:
         """
         A simple object that represents a Jupyter notebook
         """
-        self.notebook = nbapi.new_notebook()
+        self.notebook = nbf.new_notebook()
         self.add_kernelspec(language)
 
     def add_code_cell(self, source, metadata=None, **kwargs):
@@ -38,7 +38,7 @@ class JupyterNotebook:
         metadata : dict, optional(default=None)
                    Add metadata to the cell
         """
-        code_cell = nbapi.new_code_cell(source, **kwargs)
+        code_cell = nbf.new_code_cell(source, **kwargs)
         if metadata:
             code_cell = self.add_metadata(code_cell, metadata)
         self.notebook["cells"].append(code_cell)
@@ -51,7 +51,7 @@ class JupyterNotebook:
         ----------
         formatted_text : str
         """
-        markdown_cell = nbapi.new_markdown_cell(formatted_text, **kwargs)
+        markdown_cell = nbf.new_markdown_cell(formatted_text, **kwargs)
         if metadata:
             markdown_cell = self.add_metadata(markdown_cell, metadata)
         self.notebook["cells"].append(markdown_cell)
@@ -64,7 +64,7 @@ class JupyterNotebook:
         ----------
         source : str
         """
-        raw_cell = nbapi.new_raw_cell(source, **kwargs)
+        raw_cell = nbf.new_raw_cell(source, **kwargs)
         if metadata:
             raw_cell = self.add_metadata(raw_cell, metadata)
         self.notebook["cells"].append(raw_cell)

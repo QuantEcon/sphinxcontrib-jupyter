@@ -1,4 +1,5 @@
-import docutils.writers
+from docutils.writers import Writer
+
 import nbformat
 
 from .translate_code import JupyterCodeTranslator, JupyterCodeBlockTranslator
@@ -6,24 +7,38 @@ from .translate_ipynb import JupyterTranslator
 from .translate_html import JupyterHTMLTranslator
 from .translate_pdf import JupyterPDFTranslator
 
+class JupyterWriter(Writer):
+    
+    builder_translator = {
+        #Code Translators
+        'jupytercode' : JupyterCodeBlockTranslator,  #JupyterCodeTranslator
+        "execute" : JupyterCodeBlockTranslator,
+        #RST + Code Translators
+        'jupyter' : JupyterTranslator,
+        'jupyterhtml' : JupyterHTMLTranslator,
+        'jupyterpdf' : JupyterPDFTranslator
+    }
 
-class JupyterWriter(docutils.writers.Writer):
     def __init__(self, builder):
-        docutils.writers.Writer.__init__(self)
-
-        self.output = None
+        super().__init__()           #init docutils.writers.Writer
         self.builder = builder
-        self.translator_class = self._identify_translator(builder)
+        self.output = None
+        try:
+            self.translator = self.builder_translator[builder.name]
+        except:
+            msg = "Builder ({}) does not have a valid Translator".format(builder.name)
+            raise InvalidTranslator(msg)
 
     def translate(self):
-        self.document.settings.newlines = \
-            self.document.settings.indents = \
-            self.builder.env.config.xml_pretty
+        self.settings = self.document.settings
 
-        visitor = self.translator_class(self.builder, self.document)
+        #TODO: Investigate the need for these settings here
+        self.document.settings.newlines = True
+        self.document.settings.indents = True
 
-        self.document.walkabout(visitor)
-        self.output = nbformat.writes(visitor.output)
+        visitor = self.translator(self.document, self.builder)
+        self.document.walkabout(visitor)   #TODO: What is this doing?
+        self.output = nbformat.writes(visitor.output.notebook)
 
     def _set_ref_urlpath(self, urlpath=None):
         """
@@ -37,35 +52,5 @@ class JupyterWriter(docutils.writers.Writer):
         """
         self.builder.jupyter_download_nb_image_urlpath = urlpath
 
-    def _identify_translator(self, builder):
-        """
-        Determine which translator class to apply to this translation. The choices are 'code' and 'all'; all converts
-        the entire sphinx RST file to a Jupyter notebook, whereas 'code' only translates the code cells, and
-        skips over all other content.
-
-        Typically, you would use 'code' when you're testing your code blocks, not for final publication of your
-        notebooks.
-
-        The default translator to use is set in conf.py, but this value can be overridden on the command line.
-
-        :param builder: The builder object provided by the Sphinx run-time
-        :return: The translator class object to instantiate.
-        """
-        code_only = False
-        if "jupyter_conversion_mode" not in builder.config \
-                or builder.config["jupyter_conversion_mode"] is None:
-            self.builder(
-                "jupyter_conversion_mode is not given in conf.py. "
-                "Set conversion_mode as default(code)")
-            code_only = True
-        else:
-            if builder.config["jupyter_conversion_mode"] == "code":
-                code_only = True
-            elif builder.config["jupyter_conversion_mode"] != "all":
-                builder.warn(
-                    "Invalid jupyter_conversion_mode is given({}). "
-                    "Set conversion_mode as default(code)"
-                    .format(builder.config["jupyter_conversion_mode"]))
-                code_only = True
-
-        return JupyterCodeBlockTranslator if code_only else JupyterTranslator
+class InvalidTranslator(Exception):
+    pass

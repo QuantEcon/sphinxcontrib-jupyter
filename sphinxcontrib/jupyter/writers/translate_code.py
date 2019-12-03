@@ -11,16 +11,19 @@ from sphinx.util.docutils import SphinxTranslator
 
 from .notebook import JupyterNotebook
 
-class JupyterCodeBlockTranslator(SphinxTranslator):
-    """
-    .. TODO: 
-    
-        1. setup new builder to call this translator
-        2. replace JupyterCodeTranslator once working
-    """
+class SphinxSparseTranslator(SparseNodeVisitor):
+    def __init__(self, document, builder):
+        super().__init__(document)
+        self.builder = builder
+        self.config = builder.config
+        self.settings = document.settings
 
-    def __init__(self, builder, document):
-        super().__init__(builder, document)  #add document, builder, config and settings to object
+class JupyterCodeBlockTranslator(SphinxSparseTranslator):
+    
+    in_literal_block = False
+
+    def __init__(self, document, builder):
+        super().__init__(document, builder)  #add document, builder, config and settings to object
         self.warn = self.document.reporter.warning
         self.error = self.document.reporter.error
         #-Jupyter Settings-#
@@ -28,7 +31,7 @@ class JupyterCodeBlockTranslator(SphinxTranslator):
         self.jupyter_lang_synonyms = builder.config["jupyter_lang_synonyms"]
 
     def visit_document(self, node):
-        self.notebook = JupyterNotebook(language=self.language)
+        self.output = JupyterNotebook(language=self.language)
         #Collector List for Current Cell
         self.cell = []
 
@@ -47,7 +50,8 @@ class JupyterCodeBlockTranslator(SphinxTranslator):
 
     def depart_literal_block(self, node):
         source = "".join(self.cell)
-        self.notebook.add_code_cell(source)
+        self.output.add_code_cell(source)
+        self.cell = []
         self.in_literal_block = False
 
     def visit_Text(self, node):
@@ -57,7 +61,6 @@ class JupyterCodeBlockTranslator(SphinxTranslator):
 
     def depart_Text(self, node):
         pass
-
 
 #-Code for Refactoring-#
 

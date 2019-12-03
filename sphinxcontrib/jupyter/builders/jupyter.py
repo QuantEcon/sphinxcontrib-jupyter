@@ -21,17 +21,18 @@ class JupyterBuilder(Builder):
     """
     Builds Jupyter Notebook
     """
-    name = "jupyter"
-    format = "ipynb"
+    name = "jupytercode"
+    format = "ipynb"            #TODO: best not to override format
     out_suffix = ".ipynb"
     allow_parallel = True
 
     _writer_class = JupyterWriter
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(__name__)    #TODO: Should we use Sphinx LOGGING
 
     def init(self):
         pass
 
+    #TODO: Is this different to what is in Builder?
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
             if docname not in self.env.all_docs:
