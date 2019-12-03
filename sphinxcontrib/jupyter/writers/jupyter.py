@@ -1,7 +1,7 @@
 import docutils.writers
 import nbformat
 
-from .translate_code import JupyterCodeTranslator
+from .translate_code import JupyterCodeTranslator, JupyterCodeBlockTranslator
 from .translate_ipynb import JupyterTranslator
 from .translate_html import JupyterHTMLTranslator
 from .translate_pdf import JupyterPDFTranslator
@@ -68,4 +68,4 @@ class JupyterWriter(docutils.writers.Writer):
                     .format(builder.config["jupyter_conversion_mode"]))
                 code_only = True
 
-        return JupyterCodeTranslator if code_only else JupyterTranslator
+        return JupyterCodeBlockTranslator if code_only else JupyterTranslator
