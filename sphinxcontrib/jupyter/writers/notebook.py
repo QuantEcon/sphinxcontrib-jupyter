@@ -136,19 +136,43 @@ class InvalidJupyterCell(Exception):
     pass
 
 
+import textwrap
+
 class JupyterCell:
+    """
+    Example
+    -------
+    from notebook import JupyterCell
+    c = JupyterCell()
+    c.add_text("Hi there")
+    c.add_highlighted_markdown("import numpy as np", "python")
+    c.content
+    """
 
     def __init__(self):
         """
         [Test] Concept Class -> May not be used
+        Add inline and blocks
         """
         self.content = []
         self.type = None
 
-    def add_content(self, content):
-        self.content.append(content)
+    def __repr__(self):
+        print("{type}:\n{content}".format(self.type, self.content))
+
+    def add_text(self, text):
+        self.content.append(text)
     
-    def add_markdown_code(self, code, language):
-        self.content.append("``` {}\n".format(self.language))
-        self.add_content(code)
-        self.content.append("```")
+    def add_highlighted_markdown(self, code, language):
+        template = textwrap.dedent(
+        """``` {language}
+        {code}
+        ```
+        """
+        )
+        self.content.append(template)
+    
+    def add_bold(self, text):
+        template = "**{text}**"
+        self.content.append(template)
+

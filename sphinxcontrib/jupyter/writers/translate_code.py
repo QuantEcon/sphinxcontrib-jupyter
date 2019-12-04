@@ -4,8 +4,12 @@ Translators for working with Code Blocks
 
 from docutils.nodes import SparseNodeVisitor
 from sphinx.util.docutils import SphinxTranslator
+from sphinx.util import logging
 
 from .notebook import JupyterNotebook
+
+logger = logging.getLogger(__name__)
+
 
 class SphinxSparseTranslator(SparseNodeVisitor):
     def __init__(self, document, builder):
@@ -24,8 +28,6 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         and generating a Jupyter Notebook
         """
         super().__init__(document, builder)  #add document, builder, config and settings to object
-        self.warn = self.document.reporter.warning
-        self.error = self.document.reporter.error
         #-Jupyter Settings-#
         self.language = builder.config["jupyter_language"]
         self.jupyter_lang_synonyms = builder.config["jupyter_language_synonyms"]
@@ -49,6 +51,9 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         if self.nodelang == 'default':
             self.nodelang = self.language
         if self.nodelang != self.language:
+            logger.warning("Found a code-block with different programming \
+                language to the notebook language. Adding as markdown"
+            )
             self.cell.append("``` {}".format(self.nodelang))
             self.cell_type = "markdown"
 
