@@ -17,8 +17,7 @@ import pdb
 import time
 import json
 from hashlib import md5
-from .utils import copy_dependencies, create_hashcode, normalize_cell
-from munch import munchify
+from .utils import copy_dependencies, combine_executed_files
 
 class JupyterBuilder(Builder):
     """
@@ -39,7 +38,7 @@ class JupyterBuilder(Builder):
 
     def init(self):
         ### initializing required classes
-        self.executedir = self.confdir + '/_build/jupytercode/codetree'
+        self.executedir = self.confdir + '/_build/codetree'
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -78,23 +77,18 @@ class JupyterBuilder(Builder):
 
         # get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
-        nb = self.update_Metadata(nb)
 
         ### mkdir if the directory does not exist
-        nb = self.combine_executed_files(nb, docname)
+        nb = combine_executed_files(self.executedir, nb, docname)
 
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
         ensuredir(os.path.dirname(outfilename))
-        print(outfilename, "outfilename")
+
         try:
             with open(outfilename, "wt", encoding="UTF-8") as f:
                 nbformat.write(nb, f)
         except (IOError, OSError) as err:
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
-
-    def update_Metadata(self, nb):
-        nb.metadata.date = time.time()
-        return nb
 
     def copy_static_files(self):
         # copy all static files
@@ -118,30 +112,5 @@ class JupyterBuilder(Builder):
                     copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
 
-    def normalize_cell(self, cell):
-        cell.source = cell.source.strip().replace('\n','')
-        return cell
-
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-
-    def combine_executed_files(self, nb, docname):
-        codetreeFile = self.executedir + "/" + docname + ".codetree"
-        execution_count = 0
-        count = 0
-        if os.path.exists(codetreeFile):
-            with open(codetreeFile, "r", encoding="UTF-8") as f:
-                json_obj = json.load(f)
-
-            for cell in nb.cells:
-                if cell['cell_type'] == "code":
-                    execution_count += 1
-                    cell = normalize_cell(cell)
-                    hashcode = create_hashcode(cell)
-                    output = json_obj[hashcode]['outputs']
-                    cell['execution_count'] = execution_count
-                    cell['outputs'] = munchify(output)
-                    if cell['metadata']['hide-output']:
-                        cell['outputs'] = []
-
-        return nb

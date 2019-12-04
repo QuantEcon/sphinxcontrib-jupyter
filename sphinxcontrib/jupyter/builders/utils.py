@@ -2,9 +2,11 @@
     Utility functions needed primarily in builders
 """
 import os
+import json
 from hashlib import md5
 from sphinx.util.osutil import ensuredir
 from shutil import copy
+from munch import munchify
 
 def normalize_cell(cell):
     cell.source = cell.source.strip().replace('\n','')
@@ -18,6 +20,27 @@ def create_hash(cell):
     hashcode = create_hashcode(cell)
     cell.metadata.hashcode = hashcode
     return cell
+
+def combine_executed_files(executedir, nb, docname):
+    codetreeFile = executedir + "/" + docname + ".codetree"
+    execution_count = 0
+    count = 0
+    if os.path.exists(codetreeFile):
+        with open(codetreeFile, "r", encoding="UTF-8") as f:
+            json_obj = json.load(f)
+
+        for cell in nb.cells:
+            if cell['cell_type'] == "code":
+                execution_count += 1
+                cellcopy = normalize_cell(cell.copy())
+                hashcode = create_hashcode(cellcopy)
+                output = json_obj[hashcode]['outputs']
+                cell['execution_count'] = execution_count
+                cell['outputs'] = munchify(output)
+                if cell['metadata']['hide-output']:
+                    cell['outputs'] = []
+
+    return nb
 
 def copy_dependencies(builderSelf, outdir = None):
     """
