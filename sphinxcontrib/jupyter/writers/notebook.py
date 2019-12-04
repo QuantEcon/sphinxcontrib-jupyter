@@ -19,6 +19,20 @@ import nbformat
 import nbformat.v4 as nbf
 from jupyter_client.kernelspec import get_kernel_spec, find_kernel_specs
 
+class JupyterCell:
+
+    def __init__(self):
+        self.content = []
+        self.type = None
+
+    def add_content(self, content):
+        self.content.append(content)
+    
+    def add_markdown_code(self, code, language):
+        self.content.append("``` {}\n".format(self.language))
+        self.add_content(code)
+        self.content.append("```")
+
 class JupyterNotebook:
 
     def __init__(self, language="python"):

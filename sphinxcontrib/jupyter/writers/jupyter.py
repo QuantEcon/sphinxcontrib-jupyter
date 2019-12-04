@@ -25,7 +25,7 @@ class JupyterWriter(Writer):
         try:
             self.translator = self.builder_translator[builder.name]
         except:
-            msg = "Builder ({}) does not have a valid Translator".format(builder.name)
+            msg = "Builder ({}) does not have a valid translator".format(builder.name)
             raise InvalidTranslator(msg)
 
     def translate(self):

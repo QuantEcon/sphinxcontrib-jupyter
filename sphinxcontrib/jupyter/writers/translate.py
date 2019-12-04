@@ -43,7 +43,7 @@ class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
     #Document.Nodes
 
     def visit_literal_block(self, node):
-        "Parse Literal Blocks (Code Blocks)"
+        """Parse Literal Blocks (Code Blocks)"""
         self.in_literal_block = True
         self.cell_type = "code"
         try:
@@ -56,7 +56,7 @@ class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
     def depart_literal_block(self, node):
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
-        self.cell = []
+        self.new_cell()
         self.in_literal_block = False
 
     def visit_Text(self, node):
@@ -64,6 +64,13 @@ class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
         self.cell.append(text)
 
     def depart_Text(self, node):
+        pass
+
+    def unknown_visit(self, node):
+        pass
+        # raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
+
+    def unknown_departure(self, node):
         pass
 
     #Utilities

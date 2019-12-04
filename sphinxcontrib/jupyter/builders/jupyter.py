@@ -21,8 +21,8 @@ class JupyterBuilder(Builder):
     """
     Builds Jupyter Notebook (FOR TESTING PURPOSES ONLY)  @AAKASH is working on BUILDERS
     """
-    # name = "jupytercode"
-    name = "jupyter"
+    name = "jupytercode"
+    # name = "jupyter"
     format = "ipynb"            #TODO: best not to override format
     out_suffix = ".ipynb"
     allow_parallel = True
