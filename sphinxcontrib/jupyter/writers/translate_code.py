@@ -49,10 +49,12 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         if self.nodelang == 'default':
             self.nodelang = self.language
         if self.nodelang != self.language:
-            self.cell.append("``` {}\n".format(self.nodelang))
+            self.cell.append("``` {}".format(self.nodelang))
             self.cell_type = "markdown"
 
     def depart_literal_block(self, node):
+        if self.nodelang != self.language:
+            self.cell.append("```")
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
         self.new_cell()
@@ -72,59 +74,3 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         self.cell = []
         self.cell_type = None
 
-
-#->Test with Cell Object
-
-from .notebook import JupyterCell
-
-class JupyterCodeBlockTranslatorCell(SphinxSparseTranslator):
-    
-    in_literal_block = False
-
-    def __init__(self, document, builder):
-        """
-        A translator for extracting code-blocks from RST documents 
-        and generating a Jupyter Notebook
-        """
-        super().__init__(document, builder)  #add document, builder, config and settings to object
-        self.warn = self.document.reporter.warning
-        self.error = self.document.reporter.error
-        #-Jupyter Settings-#
-        self.language = builder.config["jupyter_language"]
-        self.jupyter_lang_synonyms = builder.config["jupyter_language_synonyms"]
-        self.cells = []
-
-    def visit_document(self, node):
-        self.cell = JupyterCell()
-
-    def depart_document(self, node):
-        """ Convert Cells to Jupyter Notebook """
-        self.output = JupyterNotebook(language=self.language)
-        pass
-
-    def visit_literal_block(self, node):
-        "Parse Literal Blocks (Code Blocks)"
-        self.in_literal_block = True
-        if "language" in node.attributes:
-            self.nodelang = node.attributes["language"].strip()
-        else:
-            self.nodelang = self.language    #use notebook language
-        if self.nodelang == 'default':
-            self.nodelang = self.language
-        if self.nodelang != self.language:
-            self.cell.append("``` {}\n".format(self.nodelang))
-            self.cell_type = "markdown"
-
-    def depart_literal_block(self, node):
-        source = "".join(self.cell)
-        self.output.add_cell(source, self.cell_type)
-        self.new_cell()
-        self.in_literal_block = False
-
-    def visit_Text(self, node):
-        text = node.astext()
-        if self.in_literal_block:
-            self.cell.append(text)
-
-    def depart_Text(self, node):
-        pass
