@@ -78,7 +78,7 @@ class JupyterBuilder(Builder):
         # get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
 
-        ### mkdir if the directory does not exist
+        ### combine the executed code with output of this builder
         nb = combine_executed_files(self.executedir, nb, docname)
 
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)

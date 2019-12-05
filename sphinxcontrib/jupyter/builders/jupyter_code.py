@@ -6,12 +6,14 @@ import nbformat
 from ..writers.jupyter import JupyterWriter
 from sphinx.builders import Builder
 from ..writers.execute_nb import ExecuteNotebookWriter
-from dask.distributed import Client, progress
+from dask.distributed import Client
 from sphinx.util import logging
 from sphinx.util.console import bold
 import time
 from .utils import copy_dependencies, create_hash, normalize_cell
 import json
+
+logger = logging.getLogger(__name__)
 
 class JupyterCodeBuilder(Builder):
     """
@@ -24,7 +26,6 @@ class JupyterCodeBuilder(Builder):
 
     threads_per_worker = 1
     n_workers = 1
-    logger = logging.getLogger(__name__)
     _writer_class = JupyterWriter
 
     def init(self):
@@ -135,7 +136,7 @@ class JupyterCodeBuilder(Builder):
 
     def finish(self):
         # watch progress of the execution of futures
-        self.logger.info(bold("Starting notebook execution creating coverage report if set in config"))
+        logger.info(bold("Starting notebook execution creating coverage report if set in config"))
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self, self.execution_vars)

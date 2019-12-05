@@ -8,6 +8,7 @@ from sphinx.util.osutil import ensuredir
 from shutil import copy
 from munch import munchify
 
+
 def normalize_cell(cell):
     cell.source = cell.source.strip().replace('\n','')
     return cell

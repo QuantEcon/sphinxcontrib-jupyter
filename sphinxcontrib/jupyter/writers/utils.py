@@ -166,3 +166,15 @@ def get_list_of_files(dirName):
         else:
             all_files.append(full_path)
     return all_files
+
+def get_subdirectory_and_filename(filename):
+    """
+    Gets the subdirectory path and the filename from the full path
+    """
+    subdirectory = ''
+    index = filename.rfind('/')
+    if index > 0:
+        subdirectory = filename[0:index]
+        filename = filename[index + 1:]
+    
+    return subdirectory, filename

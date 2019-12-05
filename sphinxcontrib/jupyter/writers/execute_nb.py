@@ -11,13 +11,15 @@ from io import open
 from hashlib import md5
 import sys
 
+from .utils import get_subdirectory_and_filename
+
+logger = logging.getLogger(__name__)
 
 class ExecuteNotebookWriter():
     
     """
     Executes jupyter notebook written in python or julia
     """
-    logger = logging.getLogger(__name__)
     startFlag = 0
 
     dask_log = dict()
@@ -26,14 +28,9 @@ class ExecuteNotebookWriter():
         pass
     def execute_notebook(self, builderSelf, nb, filename, params, futures):
         coverage = builderSelf.config["jupyter_make_coverage"]
-        filename = filename
-        subdirectory = ''
         full_path = filename
         # check if there are subdirectories
-        index = filename.rfind('/')
-        if index > 0:
-            subdirectory = filename[0:index]
-            filename = filename[index + 1:]
+        subdirectory, filename = get_subdirectory_and_filename(filename)
 
         language = nb.metadata.kernelspec.language
         if (language.lower().find('python') != -1):
@@ -257,7 +254,7 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
     def produce_dask_processing_report(self, builderSelf, params, fln= "dask-reports.json"):
         """
@@ -277,7 +274,7 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            self.logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
 
     def create_coverage_report(self, builderSelf, error_results, params):
         """
@@ -346,11 +343,11 @@ class ExecuteNotebookWriter():
                     results_file = open("{}/{}_overview.txt".format(error_dir, lang_ext), 'w')
                     results_file.write(language_display_name + " execution errors occurred in the notebooks below:\n")
 
-                self.logger.error(language_display_name + " execution errors occurred in the notebooks below")
+                logger.error(language_display_name + " execution errors occurred in the notebooks below")
 
                 error_number = 1
                 for filename in errors_by_file:
-                    self.logger.error(filename)
+                    logger.error(filename)
 
                     number_of_errors = str(len(errors_by_file[filename]))
                     if produce_text_reports:
