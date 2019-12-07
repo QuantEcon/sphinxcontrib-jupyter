@@ -516,7 +516,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
     def visit_reference(self, node):
         """anchor link"""
         ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+        if self.in_book_index and "refuri" in node.attributes and node.attributes['refuri'] == 'zreferences':
             return
 
         self.in_reference = True
@@ -542,7 +542,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         subdirectory = False
 
         ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+        if self.in_book_index and "refuri" in node.attributes and node.attributes['refuri'] == 'zreferences':
             return
 
         if self.in_topic:

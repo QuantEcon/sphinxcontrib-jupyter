@@ -245,6 +245,7 @@ class MakePDFWriter():
 
     def copy_tex_for_book(self):
         ## make a separate directory for tex files relevant to book
+        print(self.texbookdir, "what is ity???")
         if os.path.exists(self.texbookdir):
             shutil.rmtree(self.texbookdir)
 
