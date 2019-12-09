@@ -540,7 +540,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_reference(self, node):
         subdirectory = False
-
+        if 'index_toc' in self.source_file_name:
+            import pdb;
+            pdb.set_trace()
         ## removing zreferences from the index file
         if self.in_book_index and node.attributes['refuri'] == 'zreferences':
             return
