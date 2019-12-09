@@ -77,9 +77,9 @@ class JupyterHtmlBuilder(Builder):
 
         nb = combine_executed_files(self.executedir, nb, docname)
 
-        ## add metadata for the downloaded notebooks
-        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
-            nb = self.add_download_metadata(nb)
+        # ## add metadata for the downloaded notebooks
+        # if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
+        #     nb = self.add_download_metadata(nb)
 
         try:
             with codecs.open(outfilename, "w", "utf-8") as f:
@@ -101,6 +101,15 @@ class JupyterHtmlBuilder(Builder):
 
         nb = combine_executed_files(self.executedir, nb, docname)
 
+        outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
+        ensuredir(os.path.dirname(outfilename))
+
+        try:
+            with codecs.open(outfilename, "w", "utf-8") as f:
+                self.writer.output = nbformat.writes(nb, version=4)
+                f.write(self.writer.output)
+        except (IOError, OSError) as err:
+            self.logger.warning("error writing file %s: %s" % (outfilename, err))
         ### converting to HTML
         language_info = nb.metadata.kernelspec.language
         self._convert_class.convert(nb, docname, language_info, nb['metadata']['path'])
