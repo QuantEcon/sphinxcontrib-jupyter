@@ -42,7 +42,7 @@ class JupyterHtmlBuilder(Builder):
         self._make_site_class = MakeSiteWriter(self)
 
     def get_target_uri(self, docname: str, typ: str = None):
-        return ''
+        return docname
 
     def get_outdated_docs(self):
         return self.env.found_docs
@@ -59,12 +59,33 @@ class JupyterHtmlBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
         
+        ### processing for downloaded notebooks
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
+            nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname, True)
+            nb = self.add_download_metadata(nb) ## add metadata for the downloaded notebooks
 
-            outfilename = os.path.join(self.downloadsdir, os_path(docname) + self.out_suffix)
-            ensuredir(os.path.dirname(outfilename))
-            self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
-            self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
+        self.save_notebook(outfilename, nb)
+
+        ### processing for html notebooks
+        nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname)
+        #self.save_notebook(outfilename, nb)
+
+        ### converting to HTML
+        language_info = nb.metadata.kernelspec.language
+        self._convert_class.convert(nb, docname, language_info, nb['metadata']['path'])
+
+    def process_doctree_to_notebook(self, doctree, destination, docname, download_nb=False):
+        ref_urlpath = None
+        jupyter_download_nb_image_urlpath = None
+        outdir = self.outdir
+
+        if download_nb:
+            ref_urlpath = self.config["jupyter_download_nb_urlpath"]
+            jupyter_download_nb_image_urlpath = self.config["jupyter_download_nb_image_urlpath"]
+            outdir = self.downloadsdir
+
+        self.writer._set_ref_urlpath(ref_urlpath)
+        self.writer._set_jupyter_download_nb_image_urlpath(jupyter_download_nb_image_urlpath)
         
         ## combine the executed code with output of this builder
         self.writer.write(doctree, destination)
@@ -74,45 +95,20 @@ class JupyterHtmlBuilder(Builder):
         ## adding the site metadata here
         nb = self.add_site_metadata(nb, docname)
 
-
         nb = combine_executed_files(self.executedir, nb, docname)
 
-        # ## add metadata for the downloaded notebooks
-        # if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
-        #     nb = self.add_download_metadata(nb)
-
-        try:
-            with codecs.open(outfilename, "w", "utf-8") as f:
-                self.writer.output = nbformat.writes(nb, version=4)
-                f.write(self.writer.output)
-        except (IOError, OSError) as err:
-            self.warn("error writing file %s: %s" % (outfilename, err))
-
-        
-        self.writer._set_ref_urlpath(None)
-        self.writer._set_jupyter_download_nb_image_urlpath(None)
-        self.writer.write(doctree, destination)
-
-        nb = nbformat.reads(self.writer.output, as_version=4)
-
-        ## adding the site metadata here
-        nb = self.add_site_metadata(nb, docname)
-
-
-        nb = combine_executed_files(self.executedir, nb, docname)
-
-        outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
+        outfilename = os.path.join(outdir, os_path(docname) + self.out_suffix)
         ensuredir(os.path.dirname(outfilename))
 
+        return nb, outfilename
+
+    def save_notebook(self, outfilename, nb):
         try:
             with codecs.open(outfilename, "w", "utf-8") as f:
                 self.writer.output = nbformat.writes(nb, version=4)
                 f.write(self.writer.output)
         except (IOError, OSError) as err:
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
-        ### converting to HTML
-        language_info = nb.metadata.kernelspec.language
-        self._convert_class.convert(nb, docname, language_info, nb['metadata']['path'])
 
     def copy_static_files(self):
         # copy all static files
@@ -148,12 +144,3 @@ class JupyterHtmlBuilder(Builder):
 
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
-
-#### html code down here
-# ## generate html if needed
-# if (builderSelf.config['jupyter_generate_html'] and params['target'] == 'website'):
-#     builderSelf._convert_class.convert(executed_nb, filename, language_info, params['destination'], passed_metadata['path'])
-
-#### metadata of files in excuted ones
-
-## {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}}
