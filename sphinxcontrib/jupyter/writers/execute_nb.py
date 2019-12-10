@@ -9,6 +9,7 @@ from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
 from hashlib import md5
+from sphinx.util.console import bold
 import sys
 
 from .utils import get_subdirectory_and_filename
@@ -24,10 +25,9 @@ class ExecuteNotebookWriter():
 
     dask_log = dict()
     futuresInfo = dict()
-    def __init__(self, builderSelf):
+    def __init__(self, builder):
         pass
-    def execute_notebook(self, builderSelf, nb, filename, params, futures):
-        coverage = builderSelf.config["jupyter_make_coverage"]
+    def execute_notebook(self, builder, nb, filename, params, futures):
         full_path = filename
         # check if there are subdirectories
         subdirectory, filename = get_subdirectory_and_filename(filename)
@@ -39,20 +39,20 @@ class ExecuteNotebookWriter():
             language = 'julia'
 
         # - Parse Directories and execute them - #
-        if coverage:
-            self.execution_cases(builderSelf, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
+        if 'jupyter_execute_allow_errors' in builder.config and builder.config['jupyter_execute_allow_errors']:
+            self.execution_cases(builder, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
         else:
-            self.execution_cases(builderSelf, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
+            self.execution_cases(builder, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
 
-    def execution_cases(self, builderSelf, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
+    def execution_cases(self, builder, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
         if subdirectory != '':
-            builderSelf.executed_notebook_dir = directory + "/" + subdirectory
+            builder.executed_notebook_dir = directory + "/" + subdirectory
         else:
-            builderSelf.executed_notebook_dir = directory
+            builder.executed_notebook_dir = directory
 
         ## ensure that executed notebook directory
-        ensuredir(builderSelf.executed_notebook_dir)
+        ensuredir(builder.executed_notebook_dir)
 
         ## specifying kernels
         if language == 'python':
@@ -68,10 +68,10 @@ class ExecuteNotebookWriter():
         ### calling this function before starting work to ensure it starts recording
         if (self.startFlag == 0):
             self.startFlag = 1
-            builderSelf.client.get_task_stream()
+            builder.client.get_task_stream()
 
 
-        future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
+        future = builder.client.submit(ep.preprocess, nb, {"metadata": {"path": builder.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
 
         ### dictionary to store info for errors in future
         future_dict = { "filename": full_path, "filename_with_path": full_path, "language_info": nb['metadata']['kernelspec']}
@@ -80,20 +80,25 @@ class ExecuteNotebookWriter():
         futures.append(future)
 
 
-    def task_execution_time(self, builderSelf):
+    def task_execution_time(self, builder):
         ## calculates execution time of each task in client using get task stream
-        task_Info_latest = builderSelf.client.get_task_stream()[-1]
+        task_Info_latest = builder.client.get_task_stream()[-1]
         time_tuple = task_Info_latest['startstops'][0]
         computing_time = time_tuple[2] - time_tuple[1]
         return computing_time
 
-    def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name, params):
+    def halt_execution(self):
+        logger.info(bold("Execution halted because an error was encountered, if you do not want to halt, set jupyter_execute_allow_errors in config to True"))
+        sys.exit(1)
+
+    def check_execution_completion(self, builder, future, nb, error_results, count, total_count, futures_name, params):
         error_result = []
         self.dask_log['futures'].append(str(future))
         status = 'pass'
+        executed_nb = None
 
         # computing time for each task 
-        computing_time = self.task_execution_time(builderSelf)
+        computing_time = self.task_execution_time(builder)
 
         # store the exceptions in an error result array
         if future.status == 'error':
@@ -104,7 +109,7 @@ class ExecuteNotebookWriter():
                     filename = val['filename']
                     language_info = val['language_info']
             error_result.append(future.exception())
-
+            self.halt_execution()
         else:
             passed_metadata = nb[1]['metadata'] 
             filename = passed_metadata['filename']
@@ -112,9 +117,9 @@ class ExecuteNotebookWriter():
             executed_nb = nb[0]
             language_info = executed_nb['metadata']['kernelspec']
             executed_nb['metadata']['filename_with_path'] = filename_with_path
-            executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
-            if (builderSelf.config['jupyter_download_nb']):
-                executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
+            executed_nb['metadata']['download_nb'] = builder.config['jupyter_download_nb']
+            if (builder.config['jupyter_download_nb']):
+                executed_nb['metadata']['download_nb_path'] = builder.config['jupyter_download_nb_urlpath']
             if (futures_name.startswith('delayed') != -1):
                 # adding in executed notebooks list
                 params['executed_notebooks'].append(filename)
@@ -127,7 +132,7 @@ class ExecuteNotebookWriter():
                     if (executed == len(arr)):
                         key_to_delete = nb
                         notebook = params['delayed_notebooks'].get(nb)
-                        builderSelf._execute_notebook_class.execute_notebook(builderSelf, notebook, nb, params, params['delayed_futures'])
+                        builder._execute_notebook_class.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
                 if (key_to_delete):
                     del params['dependency_lists'][str(key_to_delete)]
                     key_to_delete = False
@@ -144,8 +149,9 @@ class ExecuteNotebookWriter():
             #     nbformat.write(executed_nb, f)
 
         #### processing the notebook and saving it in codetree
-        builderSelf.create_codetree(executed_nb)
-        #builderSelf.create_codetree_files(nb_with_hash)
+        if executed_nb:
+            builder.create_codetree(executed_nb)
+        #builder.create_codetree_files(nb_with_hash)
 
         print('({}/{})  {} -- {} -- {:.2f}s'.format(count, total_count, filename, status, computing_time))
             
@@ -160,10 +166,10 @@ class ExecuteNotebookWriter():
         error_results.append(results)
         return filename
 
-    def save_executed_notebook(self, builderSelf, params):
+    def save_executed_notebook(self, builder, params):
         error_results = []
 
-        self.dask_log['scheduler_info'] = builderSelf.client.scheduler_info()
+        self.dask_log['scheduler_info'] = builder.client.scheduler_info()
         self.dask_log['futures'] = []
 
         # this for loop gathers results in the background
@@ -172,23 +178,23 @@ class ExecuteNotebookWriter():
         update_count_delayed = 1
         for future, nb in as_completed(params['futures'], with_results=True, raise_errors=False):
             count += 1
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count, 'futures', params)
+            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count, 'futures', params)
 
         for future, nb in as_completed(params['delayed_futures'], with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0
                 total_count += len(params['delayed_futures'])
-            builderSelf._execute_notebook_class.check_execution_completion(builderSelf, future, nb, error_results, count, total_count,  'delayed_futures', params)
+            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count,  'delayed_futures', params)
 
         return error_results
 
-    def produce_code_execution_report(self, builderSelf, error_results, params, fln = "code-execution-results.json"):
+    def produce_code_execution_report(self, builder, error_results, params, fln = "code-execution-results.json"):
         """
         Updates the JSON file that contains the results of the execution of each notebook.
         """
-        ensuredir(builderSelf.reportdir)
-        json_filename = builderSelf.reportdir + fln
+        ensuredir(builder.reportdir)
+        json_filename = builder.reportdir + fln
 
         if os.path.isfile(json_filename):
             with open(json_filename, encoding="UTF-8") as json_file:
@@ -254,14 +260,14 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builder.reportdir))
 
-    def produce_dask_processing_report(self, builderSelf, params, fln= "dask-reports.json"):
+    def produce_dask_processing_report(self, builder, params, fln= "dask-reports.json"):
         """
             produces a report of dask execution
         """
-        ensuredir(builderSelf.reportdir)
-        json_filename = builderSelf.reportdir + fln
+        ensuredir(builder.reportdir)
+        json_filename = builder.reportdir + fln
 
         try:
             if (sys.version_info > (3, 0)):
@@ -274,9 +280,9 @@ class ExecuteNotebookWriter():
                         x = unicode(x, 'UTF-8')
                     json_file.write(x)
         except IOError:
-            logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builderSelf.reportdir))
+            logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builder.reportdir))
 
-    def create_coverage_report(self, builderSelf, error_results, params):
+    def create_coverage_report(self, builder, error_results, params):
         """
         Creates a coverage report of the errors in notebook
         """
@@ -304,8 +310,8 @@ class ExecuteNotebookWriter():
                 errors_by_language[language_name]['files'][filename] = error_result
 
         # Create the error report from the HTML template, if it exists.
-        templateFolder = builderSelf.config['jupyter_template_path']
-        error_report_template_file = templateFolder + "/" + builderSelf.config["jupyter_template_coverage_file_path"]
+        templateFolder = builder.config['jupyter_template_path']
+        error_report_template_file = templateFolder + "/" + builder.config["jupyter_template_coverage_file_path"]
 
         error_report_template = []
         if not os.path.isfile(error_report_template_file):
@@ -320,7 +326,7 @@ class ExecuteNotebookWriter():
             language_display_name = errors_by_language[lang_ext]['display_name']
             language = errors_by_language[lang_ext]['language']
             errors_by_file = errors_by_language[lang_ext]['files']
-            error_dir = builderSelf.errordir.format(lang_ext)
+            error_dir = builder.errordir.format(lang_ext)
 
             if produce_text_reports:
                 # set specific language output file

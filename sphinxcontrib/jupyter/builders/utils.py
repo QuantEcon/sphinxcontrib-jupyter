@@ -7,6 +7,8 @@ from hashlib import md5
 from sphinx.util.osutil import ensuredir
 from shutil import copy
 from munch import munchify
+import subprocess
+import sys
 
 
 def normalize_cell(cell):
@@ -42,6 +44,37 @@ def combine_executed_files(executedir, nb, docname):
                     cell['outputs'] = []
 
     return nb
+
+def check_codetree_validity(builder, nb, docname):
+    ### function to check codetree validity
+    if os.path.exists(builder.executedir):
+        codetreeFile = builder.executedir + "/" + docname + builder.out_suffix
+        if os.path.exists(codetreeFile):
+            with open(codetreeFile, "r", encoding="UTF-8") as f:
+                json_obj = json.load(f)
+
+            for cell in nb.cells:
+                cell = normalize_cell(cell)
+                cell = create_hash(cell)
+                if cell.metadata.hashcode not in json_obj.keys():
+                    return True
+        else:
+            return True
+    else:
+        return True
+
+    return False
+
+def run_build(target):
+    if sys.platform == 'win32':
+        makecmd = os.environ.get('MAKE', 'make.bat')
+    else:
+        makecmd = 'make'
+    try:
+        return subprocess.call([makecmd, target])
+    except OSError:
+        print('Error: Failed to run: %s' % makecmd)
+        return 1
 
 def copy_dependencies(builderSelf, outdir = None):
     """

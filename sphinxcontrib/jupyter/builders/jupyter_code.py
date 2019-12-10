@@ -10,7 +10,7 @@ from dask.distributed import Client
 from sphinx.util import logging
 from sphinx.util.console import bold
 import time
-from .utils import copy_dependencies, create_hash, normalize_cell
+from .utils import copy_dependencies, create_hash, normalize_cell, check_codetree_validity
 import json
 
 logger = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class JupyterCodeBuilder(Builder):
 
 
         ### check validity of codetree and prevent execution if needed
-        update = self.check_codetree_validity(nb, docname)
+        update = check_codetree_validity(self, nb, docname)
         if not update:
             return
 
@@ -95,26 +95,6 @@ class JupyterCodeBuilder(Builder):
             self.execution_vars['delayed_notebooks'].update({strDocname: nb})
         else:        
             self._execute_notebook_class.execute_notebook(self, nb, docname, self.execution_vars, self.execution_vars['futures'])
-
-    def check_codetree_validity(self, nb, docname):
-        ### function to check codetree validity
-        if os.path.exists(self.executedir):
-            codetreeFile = self.executedir + "/" + docname + self.out_suffix
-            if os.path.exists(codetreeFile):
-                with open(codetreeFile, "r", encoding="UTF-8") as f:
-                    json_obj = json.load(f)
-
-                for cell in nb.cells:
-                    cell = normalize_cell(cell)
-                    cell = create_hash(cell)
-                    if cell.metadata.hashcode not in json_obj.keys():
-                        return True
-            else:
-                return True
-        else:
-            return True
-
-        return False
 
     def create_codetree(self, nb):
         codetree_ds = dict()
@@ -136,19 +116,16 @@ class JupyterCodeBuilder(Builder):
 
     def finish(self):
         # watch progress of the execution of futures
-        logger.info(bold("Starting notebook execution creating coverage report if set in config"))
+        logger.info(bold("Starting notebook execution"))
 
         # save executed notebook
         error_results = self._execute_notebook_class.save_executed_notebook(self, self.execution_vars)
 
+        ## produces a JSON file of dask execution
+        self._execute_notebook_class.produce_dask_processing_report(self, self.execution_vars)
+        
+        ## generate the JSON code execution reports file
+        error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, self.execution_vars)
 
-        ##generate coverage if config value set
-        if self.config['jupyter_make_coverage']:
-            ## produces a JSON file of dask execution
-            self._execute_notebook_class.produce_dask_processing_report(self, self.execution_vars)
-            
-            ## generate the JSON code execution reports file
-            error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, self.execution_vars)
-
-            ## creates a coverage report
-            self._execute_notebook_class.create_coverage_report(self, error_results, self.execution_vars)
+        ## creates a coverage report
+        self._execute_notebook_class.create_coverage_report(self, error_results, self.execution_vars)

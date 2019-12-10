@@ -17,7 +17,10 @@ import pdb
 import time
 import json
 from hashlib import md5
-from .utils import copy_dependencies, combine_executed_files
+from .utils import copy_dependencies, combine_executed_files, check_codetree_validity, run_build
+from sphinx.cmd.make_mode import run_make_mode
+from sphinx.cmd.build import build_main
+import os
 
 class JupyterBuilder(Builder):
     """
@@ -78,7 +81,14 @@ class JupyterBuilder(Builder):
         # get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
 
+
         ### combine the executed code with output of this builder
+        update = check_codetree_validity(self, nb, docname)
+
+        if update:
+            run_build('execute')
+
+
         nb = combine_executed_files(self.executedir, nb, docname)
 
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)

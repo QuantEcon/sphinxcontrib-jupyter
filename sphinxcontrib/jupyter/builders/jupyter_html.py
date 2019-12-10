@@ -17,7 +17,7 @@ from docutils import nodes
 from docutils.nodes import Node
 import pdb
 import time
-from .utils import copy_dependencies, combine_executed_files
+from .utils import copy_dependencies, combine_executed_files, check_codetree_validity, run_build
 from ..writers.utils import get_subdirectory_and_filename
 from hashlib import md5
 
@@ -79,6 +79,12 @@ class JupyterHtmlBuilder(Builder):
         jupyter_download_nb_image_urlpath = None
         outdir = self.outdir
 
+        ### check for codetree else, create it
+        update = check_codetree_validity(self, nb, docname)
+
+        if update:
+            run_build('execute')
+
         if download_nb:
             ref_urlpath = self.config["jupyter_download_nb_urlpath"]
             jupyter_download_nb_image_urlpath = self.config["jupyter_download_nb_image_urlpath"]
@@ -94,7 +100,7 @@ class JupyterHtmlBuilder(Builder):
 
         ## adding the site metadata here
         nb = self.add_site_metadata(nb, docname)
-
+        
         nb = combine_executed_files(self.executedir, nb, docname)
 
         outfilename = os.path.join(outdir, os_path(docname) + self.out_suffix)

@@ -15,7 +15,7 @@ import pdb
 import shutil
 from distutils.spawn import find_executable
 import time
-from .utils import combine_executed_files
+from .utils import combine_executed_files, check_codetree_validity, run_build
 from ..writers.utils import get_subdirectory_and_filename
 
 logger = logging.getLogger(__name__)
@@ -97,6 +97,12 @@ class JupyterPdfBuilder(Builder):
 
         ## get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
+
+        ### check for codetree else, create it
+        update = check_codetree_validity(self, nb, docname)
+
+        if update:
+            run_build('execute')
 
         ## combine the executed code with output of this builder
         nb = combine_executed_files(self.executedir, nb, docname)
