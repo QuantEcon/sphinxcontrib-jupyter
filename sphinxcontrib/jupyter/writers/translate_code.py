@@ -10,7 +10,6 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-
 class SphinxSparseTranslator(SparseNodeVisitor):
     def __init__(self, document, builder):
         super().__init__(document)
@@ -47,9 +46,10 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
         else:
-            self.nodelang = self.language    #use notebook language
+            self.cell_type = "markdown"   
         if self.nodelang == 'default':
-            self.nodelang = self.language
+            self.nodelang = self.language   #use notebook language
+        #Check node language is the same as notebook language
         if self.nodelang != self.language:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
@@ -66,8 +66,8 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         self.in_literal_block = False
 
     def visit_Text(self, node):
-        text = node.astext()
         if self.in_literal_block:
+            text = node.astext()
             self.cell.append(text)
 
     def depart_Text(self, node):

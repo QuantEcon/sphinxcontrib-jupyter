@@ -136,6 +136,9 @@ class InvalidJupyterCell(Exception):
     pass
 
 
+
+#-Experimental Ideas-#
+
 import textwrap
 
 class JupyterCell:
@@ -160,19 +163,58 @@ class JupyterCell:
     def __repr__(self):
         print("{type}:\n{content}".format(self.type, self.content))
 
+    #Direct Entry
+
     def add_text(self, text):
         self.content.append(text)
+
+    #Accumulated Elements
+
+    @property
+    def start_block(self):
+        """ Accumulator for constructing blocks """
+        self.block = []
+
+    @property
+    def finish_block(self):
+        del self.block
     
-    def add_highlighted_markdown(self, code, language):
+    def add_highlighted_markdown(self, language):
         template = textwrap.dedent(
         """``` {language}
         {code}
         ```
         """
         )
-        self.content.append(template)
+        self.element.append(template.format(language, self.element))
     
     def add_bold(self, text):
         template = "**{text}**"
         self.content.append(template)
 
+
+class BlockAccumulator:
+
+    def __init__(self):
+        self.__block = []
+        self.__element = None
+    
+    @property
+    def block(self):
+        return "".join(self.__block)
+
+    def add(self, val):
+        self.__block.append(val)
+    
+    @property
+    def element(self):
+        return self.__element
+    
+    @element.setter
+    def element(self, val):
+        self.__element = val
+
+    @property
+    def add_element(self):
+        self.__block.append(self.element)
+        self.__element = None

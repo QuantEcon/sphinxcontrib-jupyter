@@ -17,19 +17,26 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
+from .markdown import MarkdownSyntax
+
+class JupyterBaseTranslator(SphinxTranslator):
     
+    in_literal_block = False
+    in_code_block = False
+
     def __init__(self, document, builder):
         """
         Base Class for JupyterIPYNBTranslator, JupyterHTMLTranslator, JupyterPDFTranslator
         
-        This class will handle common nodes and code-blocks for the suite of Jupyter Translators
+        Handles common nodes and code-blocks for the suite of Jupyter Translators
+        
+        1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
         """
         super().__init__(document, builder)
         #-Jupyter Settings-#
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
-        # import pdb; pdb.set_trace()
+        self.md = MarkdownSyntax()
 
     #Document
 
@@ -43,25 +50,44 @@ class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
     #Document.Nodes
 
     def visit_literal_block(self, node):
-        """Parse Literal Blocks (Code Blocks)"""
-        self.in_literal_block = True
-        self.cell_type = "code"
-        try:
-            self.nodelang = node.attributes["language"].strip()
-        except KeyError:
-            self.nodelang = self.lang
-        if self.nodelang == 'default':
-            self.nodelang = self.lang
+        """
+        Parse Literal Blocks (Code Blocks)
+        
+        .. notes::
+
+            1. node.attributes["highlight_args"] is used to identify code-blocks from raw text
+               literal includes
+        """
+        #-Identify Type of Literal Block between :: and .. highlight:: or .. code-block-#
+        if "highlight_args" in node.attributes:
+            self.in_code_block = True       #literal text (with highlighting)
+            self.cell_type = "code"
+            if "language" in node.attributes:
+                self.nodelang = node.attributes["language"].strip() 
+            if self.nodelang == 'default':
+                self.nodelang = self.language  #use notebook language
+            #Check node language is the same as notebook language
+            if self.nodelang != self.language:
+                logger.warning("Found a code-block with different programming \
+                    language to the notebook kernel. Adding as markdown"
+                )
+                self.cell.append(self.md.visit_code_block(self.nodelang))
+                self.cell_type = "markdown"
+        else:
+            self.in_literal_block = True    #literal text (without highlighting)
+            self.cell_type = "markdown"
 
     def depart_literal_block(self, node):
-        source = "".join(self.cell)
-        self.output.add_cell(source, self.cell_type)
-        self.new_cell()
+        if self.in_code_block and self.cell_type == "markdown":
+            self.cell.append(self.md.depart_code_block())
+        self.cell_to_notebook()
         self.in_literal_block = False
+        self.in_code_block = False
 
     def visit_Text(self, node):
         text = node.astext()
-        self.cell.append(text)
+        if self.in_literal_block or self.in_code_block:
+            self.cell.append(text)
 
     def depart_Text(self, node):
         pass
@@ -78,6 +104,12 @@ class JupyterBaseTranslator(SphinxTranslator):  #-> NEW
     def new_cell(self):
         self.cell = []
         self.cell_type = None
+
+    def cell_to_notebook(self):
+        source = "".join(self.cell)
+        self.output.add_cell(source, self.cell_type)
+        self.new_cell()
+
 
 #-> REFACTORING <-#
 
