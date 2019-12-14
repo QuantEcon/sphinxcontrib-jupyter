@@ -9,7 +9,7 @@ from sphinx.util import logging
 from dask.distributed import as_completed
 from io import open
 from hashlib import md5
-from sphinx.util.console import bold
+from sphinx.util.console import bold, red
 import sys
 
 from .utils import get_subdirectory_and_filename
@@ -39,10 +39,7 @@ class ExecuteNotebookWriter():
             language = 'julia'
 
         # - Parse Directories and execute them - #
-        if 'jupyter_execute_allow_errors' in builder.config and builder.config['jupyter_execute_allow_errors']:
-            self.execution_cases(builder, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
-        else:
-            self.execution_cases(builder, params['destination'], False, subdirectory, language, futures, nb, filename, full_path)
+        self.execution_cases(builder, params['destination'], True, subdirectory, language, futures, nb, filename, full_path)
 
     def execution_cases(self, builder, directory, allow_errors, subdirectory, language, futures, nb, filename, full_path):
         ## function to handle the cases of execution for coverage reports or html conversion pipeline
@@ -87,9 +84,12 @@ class ExecuteNotebookWriter():
         computing_time = time_tuple[2] - time_tuple[1]
         return computing_time
 
-    def halt_execution(self):
-        logger.info(bold("Execution halted because an error was encountered, if you do not want to halt, set jupyter_execute_allow_errors in config to True"))
-        sys.exit(1)
+    def halt_execution(self, builder, futures, traceback, filename):
+        builder.client.cancel(futures)
+        logger.info(bold(red("Error encountered in {}".format(filename))))
+        logger.info(traceback)
+        logger.info(bold("Execution halted because an error was encountered, if you do not want to halt on error, set jupyter_execute_allow_errors in config to True"))
+        sys.exit()
 
     def check_execution_completion(self, builder, future, nb, error_results, count, total_count, futures_name, params):
         error_result = []
@@ -100,50 +100,53 @@ class ExecuteNotebookWriter():
         # computing time for each task 
         computing_time = self.task_execution_time(builder)
 
-        # store the exceptions in an error result array
-        if future.status == 'error':
-            status = 'fail'
-            for key,val in self.futuresInfo.items():
-                if key == future.key:
-                    filename_with_path = val['filename_with_path']
-                    filename = val['filename']
-                    language_info = val['language_info']
-            error_result.append(future.exception())
-            self.halt_execution()
-        else:
-            passed_metadata = nb[1]['metadata'] 
-            filename = passed_metadata['filename']
-            filename_with_path = passed_metadata['filename_with_path']
-            executed_nb = nb[0]
-            language_info = executed_nb['metadata']['kernelspec']
-            executed_nb['metadata']['filename_with_path'] = filename_with_path
-            executed_nb['metadata']['download_nb'] = builder.config['jupyter_download_nb']
-            if (builder.config['jupyter_download_nb']):
-                executed_nb['metadata']['download_nb_path'] = builder.config['jupyter_download_nb_urlpath']
-            if (futures_name.startswith('delayed') != -1):
-                # adding in executed notebooks list
-                params['executed_notebooks'].append(filename)
-                key_to_delete = False
-                for nb, arr in params['dependency_lists'].items():
-                    executed = 0
-                    for elem in arr:
-                        if elem in params['executed_notebooks']:
-                            executed += 1
-                    if (executed == len(arr)):
-                        key_to_delete = nb
-                        notebook = params['delayed_notebooks'].get(nb)
-                        builder._execute_notebook_class.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
-                if (key_to_delete):
-                    del params['dependency_lists'][str(key_to_delete)]
-                    key_to_delete = False
-            notebook_name = "{}.ipynb".format(filename)
-            executed_notebook_path = os.path.join(passed_metadata['path'], notebook_name)
+        ## getting necessary variables from the notebook
+        passed_metadata = nb[1]['metadata'] 
+        filename = passed_metadata['filename']
+        filename_with_path = passed_metadata['filename_with_path']
+        executed_nb = nb[0]
+        language_info = executed_nb['metadata']['kernelspec']
+        executed_nb['metadata']['filename_with_path'] = filename_with_path
+        executed_nb['metadata']['download_nb'] = builder.config['jupyter_download_nb']
 
-            #Parse Executed notebook to remove hide-output blocks
-            for cell in executed_nb['cells']:
-                if cell['cell_type'] == "code":
-                    if cell['metadata']['hide-output']:
-                        cell['outputs'] = []
+        # store the exceptions in an error result array
+        for cell in nb[0].cells:
+            if 'outputs' in cell and len(cell['outputs']) and cell['outputs'][0]['output_type'] == 'error':
+                status = 'fail'
+                for key,val in self.futuresInfo.items():
+                    if key == future.key:
+                        filename_with_path = val['filename_with_path']
+                        filename = val['filename']
+                        language_info = val['language_info']
+                traceback = cell['outputs'][0]['traceback']
+                error_result.append(cell['outputs'][0])
+                if 'jupyter_execute_allow_errors' in builder.config and builder.config['jupyter_execute_allow_errors'] is False:
+                    self.halt_execution(builder, params['futures'], traceback, filename)
+
+        if (builder.config['jupyter_download_nb']):
+            executed_nb['metadata']['download_nb_path'] = builder.config['jupyter_download_nb_urlpath']
+        if (futures_name.startswith('delayed') != -1):
+            # adding in executed notebooks list
+            params['executed_notebooks'].append(filename)
+            key_to_delete = False
+            for nb, arr in params['dependency_lists'].items():
+                executed = 0
+                for elem in arr:
+                    if elem in params['executed_notebooks']:
+                        executed += 1
+                if (executed == len(arr)):
+                    key_to_delete = nb
+                    notebook = params['delayed_notebooks'].get(nb)
+                    builder._execute_notebook_class.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
+            if (key_to_delete):
+                del params['dependency_lists'][str(key_to_delete)]
+                key_to_delete = False
+
+        #Parse Executed notebook to remove hide-output blocks
+        for cell in executed_nb['cells']:
+            if cell['cell_type'] == "code":
+                if cell['metadata']['hide-output']:
+                    cell['outputs'] = []
             # #Write Executed Notebook as File
             # with open(executed_notebook_path, "wt", encoding="UTF-8") as f:
             #     nbformat.write(executed_nb, f)
@@ -262,6 +265,8 @@ class ExecuteNotebookWriter():
         except IOError:
             logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builder.reportdir))
 
+        return error_results
+
     def produce_dask_processing_report(self, builder, params, fln= "dask-reports.json"):
         """
             produces a report of dask execution
@@ -287,16 +292,16 @@ class ExecuteNotebookWriter():
         Creates a coverage report of the errors in notebook
         """
         errors = []
-        error_results = []
+        error_files = []
         errors_by_language = dict()
         produce_text_reports = True
-        
+
         #Parse Error Set
         for full_error_set in error_results:
             error_result = full_error_set['errors']
             filename = full_error_set['filename']
             current_language = full_error_set['language']
-            language_name = current_language['extension']
+            language_name = current_language['name']
             if error_result:
                 if language_name not in errors_by_language:
                     errors_by_language[language_name] = dict()
@@ -369,27 +374,27 @@ class ExecuteNotebookWriter():
                     for error in errors_by_file[filename]:
                         # Some errors don't provide a traceback. Make sure that some useful information is provided
                         # to the report - if nothing else, the type of error that was caught.
-                        traceback = getattr(error, "traceback", None)
-                        if traceback is None:
-                            error.traceback = str(error)
+                        print(error, "what is this?")
+                        if error:
+                            traceback = ' '.join(error.traceback)
 
-                        last_line = error.traceback.splitlines()[-1]
-                        if last_line not in error_files_dict:
-                            error_files_dict[last_line] = []
-                        error_files_dict[last_line].append(error_number)
+                            last_line = traceback[-1]
+                            if last_line not in error_files_dict:
+                                error_files_dict[last_line] = []
+                            error_files_dict[last_line].append(error_number)
 
-                        if last_line not in error_count_dict:
-                            error_count_dict[last_line] = 0
-                        error_count_dict[last_line] += 1
+                            if last_line not in error_count_dict:
+                                error_count_dict[last_line] = 0
+                            error_count_dict[last_line] += 1
 
-                        notebook_looper += "<pre><code class=\""\
-                                        + language\
-                                        + "\">{}</code></pre>\n".format(error.traceback)
+                            notebook_looper += "<pre><code class=\""\
+                                            + language\
+                                            + "\">{}</code></pre>\n".format(traceback)
 
-                        error_number += 1
+                            error_number += 1
 
-                        if produce_text_reports:
-                            error_file.write(error.traceback + "\n")
+                            if produce_text_reports:
+                                error_file.write(traceback + "\n")
 
                     if produce_text_reports:
                         error_file.close()

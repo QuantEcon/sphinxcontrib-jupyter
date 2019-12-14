@@ -12,6 +12,7 @@ from sphinx.util.console import bold
 import time
 from .utils import copy_dependencies, create_hash, normalize_cell, check_codetree_validity
 import json
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class JupyterCodeBuilder(Builder):
         }
         
     def get_target_uri(self, docname: str, typ: str = None):
-        return ''
+        return docname
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
@@ -97,7 +98,7 @@ class JupyterCodeBuilder(Builder):
             self._execute_notebook_class.execute_notebook(self, nb, docname, self.execution_vars, self.execution_vars['futures'])
 
     def create_codetree(self, nb):
-        codetree_ds = dict()
+        codetree_ds = OrderedDict()
         for cell in nb.cells:
             cell = normalize_cell(cell)
             cell = create_hash(cell)
