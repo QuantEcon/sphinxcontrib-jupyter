@@ -61,6 +61,9 @@ clean-website:
 clean-pdf:
 	rm -rf $(BUILDPDF)
 
+clean-jupyter:
+	rm -rf $(BUILDDIR)
+
 #### TODO - Add these back in once test cases are setup ####
 # coverage:
 # ifneq (,$(filter $(parallel),true True))
@@ -80,7 +83,10 @@ pdf:
 	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
 
 code:
-	@$(SPHINXBUILD) -M jupyter "$(SOURCECODE)" "$(BUILDCODE)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) -M jupytercode "$(SOURCECODE)" "$(BUILDCODE)" $(SPHINXOPTS) $(O)
+
+jupyterbase:
+	@$(SPHINXBUILD) -M jupyterbase "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

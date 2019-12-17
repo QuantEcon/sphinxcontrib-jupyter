@@ -47,6 +47,89 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_document(self, node):
         pass
 
+    def visit_section(self, node):
+        self.section_level += 1
+
+    def depart_section(self, node):
+        self.section_level -= 1
+
+    def visit_topic(self, node):
+        self.in_topic = True
+
+    def depart_topic(self, node):
+        self.in_topic = False
+
+    def visit_comment(self, node):
+        raise nodes.SkipNode
+    
+    ### TODO: figure out if this literal_block definitions should be kept in codeblock translator or her in base translator
+    def visit_literal_block(self, node):
+        "Parse Literal Blocks (Code Blocks)"
+        self.in_literal_block = True
+        self.cell_type = "code"
+        if "language" in node.attributes:
+            self.nodelang = node.attributes["language"].strip()
+        else:
+            self.cell_type = "markdown"   
+        if self.nodelang == 'default':
+            self.nodelang = self.language   #use notebook language
+        #Check node language is the same as notebook language
+        if self.nodelang != self.language:
+            logger.warning("Found a code-block with different programming \
+                language to the notebook language. Adding as markdown"
+            )
+            self.cell.append("``` {}".format(self.nodelang))
+            self.cell_type = "markdown"
+
+    def depart_literal_block(self, node):
+        if self.nodelang != self.language:
+            self.cell.append("```")
+        source = "".join(self.cell)
+        self.output.add_cell(source, self.cell_type)
+        self.new_cell()
+        self.in_literal_block = False
+
+    ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
+    def visit_math_block(self, node):
+        """directive math"""
+        # visit_math_block is called only with sphinx >= 1.8
+
+        self.in_math_block = True
+
+        if self.in_list and node["label"]:
+            self.markdown_lines.pop()  #remove entry \n from table builder
+
+        #check for labelled math
+        if node["label"]:
+            #Use \tags in the LaTeX environment
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            #node["ids"] should always exist for labelled displaymath
+            self.math_block_label = referenceBuilder
+
+    def depart_math_block(self, node):
+        if self.in_list:
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
+
+        self.in_math_block = False
+
+    # general paragraph
+    def visit_paragraph(self, node):
+        pass
+
+    def depart_paragraph(self, node):
+        if self.list_level > 0:
+            self.markdown_lines.append(self.sep_lines)
+        elif self.table_builder:
+            pass
+        elif self.block_quote_type == "epigraph":
+            try:
+                attribution = node.parent.children[1]
+                self.markdown_lines.append("\n>\n")   #Continue block for attribution
+            except:
+                self.markdown_lines.append(self.sep_paras)
+        else:
+            self.markdown_lines.append(self.sep_paras)
+
     #Document.Nodes
 
     def visit_literal_block(self, node):

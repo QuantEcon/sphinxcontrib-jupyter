@@ -10,81 +10,11 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate import JupyterCodeTranslator, JupyterBaseTranslator
+from .translate_code import JupyterCodeTranslator
 from .utils import JupyterOutputCellGenerators
 
-class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
-    
-    #Configuration (Formatting)
-    sep_lines = "  \n"
-    sep_paragraph = "\n\n"
-    indent_char = " "
-    indent = indent_char * 4
-    indents = []                    #TODO: check
-    section_level = 0
-    #-Configuration (Formatting Lists)
-    list_level = 0
-    bullets = []
-    list_item_starts = []
-    #-Configuration (References)
-    in_reference = False
-    reference_text_start = 0
-    #Configuration (File)
-    default_ext = ".ipynb"
-    #Configuration (Math)
-    math_block_label = None
-    #Configuration (Static Assets)
-    images = []
-    files = []
-    #Configuration (Tables)
-    table_builder = None    #TODO: table builder object
-    #Configuration (Slideshow)
-    metadata_slide = False
-    slide = "slide"         #TODO: change to slide type or slide builder object?
-    #Configuration (visit/depart)
-    in_block_quote = False
-    in_note = False
-    in_attribution = False
-    in_rubric = False
-    in_footnote = False
-    in_footnote_reference = False
-    in_download_reference = False
-    in_inpage_reference = False
-    in_citation = False
-    in_caption = False
-    in_toctree = False
-    in_list = False
-    in_math = False
-    in_math_block = False
-    in_topic = False
 
-    def __init__(self, document, builder):
-        """
-        A Jupyter Notebook Translator
-
-        This translator supports the construction of Jupyter notebooks
-        with an emphasis on readability. It uses markdown structures
-        wherever possible. Notebooks geared towards HTML or PDF are 
-        available through JupyterHTMLTranslator, JupyterPDFTranslator
-        """
-        super().__init__(document, builder)
-
-    def visit_document(self, node):
-        super().visit_document(self, node)
-
-    def depart_document(self, node):
-        pass
-
-    def unknown_visit(self, node):
-        raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
-
-    def unknown_departure(self, node):
-        pass
-
-
-#->REFACTOR
-
-class JupyterTranslator(JupyterCodeTranslator):   #->OLD
+class JupyterTranslator(JupyterCodeTranslator):
     """ 
     Jupyter Translator for RST to IPYNB
 
@@ -97,44 +27,44 @@ class JupyterTranslator(JupyterCodeTranslator):   #->OLD
         super(JupyterTranslator, self).__init__(builder, document)
         
         #set additional options from conf.py
-        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]  #use self.config
-        self.jupyter_target_html = builder.config["jupyter_target_html"]            #use self.config
-        self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]    #use self.config
-        self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]              #use self.config
-        self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]  #use self.config
-        self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]  #use self.config
-        self.book_index = builder.config["jupyter_pdf_book_index"]  #use self.config
+        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
+        self.jupyter_target_html = builder.config["jupyter_target_html"]
+        self.jupyter_images_markdown = builder.config["jupyter_images_markdown"]
+        self.jupyter_target_pdf = builder.config["jupyter_target_pdf"]
+        self.jupyter_pdf_showcontentdepth = builder.config["jupyter_pdf_showcontentdepth"]
+        self.jupyter_pdf_book = builder.config["jupyter_pdf_book"]
+        self.book_index = builder.config["jupyter_pdf_book_index"]
 
-        if hasattr(builder, 'add_bib_to_latex'):                    #pdf builder
-            self.add_bib_to_latex = builder.add_bib_to_latex        #pdf builder
+        if hasattr(builder, 'add_bib_to_latex'):
+            self.add_bib_to_latex = builder.add_bib_to_latex
 
-        if hasattr(builder, 'jupyter_download_nb_image_urlpath'):   #html builder
-            self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath   #html builder
+        if hasattr(builder, 'jupyter_download_nb_image_urlpath'):
+            self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
 
         # Settings
-        self.sep_lines = "  \n"     #migrated
-        self.sep_paras = "\n\n"     #migrated
-        self.indent_char = " "      #migrated
-        self.indent = self.indent_char * 4 #migrated
-        self.default_ext = ".ipynb" #migrated
-        self.html_ext = ".html"     
+        self.sep_lines = "  \n"
+        self.sep_paras = "\n\n"
+        self.indent_char = " "
+        self.indent = self.indent_char * 4
+        self.default_ext = ".ipynb"
+        self.html_ext = ".html"
         self.urlpath = builder.urlpath
         # Variables used in visit/depart
-        self.in_code_block = False  # not migrating, in BaseTranslator (with in_literal_block)
-        self.in_block_quote = False #migrated
-        self.block_quote_type = "block-quote"  #not migrating
-        self.in_note = False    #migrated
-        self.in_attribution = False #migrated
-        self.in_rubric = False  #migrated
-        self.in_footnote = False    #migrated
-        self.in_footnote_reference = False #migrated
-        self.in_download_reference = False  #migrated
-        self.in_inpage_reference = False    #migrated
-        self.in_caption = False #migrated
-        self.in_toctree = False #migrated
-        self.in_list = False    #migrated
-        self.in_math = False    #migrated
-        self.in_math_block = False  #migrated
+        self.in_code_block = False  # if False, it means in markdown_cell
+        self.in_block_quote = False
+        self.block_quote_type = "block-quote"
+        self.in_note = False
+        self.in_attribution = False
+        self.in_rubric = False
+        self.in_footnote = False
+        self.in_footnote_reference = False
+        self.in_download_reference = False
+        self.in_inpage_reference = False
+        self.in_caption = False
+        self.in_toctree = False
+        self.in_list = False
+        self.in_math = False
+        self.in_math_block = False
 
         self.code_lines = []
         self.markdown_lines = []
@@ -151,7 +81,7 @@ class JupyterTranslator(JupyterCodeTranslator):   #->OLD
         self.content_depth = self.jupyter_pdf_showcontentdepth
         self.content_depth_to_skip = None
         self.remove_next_content = False
-        self.in_citation = False    #migrated
+        self.in_citation = False
         self.math_block_label = None
 
         self.images = []
