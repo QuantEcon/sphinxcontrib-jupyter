@@ -20,10 +20,49 @@ logger = logging.getLogger(__name__)
 from .markdown import MarkdownSyntax
 
 class JupyterBaseTranslator(SphinxTranslator):
-    
+
+    #Configuration (Formatting)
+    sep_lines = "  \n"              #TODO: needed?
+    sep_paragraph = "\n\n"          #TODO: needed?
+    indent_char = " "               #TODO: needed?
+    indent = indent_char * 4        #TODO: needed?
+    indents = []                    #TODO: needed?
+    section_level = 0
+    #-Configuration (Formatting Lists)
+    list_level = 0
+    bullets = []
+    list_item_starts = []
+    #-Configuration (References)
+    in_reference = False
+    reference_text_start = 0
+    #Configuration (File)
+    default_ext = ".ipynb"
+    #Configuration (Math)
+    math_block_label = None
+    #Configuration (Static Assets)
+    images = []
+    files = []
+    #Configuration (Tables)
+    table_builder = None    #TODO: table builder object
+    #Configuration (visit/depart)
+    in_block_quote = False
+    in_note = False
+    in_attribution = False
+    in_rubric = False
+    in_footnote = False
+    in_footnote_reference = False
+    in_download_reference = False
+    in_inpage_reference = False
+    in_citation = False
+    in_caption = False
+    in_toctree = False
+    in_list = False
+    in_math = False
+    in_math_block = False
+    in_topic = False
     in_literal_block = False
     in_code_block = False
-
+    
     def __init__(self, document, builder):
         """
         Base Class for JupyterIPYNBTranslator, JupyterHTMLTranslator, JupyterPDFTranslator

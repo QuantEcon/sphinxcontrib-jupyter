@@ -1,25 +1,6 @@
-
-class MarkdownConstructor:
-
-    def __init__(self):
-        """A collection of markdown syntax methods"""
-        pass
-
-    @classmethod
-    def highlighted_code(self, code, language):
-        template = textwrap.dedent(
-        """``` {language}
-        {code}
-        ```
-        """
-        )
-        return template % {'code' : code, 'language' : language}
-    
-    @classmethod
-    def bold(self, text):
-        template = "**{text}**"
-        return template % {'text' : text}
-
+"""
+Contains Markdown Syntax and Object Accumulators
+"""
 
 class MarkdownSyntax:
     """
@@ -29,9 +10,6 @@ class MarkdownSyntax:
         methods contain the begining of the markdown syntax
     depart_{}:
         methods contain the end of the markdown syntax and may not be needed
-
-    some items are multi-part that are most easily constructed in full. But 
-    may be split to use visit_reference and visit_label to mimic sphinx
 
     Reference
     ---------
@@ -86,11 +64,6 @@ class MarkdownSyntax:
     def depart_inline_code(self):
         return "`"
     
-    #-Multi Part Elements-#
-    
-    def image(self, label, link):
-        return "![{}]({})".format(label, link)
-
     def visit_image(self, text, link):
         return "!"
 
@@ -100,8 +73,17 @@ class MarkdownSyntax:
     def depart_label(self):
         return "]"
 
+    def visit_reference(self):
+        #TODO: consider context for different reference types in markdown
+        return "("
+    
+    def depart_reference(self):
+        #TODO: consider context for different reference types in markdown
+        return ")"
 
-#-List Accumulators-#
+#-Accumulator Objects-#
+# List, Enumerated List
+# TODO: TableBuilder, Image(?)
 
 class List:
 

@@ -13,6 +13,35 @@ import os
 from .translate_code import JupyterCodeTranslator
 from .utils import JupyterOutputCellGenerators
 
+class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
+    
+    #Configuration (Slideshow)
+    metadata_slide = False
+    slide = "slide"         #TODO: change to slide translator object?
+
+    def __init__(self, document, builder):
+        """
+        A Jupyter Notebook Translator
+
+        This translator supports the construction of Jupyter notebooks
+        with an emphasis on readability. It uses markdown structures
+        wherever possible. Notebooks geared towards HTML or PDF are 
+        available through JupyterHTMLTranslator, JupyterPDFTranslator
+        """
+        super().__init__(document, builder)
+
+    def visit_document(self, node):
+        super().visit_document(self, node)
+
+    def depart_document(self, node):
+        pass
+
+    def unknown_visit(self, node):
+        raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
+
+    def unknown_departure(self, node):
+        pass
+
 
 class JupyterTranslator(JupyterCodeTranslator):
     """ 
