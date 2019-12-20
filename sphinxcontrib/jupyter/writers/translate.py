@@ -142,6 +142,24 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_topic(self, node):
         self.in_topic = False
 
+    def visit_exercise_node(self, node):
+        pass
+
+    def depart_exercise_node(self, node):
+        pass
+
+    def visit_compound(self, node):
+        pass
+
+    def depart_compound(self, node):
+        pass
+
+    def visit_inline(self, node):
+        pass
+
+    def depart_inline(self, node):
+        pass
+
     def visit_title(self, node):
         if self.visit_first_title:
             self.title = node.astext()

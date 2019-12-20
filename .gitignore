@@ -8,6 +8,7 @@ dask-worker-space/
 __pycache__
 *.egg-info/
 tests/base/_build/
+tests/base-A/_build/
 tests/pdf/_build/
 tests/pdf/_static/
 tests/pdf/theme/
