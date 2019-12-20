@@ -21,7 +21,7 @@ class JupyterBuilder(Builder):
     """
     Builds Jupyter Notebook (FOR TESTING PURPOSES ONLY)  @AAKASH is working on BUILDERS
     """
-    name = "jupyterbase"
+    name = "jupyter"
     # name = "jupyter"
     format = "ipynb"            #TODO: best not to override format
     out_suffix = ".ipynb"
@@ -199,7 +199,6 @@ class JupyterBuilderOld(Builder):
 
         ## copies the dependencies to the notebook folder
         copy_dependencies(self)
-
         if (self.config["jupyter_execute_notebooks"]):
              ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)

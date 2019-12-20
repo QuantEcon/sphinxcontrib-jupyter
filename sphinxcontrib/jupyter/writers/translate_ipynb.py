@@ -10,8 +10,9 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate_code import JupyterCodeTranslator
+from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
+from .translate import JupyterBaseTranslator
 
 class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
     
@@ -31,10 +32,37 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         super().__init__(document, builder)
 
     def visit_document(self, node):
-        super().visit_document(self, node)
+        super().visit_document(node)
 
     def depart_document(self, node):
         pass
+
+    def visit_jupyter_node(self, node):
+        try:
+            if 'cell-break' in node.attributes:
+                self.add_markdown_cell()
+            if 'slide' in node.attributes:
+                self.metadata_slide = node['slide'] # this activates the slideshow metadata for the notebook
+            if 'slide-type' in node.attributes:
+                if "fragment" in node['slide-type']:
+                    self.add_markdown_cell(slide_type=node['slide-type'])   #start a new cell
+                self.slide = node['slide-type'] # replace the default value
+        except:
+            pass
+        #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
+        try:
+            self.files.append(node['uri'])
+        except:
+            pass
+
+    def depart_jupyter_node(self, node):
+        if 'cell-break' in node.attributes:
+            pass
+        if 'slide' in node.attributes:
+            pass
+        if 'slide-type' in node.attributes:
+            pass
+
 
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
@@ -43,7 +71,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         pass
 
 
-class JupyterTranslator(JupyterCodeTranslator):
+class JupyterTranslator(JupyterCodeBlockTranslator):
     """ 
     Jupyter Translator for RST to IPYNB
 

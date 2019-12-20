@@ -192,14 +192,6 @@ class JupyterHTMLTranslator(JupyterTranslator):
     def depart_Text(self, node):
         pass
 
-    def visit_attribution(self, node):
-        self.in_attribution = True
-        self.markdown_lines.append("> ")
-
-    def depart_attribution(self, node):
-        self.in_attribution = False
-        self.markdown_lines.append("\n")
-
     # image
     def visit_image(self, node):
         """
@@ -371,9 +363,6 @@ class JupyterHTMLTranslator(JupyterTranslator):
         left = ":" if alignment != "right" else "-"
         right = ":" if alignment != "left" else "-"
         return left + "-" * (line_length - 2) + right
-
-    def visit_colspec(self, node):
-        self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_row(self, node):
         self.table_builder['line_pending'] = "|"
@@ -697,16 +686,7 @@ class JupyterHTMLTranslator(JupyterTranslator):
     def visit_target(self, node):
         if "refid" in node.attributes:
             refid = node.attributes["refid"]
-            if self.jupyter_target_pdf:
-                if 'equation' in refid:
-                    #no html targets when computing notebook to target pdf in labelled math
-                    pass
-                else:
-                    #set hypertargets for non math targets
-                    if self.markdown_lines:
-                        self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
-            else:
-                self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
+            self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
     # list items
     def visit_bullet_list(self, node):
@@ -818,12 +798,6 @@ class JupyterHTMLTranslator(JupyterTranslator):
 
     def depart_field_list(self, node):
         self.depart_definition_list(node)
-
-    def visit_field_name(self, node):
-        self.visit_term(node)
-
-    def depart_field_name(self, node):
-        self.depart_term(node)
 
     def visit_field_body(self, node):
         self.visit_definition(node)
@@ -957,14 +931,6 @@ class JupyterHTMLTranslator(JupyterTranslator):
                 self.in_toctree = False
         except:
             pass
-
-    def visit_caption(self, node):
-        self.in_caption = True
-
-    def depart_caption(self, node):
-        self.in_caption = False
-        if self.in_toctree:
-            self.markdown_lines.append("\n")
 
     # ================
     # general methods

@@ -1,6 +1,6 @@
 from docutils.writers import Writer
 
-from .translate import JupyterCodeTranslator, JupyterBaseTranslator
+from .translate import JupyterBaseTranslator
 from .translate_code import JupyterCodeBlockTranslator
 from .translate_ipynb import JupyterTranslator, JupyterIPYNBTranslator
 from .translate_html import JupyterHTMLTranslator

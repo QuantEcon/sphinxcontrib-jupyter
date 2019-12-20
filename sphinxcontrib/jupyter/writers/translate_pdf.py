@@ -191,14 +191,6 @@ class JupyterPDFTranslator(JupyterTranslator):
     def depart_Text(self, node):
         pass
 
-    def visit_attribution(self, node):
-        self.in_attribution = True
-        self.markdown_lines.append("> ")
-
-    def depart_attribution(self, node):
-        self.in_attribution = False
-        self.markdown_lines.append("\n")
-
     # image
     def visit_image(self, node):
         """
@@ -370,9 +362,6 @@ class JupyterPDFTranslator(JupyterTranslator):
         left = ":" if alignment != "right" else "-"
         right = ":" if alignment != "left" else "-"
         return left + "-" * (line_length - 2) + right
-
-    def visit_colspec(self, node):
-        self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_row(self, node):
         self.table_builder['line_pending'] = "|"
@@ -706,7 +695,6 @@ class JupyterPDFTranslator(JupyterTranslator):
                         self.markdown_lines.append("\n\\hypertarget{" + refid + "}{}\n\n")
             else:
                 self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
-
     # list items
     def visit_bullet_list(self, node):
         ## trying to return if it is in the topmost depth and it is more than 1
@@ -799,12 +787,6 @@ class JupyterPDFTranslator(JupyterTranslator):
     def depart_definition_list(self, node):
         self.markdown_lines.append("\n</dl>{}".format(self.sep_paras))
 
-    def visit_term(self, node):
-        self.markdown_lines.append("<dt>")
-
-    def depart_term(self, node):
-        self.markdown_lines.append("</dt>\n")
-
     def visit_definition(self, node):
         self.markdown_lines.append("<dd>\n")
 
@@ -817,12 +799,6 @@ class JupyterPDFTranslator(JupyterTranslator):
 
     def depart_field_list(self, node):
         self.depart_definition_list(node)
-
-    def visit_field_name(self, node):
-        self.visit_term(node)
-
-    def depart_field_name(self, node):
-        self.depart_term(node)
 
     def visit_field_body(self, node):
         self.visit_definition(node)
@@ -848,6 +824,22 @@ class JupyterPDFTranslator(JupyterTranslator):
         self.in_citation = False
 
     # label
+    def visit_label(self, node):
+        if self.in_footnote:
+            ids = node.parent.attributes["ids"]
+            id_text = ""
+            for id_ in ids:
+                id_text += "{} ".format(id_)
+            else:
+                id_text = id_text[:-1]
+            if self.jupyter_target_html:
+                self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
+            else:
+                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            raise nodes.SkipNode
+        if self.in_citation:
+            self.markdown_lines.append("\[")
+
     def visit_label(self, node):
         if self.in_footnote:
             ids = node.parent.attributes["ids"]
@@ -894,6 +886,7 @@ class JupyterPDFTranslator(JupyterTranslator):
 
     def depart_literal_block(self, node):
         JupyterCodeTranslator.depart_literal_block(self, node)
+        
     def visit_note(self, node):
         self.in_note = True
         self.markdown_lines.append(">**Note**\n>\n>")
@@ -956,14 +949,6 @@ class JupyterPDFTranslator(JupyterTranslator):
                 self.in_toctree = False
         except:
             pass
-
-    def visit_caption(self, node):
-        self.in_caption = True
-
-    def depart_caption(self, node):
-        self.in_caption = False
-        if self.in_toctree:
-            self.markdown_lines.append("\n")
 
     # ================
     # general methods
