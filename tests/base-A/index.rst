@@ -1,29 +1,63 @@
-.. sphinxcontrib-jupyter.minimal documentation master file, created by
-   sphinx-quickstart on Tue Jan 30 14:46:58 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Code blocks
+-----------
 
-Welcome to sphinxcontrib-jupyter.minimal's documentation!
-=========================================================
+This is a collection to test various code-blocks
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+This is a **.. code::** directive
 
-   code_blocks
-   code_synonyms
-   collapse
-   dependency
-   download
-   equation_labels
-   footnotes
-   ignore
-   images
-   inline
-   jupyter
-   literal_include
-   notes
-   only
-   exercise_list_all
-   exercise_list_section
-   section2/index
+.. code:: python
+
+    this = 'is a code block'
+    x = 1
+    no = 'really!'
+    p = argwhere(x == 2)
+
+This is another **.. code::** directive
+
+.. code:: python
+
+    from pylab import linspace
+    t = linspace(0, 1)
+    x = t**2
+
+This is a **::** directive
+
+::
+
+    from pylab import *
+    x = logspace(0, 1)
+    y = x**2
+    figure()
+    plot(x, y)
+    show()
+
+This is a **.. code-block:: julia** test with showing snippet for another language *Julia*
+and it is included as a non-execute cell
+
+.. code-block:: julia
+
+    using QuantEcon
+
+~~However this **currently** means **.. code-block:: python** is also included as a non-execute 
+cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`__]~~
+
+This has been fixed by using jupyter_lang_synonyms = ["python"] in **conf.py** file. So **python**
+will now be included alongside *python3*, *ipython*, and *pycon*.
+
+.. code-block:: python
+
+    import pandas as pd
+
+
+
+A test suite for inline items
+
+Here is some inline python ``import numpy as np`` that should be displayed
+
+and some text that is not code ``here``
+
+Inline maths with inline role: :math:`x^3+\frac{1+\sqrt{2}}{\pi}`
+
+Inline maths using dollar signs (not supported yet): $x^3+\frac{1+\sqrt{2}}{\pi}$ as the 
+backslashes are removed.
+

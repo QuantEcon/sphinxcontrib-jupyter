@@ -35,39 +35,69 @@ class JupyterBaseTranslator(SphinxTranslator):
     list_level = 0
     bullets = []
     list_item_starts = []
+
+    ## dict for visit title
+    title_dict = dict()
+    title_dict['visit_first_title'] = True
+
     #-Configuration (References)
-    in_reference = False
-    reference_text_start = 0
+    reference_dict = dict()
+    reference_dict['in'] = False
+    reference_dict['reference_text_start'] = 0
     #Configuration (File)
     default_ext = ".ipynb"
     #Configuration (Math)
-    math_block_label = None
+    math_block_dict = dict()
+    math_block_dict['in'] = False
+    math_block_dict['math_block_label'] = None
     #Configuration (Static Assets)
     images = []
     files = []
     #Configuration (Tables)
     table_builder = None    #TODO: table builder object
     #Configuration (visit/depart)
-    in_block_quote = False
+    block_quote_dict = dict()
+    block_quote_dict['in_block_quote'] = False
+    footnote_dict = dict()
+    footnote_dict['in'] = False
+    footnote_reference = dict()
+    footnote_reference['in'] = False
+    download_reference_dict = dict()
+    download_reference_dict['in'] = False
+    citation_dict = dict()
+    citation_dict['in'] = False
+
     in_note = False
     in_attribution = False
     in_rubric = False
-    in_footnote = False
-    in_footnote_reference = False
-    in_download_reference = False
     in_inpage_reference = False
     in_citation = False
     in_caption = False
     in_toctree = False
     in_list = False
     in_math = False
-    in_math_block = False
     in_topic = False
     in_literal_block = False
     in_code_block = False
+    remove_next_content = False
 
     ## options to remove?
-    block_quote_type = "block-quote"
+    block_quote_dict['block_quote_type'] = "block-quote"
+
+    # Slideshow option
+    metadata_slide = False  #False is the value by default for all the notebooks
+    slide = "slide" #value by default
+    
+    ## pdf book options
+    in_book_index = False
+    book_index_previous_links = []
+    markdown_lines_trimmed = []
+    content_depth_to_skip = None
+    skip_next_content = False
+
+    ### to be removed
+    code_lines = []
+    markdown_lines = []
     
     def __init__(self, document, builder):
         """
@@ -86,39 +116,8 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
         self.md = MarkdownSyntax()
-        self.visit_first_title = True
 
-        ### to be removed
-        self.code_lines = []
-        self.markdown_lines = []
-
-        self.indents = []
-        self.section_level = 0
-        self.bullets = []
-        self.list_item_starts = []
-        self.in_topic = False
-        self.reference_text_start = 0
-        self.in_reference = False
-        self.list_level = 0
-        self.skip_next_content = False
         self.content_depth = self.config.jupyter_pdf_showcontentdepth
-        self.content_depth_to_skip = None
-        self.remove_next_content = False
-        self.in_citation = False
-        self.math_block_label = None
-
-        self.images = []
-        self.files = []
-        self.table_builder = None
-
-        # Slideshow option
-        self.metadata_slide = False  #False is the value by default for all the notebooks
-        self.slide = "slide" #value by default
-        
-        ## pdf book options
-        self.in_book_index = False
-        self.book_index_previous_links = []
-        self.markdown_lines_trimmed = []
 
 
     #Document
@@ -161,9 +160,9 @@ class JupyterBaseTranslator(SphinxTranslator):
         pass
 
     def visit_title(self, node):
-        if self.visit_first_title:
-            self.title = node.astext()
-        self.visit_first_title = False
+        if self.title_dict['visit_first_title']:
+            self.title_dict['title'] = node.astext()
+        self.title_dict['visit_first_title'] = False
 
         ### to remove the main title from ipynb as they are already added by metadata
         if self.config.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
@@ -281,7 +280,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         """directive math"""
         # visit_math_block is called only with sphinx >= 1.8
 
-        self.in_math_block = True
+        self.math_block_dict['in'] = True
 
         if self.in_list and node["label"]:
             self.markdown_lines.pop()  #remove entry \n from table builder
@@ -295,13 +294,13 @@ class JupyterBaseTranslator(SphinxTranslator):
             else:
                 referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
-            self.math_block_label = referenceBuilder
+            self.math_block_dict['math_block_label'] = referenceBuilder
 
     def depart_math_block(self, node):
         if self.in_list:
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
-        self.in_math_block = False
+        self.math_block_dict['in'] = False
 
     # general paragraph
     def visit_paragraph(self, node):
@@ -312,7 +311,7 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.markdown_lines.append(self.sep_lines)
         elif self.table_builder:
             pass
-        elif self.block_quote_type == "epigraph":
+        elif self.block_quote_dict['block_quote_type'] == "epigraph":
             try:
                 attribution = node.parent.children[1]
                 self.markdown_lines.append("\n>\n")   #Continue block for attribution
@@ -375,23 +374,25 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.depart_term(node)
 
     def visit_label(self, node):
-        if self.in_footnote:
+        if self.footnote_dict['in']:
             ids = node.parent.attributes["ids"]
             id_text = ""
             for id_ in ids:
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
+            self.footnote_dict['ids'] = node.parent.attributes["ids"]
+            self.footnote_dict['id_text'] = id_text
             if self.config.jupyter_target_pdf:
                 self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
             else:
                 self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
             raise nodes.SkipNode
-        if self.in_citation:
+        if self.citation_dict['in']:
             self.markdown_lines.append("\[")
 
     def depart_label(self, node):
-        if self.in_citation:
+        if self.citation_dict['in']:
             self.markdown_lines.append("\] ")
 
     def visit_term(self, node):
@@ -404,16 +405,16 @@ class JupyterBaseTranslator(SphinxTranslator):
         if self.in_list:               #allow for 4 spaces interpreted as block_quote
             self.markdown_lines.append("\n")
             return
-        self.in_block_quote = True
+        self.block_quote_dict['in_block_quote'] = True
         if "epigraph" in node.attributes["classes"]:
-            self.block_quote_type = "epigraph"
+            self.block_quote_dict['block_quote_type'] = "epigraph"
         self.markdown_lines.append("> ")
 
     def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
-            self.block_quote_type = "block-quote"
+            self.block_quote_dict['block_quote_type'] = "block-quote"
         self.markdown_lines.append("\n")
-        self.in_block_quote = False
+        self.block_quote_dict['in_block_quote'] = False
 
     def visit_bullet_list(self, node):
         ## trying to return if it is in the topmost depth and it is more than 1
@@ -439,20 +440,22 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.indents.pop()
 
     def visit_citation(self, node):
-        self.in_citation = True
+        self.citation_dict['in'] = True
         if "ids" in node.attributes:
-            ids = node.attributes["ids"]
+            self.citation_dict['ids'] = node.attributes["ids"]
             id_text = ""
             for id_ in ids:
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
 
+            self.citation_dict['id_text'] = id_text
+
             self.markdown_lines.append(
                 "<a id='{}'></a>\n".format(id_text))
 
     def depart_citation(self, node):
-        self.in_citation = False
+        self.citation_dict['in'] = False
 
     def visit_definition_list(self, node):
         self.markdown_lines.append("\n<dl style='margin: 20px 0;'>\n")
@@ -486,10 +489,10 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.markdown_lines.append(self.sep_lines)
     
     def visit_footnote(self, node):
-        self.in_footnote = True
+        self.footnote_dict['in'] = True
 
     def depart_footnote(self, node):
-        self.in_footnote = False
+        self.footnote_dict['in'] = False
     
     def visit_note(self, node):
         self.in_note = True
@@ -607,26 +610,26 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.markdown_lines.append("*")
 
     def visit_footnote_reference(self, node):
-        self.in_footnote_reference = True
-        refid = node.attributes['refid']
-        ids = node.astext()
+        self.footnote_reference['in'] = True
+        self.footnote_reference['refid'] = node.attributes['refid']
+        self.footnote_reference['ids'] = node.astext()
         if self.config.jupyter_target_pdf:
-            link = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(refid, refid, ids)
+            self.footnote_reference['link'] = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(self.footnote_reference['refid'], self.footnote_reference['refid'], self.footnote_reference['ids'])
         else:
-            link = "<sup>[{}](#{})</sup>".format(ids, refid)
+            self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(self.footnote_reference['ids'], self.footnote_reference['refid'])
         self.markdown_lines.append(link)
         raise nodes.SkipNode
 
     def depart_footnote_reference(self, node):
-        self.in_footnote_reference = False
+        self.footnote_reference['in'] = False
     
     def visit_literal(self, node):
-        if self.in_download_reference:
+        if self.download_reference_dict['in']:
             return
         self.markdown_lines.append("`")
 
     def depart_literal(self, node):
-        if self.in_download_reference:
+        if self.download_reference_dict['in']:
             return
         self.markdown_lines.append("`")
 
@@ -668,7 +671,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         if self.in_book_index and node.attributes['refuri'] == 'zreferences':
             return
 
-        self.in_reference = True
+        self.reference_dict['in'] = True
         if self.config.jupyter_target_pdf:
             if "refuri" in node and "http" in node["refuri"]:
                 self.markdown_lines.append("[")
@@ -685,7 +688,7 @@ class JupyterBaseTranslator(SphinxTranslator):
                 self.markdown_lines.append("\hyperlink{")
         else:
             self.markdown_lines.append("[")
-        self.reference_text_start = len(self.markdown_lines)
+        self.reference_dict['reference_text_start'] = len(self.markdown_lines)
 
     def depart_reference(self, node):
         subdirectory = False
@@ -697,7 +700,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
-                self.markdown_lines[self.reference_text_start:]).strip()
+                self.markdown_lines[self.reference_dict['reference_text_start']:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             if self.config.jupyter_target_pdf:
@@ -829,7 +832,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         if self.in_toctree:
             self.markdown_lines.append("\n")
 
-        self.in_reference = False
+        self.reference_dict['in'] = False
 
     def visit_strong(self, node):
         self.markdown_lines.append("**")
@@ -852,13 +855,13 @@ class JupyterBaseTranslator(SphinxTranslator):
             pass
 
     def visit_download_reference(self, node):
-        self.in_download_reference = True
-        html = "<a href={} download>".format(node["reftarget"])
-        self.markdown_lines.append(html)
+        self.download_reference_dict['in'] = True
+        self.download_reference_dict['html'] = "<a href={} download>".format(node["reftarget"])
+        self.markdown_lines.append(self.download_reference_dict['html'])
 
     def depart_download_reference(self, node):
         self.markdown_lines.append("</a>")
-        self.in_download_reference = False
+        self.download_reference_dict['in'] = False
 
     def visit_only(self, node):
         pass
