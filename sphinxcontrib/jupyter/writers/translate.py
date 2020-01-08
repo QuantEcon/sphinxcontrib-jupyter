@@ -162,40 +162,8 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.title_dict['title'] = node.astext()
         self.title_dict['visit_first_title'] = False
 
-        self.output.add_metadata(self.cell, self.title_dict['title'])
-        ### to remove the main title from ipynb as they are already added by metadata
-        if self.config.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
-            return
-        else:
-            self.add_markdown_cell()
-        if self.in_topic:
-            ### this prevents from making it a subsection from section
-            if self.config.jupyter_target_pdf and self.section_level == 1:
-                self.cell.append(
-                    "{} ".format("#" * (self.section_level)))
-            else:
-                self.cell.append(
-                    "{} ".format("#" * (self.section_level + 1)))
-        elif self.table_builder:
-            self.cell.append(
-                "### {}\n".format(node.astext()))
-        else:
-            ### this makes all the sections go up one level to transform subsections to sections
-            if self.config.jupyter_target_pdf:
-                self.cell.append(
-                "{} ".format("#" * (self.section_level -1)))
-            else:
-                self.cell.append(
-                    "{} ".format("#" * self.section_level))
-
     def depart_title(self, node):
-        if not self.table_builder:
-
-            ### to remove the main title from ipynb as they are already added by metadata
-            if self.config.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
-                self.cell = []
-                return
-            self.cell.append(self.sep_paragraph)
+        pass
 
 
     def visit_comment(self, node):

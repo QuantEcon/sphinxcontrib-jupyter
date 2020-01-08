@@ -57,6 +57,26 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         if 'slide-type' in node.attributes:
             pass
 
+    def visit_title(self, node):
+        super().visit_title(node)
+        self.new_cell()
+        self.cell_type = 'markdown'
+        if self.in_topic:
+            ### this prevents from making it a subsection from section
+            self.cell.append("{} ".format("#" * (self.section_level + 1)))
+        elif self.table_builder:
+            self.cell.append(
+                "### {}\n".format(self.title_dict['title']))
+        else:
+            ### this makes all the sections go up one level to transform subsections to sections
+            self.cell.append(
+                    "{} ".format("#" * self.section_level))
+        import pdb; 
+        pdb.set_trace()
+
+    def depart_title(self, node):
+        if not self.table_builder:
+            self.cell.append(self.sep_paragraph)
 
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
