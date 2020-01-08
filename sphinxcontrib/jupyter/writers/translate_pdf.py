@@ -10,11 +10,10 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate_ipynb import JupyterTranslator
 from .utils import JupyterOutputCellGenerators
+from .translate import JupyterBaseTranslator
 
-
-class JupyterPDFTranslator(JupyterTranslator):
+class JupyterPDFTranslator(JupyterBaseTranslator):
     """ 
     Jupyter Translator for PDF Support
 
@@ -26,63 +25,12 @@ class JupyterPDFTranslator(JupyterTranslator):
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
     def __init__(self, builder, document):
-        super(JupyterTranslator, self).__init__(builder, document)
-
-        # Settings
-        self.sep_lines = "  \n"
-        self.sep_paras = "\n\n"
-        self.indent_char = " "
-        self.indent = self.indent_char * 4
-        self.default_ext = ".ipynb"
-        self.html_ext = ".html"
-        self.urlpath = builder.urlpath
-        # Variables used in visit/depart
-        self.in_code_block = False  # if False, it means in markdown_cell
-        self.in_block_quote = False
-        self.block_quote_type = "block-quote"
-        self.in_note = False
-        self.in_attribution = False
-        self.in_rubric = False
-        self.in_footnote = False
-        self.in_footnote_reference = False
-        self.in_download_reference = False
-        self.in_inpage_reference = False
-        self.in_caption = False
-        self.in_toctree = False
-        self.in_list = False
-        self.in_math = False
-        self.in_math_block = False
-
-        self.code_lines = []
-        self.markdown_lines = []
-
-        self.indents = []
-        self.section_level = 0
-        self.bullets = []
-        self.list_item_starts = []
-        self.in_topic = False
-        self.reference_text_start = 0
-        self.in_reference = False
-        self.list_level = 0
-        self.skip_next_content = False
-        self.content_depth = self.jupyter_pdf_showcontentdepth
-        self.content_depth_to_skip = None
-        self.remove_next_content = False
-        self.in_citation = False
-        self.math_block_label = None
-
-        self.images = []
-        self.files = []
-        self.table_builder = None
-
-        # Slideshow option
-        self.metadata_slide = False  #False is the value by default for all the notebooks
-        self.slide = "slide" #value by default
+        super().__init__(document, builder)
         
-        ## pdf book options
         self.in_book_index = False
         self.book_index_previous_links = []
         self.markdown_lines_trimmed = []
+        self.book_index = self.config["jupyter_pdf_book_index"]
 
 
     # specific visit and depart methods
@@ -91,60 +39,14 @@ class JupyterPDFTranslator(JupyterTranslator):
     def visit_document(self, node):
         """at start
         """
-        JupyterCodeTranslator.visit_document(self, node)
+        super().visit_document(node)
 
         ## if the source file parsed is book index file and target is pdf
-        if self.book_index is not None and self.book_index in self.source_file_name and self.jupyter_pdf_book:
+        if self.book_index is not None and self.book_index in self.source_file_name:
             self.in_book_index = True
 
-
-
-
     def depart_document(self, node):
-        """at end
-        Almost the exact same implementation as that of the superclass.
-
-
-        Notes
-        -----
-        [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
-        [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
-        """
-        self.add_markdown_cell()
-        #Parse .. jupyter-dependency::
-        if len(self.files) > 0:
-            for fl in self.files:
-                src_fl = os.path.join(self.builder.srcdir, fl)
-                out_fl = os.path.join(self.builder.outdir, os.path.basename(fl))   #copy file to same location as notebook (remove dir structure)
-                #Check if output directory exists
-                out_dir = os.path.dirname(out_fl)
-                if not os.path.exists(out_dir):
-                    os.makedirs(out_dir)
-                print("Copying {} to {}".format(src_fl, out_fl))
-                copyfile(src_fl, out_fl)
-        JupyterCodeTranslator.depart_document(self, node)
-    
-    # =========
-    # Sections
-    # =========
-
-    def visit_only(self, node):
         pass
-
-    def depart_only(self, node):
-        pass
-
-    def visit_topic(self, node):
-        self.in_topic = True
-
-    def depart_topic(self, node):
-        self.in_topic = False
-
-    def visit_section(self, node):
-        self.section_level += 1
-
-    def depart_section(self, node):
-        self.section_level -= 1
 
     #=================
     # Inline elements

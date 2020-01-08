@@ -31,12 +31,6 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         """
         super().__init__(document, builder)
 
-    def visit_document(self, node):
-        super().visit_document(node)
-
-    def depart_document(self, node):
-        pass
-
     def visit_jupyter_node(self, node):
         try:
             if 'cell-break' in node.attributes:
