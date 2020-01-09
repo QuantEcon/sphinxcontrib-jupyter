@@ -219,6 +219,7 @@ class JupyterBaseTranslator(SphinxTranslator):
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
         self.in_literal_block = True
+        self.cell_to_notebook()
         self.cell_type = "code"
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
@@ -227,7 +228,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook language
         #Check node language is the same as notebook language
-        if self.nodelang != self.language:
+        if self.nodelang not in self.language_synonyms:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
@@ -860,6 +861,9 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.cell_type = None
 
     def cell_to_notebook(self):
+        ## default cell type when no cell type is specified
+        if not self.cell_type:
+            self.cell_type = "markdown"
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
         self.new_cell()

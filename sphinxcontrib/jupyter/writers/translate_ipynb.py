@@ -59,8 +59,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_title(self, node):
         super().visit_title(node)
-        self.new_cell()
-        self.cell_type = 'markdown'
+        self.cell_type = "markdown"
         if self.in_topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
@@ -71,12 +70,48 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
             ### this makes all the sections go up one level to transform subsections to sections
             self.cell.append(
                     "{} ".format("#" * self.section_level))
-        import pdb; 
-        pdb.set_trace()
 
     def depart_title(self, node):
         if not self.table_builder:
             self.cell.append(self.sep_paragraph)
+
+    def visit_Text(self, node):
+        super().visit_Text(node)
+        text = node.astext()
+        ## removing references from index file book
+        if self.in_book_index and 'references' in text.lower():
+            return
+
+        #Escape Special markdown chars except in code block
+        if self.in_code_block == False:
+            text = text.replace("$", "\$")
+
+        if self.in_math:
+            text = '$ {} $'.format(text.strip())
+        elif self.math_block_dict['in'] and self.math_block_label:
+            text = "$$\n{0}{1}$${2}".format(
+                        text.strip(), self.math_block_label, self.sep_paras
+                    )
+            self.math_block_label = None
+        elif self.math_block_dict['in']:
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
+
+        if self.in_code_block:
+            self.code_lines.append(text)
+        elif self.table_builder:
+            self.table_builder['line_pending'] += text
+        elif self.block_quote_dict['in_block_quote'] or self.in_note:
+            if self.block_quote_type == "epigraph":
+                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+            else:
+                self.cell.append(text)
+        elif self.in_caption and self.in_toctree:
+            self.cell.append("# {}".format(text))
+        else:
+            self.cell.append(text)
+
+    def depart_Text(self, node):
+        pass
 
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
@@ -233,9 +268,8 @@ class JupyterTranslator(JupyterCodeBlockTranslator):
     # Inline elements
     #=================
     def visit_Text(self, node):
-
+        super().visit_Text(node)
         text = node.astext()
-
         ## removing references from index file book
         if self.in_book_index and 'references' in text.lower():
             return
@@ -263,13 +297,13 @@ class JupyterTranslator(JupyterCodeBlockTranslator):
             self.table_builder['line_pending'] += text
         elif self.in_block_quote or self.in_note:
             if self.block_quote_type == "epigraph":
-                self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
-                self.markdown_lines.append(text)
+                self.cell.append(text)
         elif self.in_caption and self.in_toctree:
-            self.markdown_lines.append("# {}".format(text))
+            self.cell.append("# {}".format(text))
         else:
-            self.markdown_lines.append(text)
+            self.cell.append(text)
 
     def depart_Text(self, node):
         pass
