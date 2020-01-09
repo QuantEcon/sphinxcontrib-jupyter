@@ -90,13 +90,9 @@ class JupyterBaseTranslator(SphinxTranslator):
     
     ## pdf book options
     in_book_index = False
-    markdown_lines_trimmed = []
+    cell_trimmed = []
     content_depth_to_skip = None
     skip_next_content = False
-
-    ### to be removed
-    code_lines = []
-    markdown_lines = []
     
     def __init__(self, document, builder):
         """
@@ -114,6 +110,10 @@ class JupyterBaseTranslator(SphinxTranslator):
         #-Jupyter Settings-#
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
+        self.source_file_name = get_source_file_name(
+            self.settings._source,
+            self.settings.env.srcdir)
+
         self.md = MarkdownSyntax()
 
         self.content_depth = self.config.jupyter_pdf_showcontentdepth
@@ -125,7 +125,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.new_cell()     #Initialise Cell
 
     def depart_document(self, node):
-        pass
+        self.cell_to_notebook()
 
     def visit_section(self, node):
         self.section_level += 1
@@ -157,6 +157,12 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_inline(self, node):
         pass
 
+    def visit_title_reference(self, node):
+        pass
+
+    def depart_title_reference(self, node):
+        pass
+
     def visit_title(self, node):
         if self.title_dict['visit_first_title']:
             self.title_dict['title'] = node.astext()
@@ -165,6 +171,11 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_title(self, node):
         pass
 
+    def visit_definition_list_item(self, node):
+        pass
+
+    def visit_doctest_block(self, node):
+        pass
 
     def visit_comment(self, node):
         raise nodes.SkipNode
@@ -236,11 +247,9 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.cell_type = "markdown"
 
     def depart_literal_block(self, node):
-        if self.nodelang != self.language:
+        if self.nodelang not in self.language_synonyms:
             self.cell.append("```")
-        source = "".join(self.cell)
-        self.output.add_cell(source, self.cell_type)
-        self.new_cell()
+        self.cell_to_notebook()
         self.in_literal_block = False
 
     ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
@@ -840,9 +849,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     #Document.Nodes
     def visit_Text(self, node):
         text = node.astext()
-
-        if self.in_literal_block or self.in_code_block:
-            self.cell.append(text)
 
     def depart_Text(self, node):
         pass

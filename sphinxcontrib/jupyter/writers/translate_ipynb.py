@@ -59,7 +59,6 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_title(self, node):
         super().visit_title(node)
-        self.cell_type = "markdown"
         if self.in_topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
@@ -88,20 +87,20 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
         if self.in_math:
             text = '$ {} $'.format(text.strip())
-        elif self.math_block_dict['in'] and self.math_block_label:
+        elif self.math_block_dict['in'] and self.math_block_dict['math_block_label']:
             text = "$$\n{0}{1}$${2}".format(
-                        text.strip(), self.math_block_label, self.sep_paras
+                        text.strip(), self.math_block_dict['math_block_label'], self.sep_paragraph
                     )
-            self.math_block_label = None
+            self.math_block_dict['math_block_label'] = None
         elif self.math_block_dict['in']:
-            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
         if self.in_code_block:
             self.code_lines.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
         elif self.block_quote_dict['in_block_quote'] or self.in_note:
-            if self.block_quote_type == "epigraph":
+            if self.block_quote_dict['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.cell.append(text)
