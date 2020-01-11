@@ -66,6 +66,9 @@ class JupyterBaseTranslator(SphinxTranslator):
     download_reference_dict['in'] = False
     citation_dict = dict()
     citation_dict['in'] = False
+    literal_block_dict = dict()
+    literal_block_dict['in'] = False
+    literal_block_dict['no-execute'] = False
 
     in_note = False
     in_attribution = False
@@ -77,7 +80,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     in_list = False
     in_math = False
     in_topic = False
-    in_literal_block = False
     in_code_block = False
     remove_next_content = False
 
@@ -229,28 +231,31 @@ class JupyterBaseTranslator(SphinxTranslator):
     ### TODO: figure out if this literal_block definitions should be kept in codeblock translator or here in base translator
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
-        self.in_literal_block = True
+        self.literal_block_dict['in'] = True
         self.cell_to_notebook()
         self.cell_type = "code"
+
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
         else:
-            self.cell_type = "markdown"   
+            self.cell_type = "markdown"
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook language
         #Check node language is the same as notebook language
-        if self.nodelang not in self.language_synonyms:
+        if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
+            self.literal_block_dict['no-execute'] = True
+        if self.nodelang not in self.language_synonyms or self.literal_block_dict['no-execute']:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
-            self.cell.append("``` {}".format(self.nodelang))
+            self.cell.append("``` {} \n".format(self.nodelang))
             self.cell_type = "markdown"
 
     def depart_literal_block(self, node):
-        if self.nodelang not in self.language_synonyms:
+        if self.nodelang not in self.language_synonyms or self.literal_block_dict['no-execute']:
             self.cell.append("```")
         self.cell_to_notebook()
-        self.in_literal_block = False
+        self.literal_block_dict['in'] = False
 
     ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
     def visit_math_block(self, node):
