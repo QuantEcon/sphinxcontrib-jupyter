@@ -80,7 +80,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     in_list = False
     in_math = False
     in_topic = False
-    in_code_block = False
     remove_next_content = False
 
     ## options to remove?
@@ -241,18 +240,24 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.cell_type = "markdown"
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook language
-        #Check node language is the same as notebook language
+
+        ## checking if no-execute flag
         if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
             self.literal_block_dict['no-execute'] = True
-        if self.nodelang not in self.language_synonyms or self.literal_block_dict['no-execute']:
+        else:
+            self.literal_block_dict['no-execute'] = False
+
+        ## Check node language is the same as notebook language else make it markdown
+        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block_dict['no-execute']:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
             self.cell.append("``` {} \n".format(self.nodelang))
             self.cell_type = "markdown"
 
+
     def depart_literal_block(self, node):
-        if self.nodelang not in self.language_synonyms or self.literal_block_dict['no-execute']:
+        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block_dict['no-execute']:
             self.cell.append("```")
         self.cell_to_notebook()
         self.literal_block_dict['in'] = False

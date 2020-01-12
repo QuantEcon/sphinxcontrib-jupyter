@@ -82,7 +82,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
             return
 
         #Escape Special markdown chars except in code block
-        if self.in_code_block == False:
+        if self.literal_block_dict['in'] == False:
             text = text.replace("$", "\$")
 
         if self.in_math:
@@ -95,8 +95,8 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         elif self.math_block_dict['in']:
             text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
-        if self.in_code_block:
-            self.code_lines.append(text)
+        if self.literal_block_dict['in']:
+            self.cell.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
         elif self.block_quote_dict['in_block_quote'] or self.in_note:
