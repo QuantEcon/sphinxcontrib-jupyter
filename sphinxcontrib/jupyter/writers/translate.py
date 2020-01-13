@@ -27,18 +27,9 @@ class JupyterBaseTranslator(SphinxTranslator):
     #Configuration (Formatting)
     sep_lines = "  \n"              #TODO: needed?
     sep_paragraph = "\n\n"          #TODO: needed?
-    indent_char = " "               #TODO: needed?
-    indent = indent_char * 4        #TODO: needed?
-    indents = []                    #TODO: needed?
     section_level = 0
-    #-Configuration (Formatting Lists)
-    list_level = 0
-    bullets = []
-    list_item_starts = []
 
-    ## dict for visit title
-    title_dict = dict()
-    title_dict['visit_first_title'] = True
+    ## Dictionary types are used below to store node variables to be used in specific translators  
 
     #-Configuration (References)
     reference_dict = dict()
@@ -56,19 +47,42 @@ class JupyterBaseTranslator(SphinxTranslator):
     #Configuration (Tables)
     table_builder = None    #TODO: table builder object
     #Configuration (visit/depart)
+    title_dict = dict()
+    title_dict['visit_first_title'] = True
+
     block_quote_dict = dict()
     block_quote_dict['in_block_quote'] = False
+
     footnote_dict = dict()
     footnote_dict['in'] = False
+
     footnote_reference = dict()
     footnote_reference['in'] = False
+
     download_reference_dict = dict()
     download_reference_dict['in'] = False
+
     citation_dict = dict()
     citation_dict['in'] = False
+
     literal_block_dict = dict()
     literal_block_dict['in'] = False
     literal_block_dict['no-execute'] = False
+
+    image_dict = dict()
+    target_dict = dict()
+
+    list_dict = dict()
+    list_dict['in'] = False
+    list_dict['skip_next_content'] = False
+    list_dict['list_item_starts'] = []
+    list_dict['initial_lines'] = []
+    list_dict['content_depth_to_skip'] = None
+    list_dict['list_level'] = 0
+    list_dict['bullets'] = []
+    list_dict['indent_char'] = " "                            #TODO: needed?
+    list_dict['indent'] = list_dict['indent_char'] * 4        #TODO: needed?
+    list_dict['indents'] = []                                 #TODO: needed?
 
     in_note = False
     in_attribution = False
@@ -77,7 +91,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     in_citation = False
     in_caption = False
     in_toctree = False
-    in_list = False
     in_math = False
     in_topic = False
     remove_next_content = False
@@ -92,8 +105,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     ## pdf book options
     in_book_index = False
     cell_trimmed = []
-    content_depth_to_skip = None
-    skip_next_content = False
     
     def __init__(self, document, builder):
         """
@@ -117,7 +128,7 @@ class JupyterBaseTranslator(SphinxTranslator):
 
         self.md = MarkdownSyntax()
 
-        self.content_depth = self.config.jupyter_pdf_showcontentdepth
+        self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]
 
 
     #Document
@@ -190,23 +201,14 @@ class JupyterBaseTranslator(SphinxTranslator):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
-        ### preventing image from the index file at the moment
-        if self.in_book_index:
-            return
-        uri = node.attributes["uri"]
-        self.images.append(uri)             #TODO: list of image files
-        if self.config.jupyter_download_nb_image_urlpath:
-            for file_path in self.jupyter_static_file_path:
-                if file_path in uri:
-                    uri = uri.replace(file_path +"/", self.config.jupyter_download_nb_image_urlpath)
-                    break  #don't need to check other matches
+        self.image_dict['uri'] = node.attributes["uri"]
         attrs = node.attributes
         if self.config.jupyter_images_markdown:
             #-Construct MD image
-            image = "![{0}]({0})".format(uri)
+            image = "![{0}]({0})".format(self.image_dict['uri'])
         else:
             # Construct HTML image
-            image = '<img src="{}" '.format(uri)
+            image = '<img src="{}" '.format(self.image_dict['uri'])
             if "alt" in attrs.keys():
                 image += 'alt="{}" '.format(attrs["alt"])
             style = ""
@@ -220,11 +222,12 @@ class JupyterBaseTranslator(SphinxTranslator):
             if "align" in attrs.keys():
                 image += 'align="{}"'.format(attrs["align"])
             image = image.rstrip() + ">\n\n"  #Add double space for html
-        self.cell.append(image)
+        
+        self.image_dict['image'] = image
     
     def depart_image(self, node):
-        if self.config.jupyter_target_pdf:
-            self.cell.append("\n")
+        pass
+            
 
 
     ### TODO: figure out if this literal_block definitions should be kept in codeblock translator or here in base translator
@@ -269,24 +272,14 @@ class JupyterBaseTranslator(SphinxTranslator):
 
         self.math_block_dict['in'] = True
 
-        if self.in_list and node["label"]:
-            self.cell.pop()  #remove entry \n from table builder
-
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
-            if self.config.jupyter_target_pdf:
-                #pdf should have label following tag and removed html id tags in visit_target
-                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
-            else:
-                referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
+            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
             self.math_block_dict['math_block_label'] = referenceBuilder
 
     def depart_math_block(self, node):
-        if self.in_list:
-            self.cell[-1] = self.cell[-1][:-1]  #remove excess \n
-
         self.math_block_dict['in'] = False
 
     # general paragraph
@@ -294,18 +287,7 @@ class JupyterBaseTranslator(SphinxTranslator):
         pass
 
     def depart_paragraph(self, node):
-        if self.list_level > 0:
-            self.cell.append(self.sep_lines)
-        elif self.table_builder:
-            pass
-        elif self.block_quote_dict['block_quote_type'] == "epigraph":
-            try:
-                attribution = node.parent.children[1]
-                self.cell.append("\n>\n")   #Continue block for attribution
-            except:
-                self.cell.append(self.sep_paragraph)
-        else:
-            self.cell.append(self.sep_paragraph)
+        pass
 
     def visit_raw(self, node):
         pass
@@ -313,9 +295,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     def visit_rubric(self, node):
         self.in_rubric = True
         self.add_markdown_cell()
-        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
-            self.cell.append('**{}**\n\n'.format(node.children[0].astext()))
-            raise nodes.SkipNode
 
     def depart_rubric(self, node):
         self.add_markdown_cell()
@@ -323,42 +302,22 @@ class JupyterBaseTranslator(SphinxTranslator):
 
     def visit_target(self, node):
         if "refid" in node.attributes:
-            refid = node.attributes["refid"]
-            if self.config.jupyter_target_pdf:
-                if 'equation' in refid:
-                    #no html targets when computing notebook to target pdf in labelled math
-                    pass
-                else:
-                    #set hypertargets for non math targets
-                    if self.cell:
-                        self.cell.append("\n\\hypertarget{" + refid + "}{}\n\n")
-            else:
-                self.cell.append("\n<a id='{}'></a>\n".format(refid))
+            self.target_dict['refid'] = node.attributes["refid"]
 
     def visit_attribution(self, node):
         self.in_attribution = True
-        self.cell.append("> ")
 
     def depart_attribution(self, node):
         self.in_attribution = False
-        self.cell.append("\n")
 
     def visit_caption(self, node):
         self.in_caption = True
 
     def depart_caption(self, node):
         self.in_caption = False
-        if self.in_toctree:
-            self.cell.append("\n")
 
     def visit_colspec(self, node):
         self.table_builder['column_widths'].append(node['colwidth'])
-
-    def visit_field_name(self, node):
-        self.visit_term(node)
-
-    def depart_field_name(self, node):
-        self.depart_term(node)
 
     def visit_label(self, node):
         if self.footnote_dict['in']:
@@ -370,61 +329,23 @@ class JupyterBaseTranslator(SphinxTranslator):
                 id_text = id_text[:-1]
             self.footnote_dict['ids'] = node.parent.attributes["ids"]
             self.footnote_dict['id_text'] = id_text
-            if self.config.jupyter_target_pdf:
-                self.cell.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
-            else:
-                self.cell.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
-            raise nodes.SkipNode
-        if self.citation_dict['in']:
-            self.cell.append("\[")
 
-    def depart_label(self, node):
-        if self.citation_dict['in']:
-            self.cell.append("\] ")
-
-    def visit_term(self, node):
-        self.cell.append("<dt>")
-
-    def depart_term(self, node):
-        self.cell.append("</dt>\n")
 
     def visit_block_quote(self, node):
-        if self.in_list:               #allow for 4 spaces interpreted as block_quote
-            self.cell.append("\n")
-            return
         self.block_quote_dict['in_block_quote'] = True
         if "epigraph" in node.attributes["classes"]:
             self.block_quote_dict['block_quote_type'] = "epigraph"
-        self.cell.append("> ")
 
     def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
             self.block_quote_dict['block_quote_type'] = "block-quote"
-        self.cell.append("\n")
         self.block_quote_dict['in_block_quote'] = False
 
     def visit_bullet_list(self, node):
-        ## trying to return if it is in the topmost depth and it is more than 1
-        if self.config.jupyter_target_pdf and (self.content_depth == self.jupyter_pdf_showcontentdepth) and self.content_depth > 1:
-            self.content_depth_to_skip = self.content_depth
-            self.initial_lines = []
-            return
-
-        self.list_level += 1
-
-        # markdown does not have option changing bullet chars
-        self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
+        self.list_dict['list_level'] += 1
 
     def depart_bullet_list(self, node):
-        self.list_level -= 1
-        if self.list_level == 0:
-            self.cell.append(self.sep_paragraph)
-            if self.in_topic:
-                self.add_markdown_cell()
-        if len(self.bullets):
-            self.bullets.pop()
-            self.indents.pop()
+        self.list_dict['list_level'] -= 1
 
     def visit_citation(self, node):
         self.citation_dict['in'] = True
@@ -438,42 +359,17 @@ class JupyterBaseTranslator(SphinxTranslator):
 
             self.citation_dict['id_text'] = id_text
 
-            self.cell.append(
-                "<a id='{}'></a>\n".format(id_text))
-
     def depart_citation(self, node):
         self.citation_dict['in'] = False
 
-    def visit_definition_list(self, node):
-        self.cell.append("\n<dl style='margin: 20px 0;'>\n")
-
-    def depart_definition_list(self, node):
-        self.cell.append("\n</dl>{}".format(self.sep_paragraph))
-
     def visit_enumerated_list(self, node):
-        self.list_level += 1
-        # markdown does not have option changing bullet chars
-        self.bullets.append("1.")
-        self.indents.append(len(self.bullets[-1]))
+        self.list_dict['list_level'] += 1
 
     def depart_enumerated_list(self, node):
-        self.list_level -= 1
-        if self.list_level == 0:
-            self.cell.append(self.sep_paragraph)
-        self.bullets.pop()
-        self.indents.pop()
-    
-    def visit_field_list(self, node):
-        self.visit_definition_list(node)
-
-    def depart_field_list(self, node):
-        self.depart_definition_list(node)
+        self.list_dict['list_level'] -= 1
 
     def visit_figure(self, node):
         pass
-
-    def depart_figure(self, node):
-        self.cell.append(self.sep_lines)
     
     def visit_footnote(self, node):
         self.footnote_dict['in'] = True
@@ -483,7 +379,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     
     def visit_note(self, node):
         self.in_note = True
-        self.cell.append(">**Note**\n>\n>")
 
     def depart_note(self, node):
         self.in_note = False
@@ -501,14 +396,7 @@ class JupyterBaseTranslator(SphinxTranslator):
 
     def depart_table(self, node):
         table_lines = "".join(self.table_builder['lines'])
-        self.cell.append(table_lines)
         self.table_builder = None
-
-    def visit_definition(self, node):
-        self.cell.append("<dd>\n")
-
-    def depart_definition(self, node):
-        self.cell.append("</dd>\n")
 
     def visit_entry(self, node):
         pass
@@ -516,58 +404,36 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_entry(self, node):
         self.table_builder['line_pending'] += "|"
 
-    def visit_field_body(self, node):
-        self.visit_definition(node)
-
-    def depart_field_body(self, node):
-        self.depart_definition(node)
-
     def visit_list_item(self, node):
 
         ## do not add this list item to the list
-        if self.skip_next_content is True:
-           self.cell = copy.deepcopy(self.initial_lines)
-           self.skip_next_content = False
+        if self.list_dict['skip_next_content']:
+           self.cell = copy.deepcopy(self.list_dict['initial_lines'])
+           self.list_dict['skip_next_content'] = False
         
         ## if we do not want to add the items in this depth to the list
-        if self.content_depth == self.content_depth_to_skip:
-           self.initial_lines = copy.deepcopy(self.cell)
-           self.skip_next_content = True
-           self.content_depth_to_skip = None
+        if self.list_dict['content_depth'] == self.list_dict['content_depth_to_skip']:
+           self.list_dict['initial_lines'] = copy.deepcopy(self.cell)
+           self.list_dict['skip_next_content'] = True
+           self.list_dict['content_depth_to_skip'] = None
 
            ## only one item in this content depth to remove 
-           self.content_depth -= 1
+           self.list_dict['content_depth'] -= 1
            return
 
         ## check if there is a list level
-        if not len(self.bullets):
+        if not len(self.list_dict['bullets']):
             return
-        self.in_list = True
-        head = "{} ".format(self.bullets[-1])
-        self.cell.append(head)
-        self.list_item_starts.append(len(self.cell))
+        self.list_dict['in'] = True
+        self.list_dict['head'] = "{} ".format(self.list_dict['bullets'][-1])
 
     def depart_list_item(self, node):
         ## check if there is a list level
-        if not len(self.list_item_starts):
+        if not len(self.list_dict['list_item_starts']):
             return
-        self.in_list = False
-        list_item_start = self.list_item_starts.pop()
-        indent = self.indent_char * self.indents[-1]
-        br_removed_flag = False
+        self.list_dict['in'] = False
+        self.list_dict['indent'] = self.list_dict['indent_char'] * self.list_dict['indents'][-1]
 
-        # remove last breakline
-        if self.cell and self.cell[-1][-1] == "\n":
-            br_removed_flag = True
-            self.cell[-1] = self.cell[-1][:-1]
-
-        for i in range(list_item_start, len(self.cell)):
-            self.cell[i] = self.cell[i].replace(
-                "\n", "\n{}".format(indent))
-
-        # add breakline
-        if br_removed_flag:
-            self.cell.append("\n")
 
     def visit_row(self, node):
         self.table_builder['line_pending'] = "|"
@@ -604,7 +470,7 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.footnote_reference['link'] = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(self.footnote_reference['refid'], self.footnote_reference['refid'], self.footnote_reference['ids'])
         else:
             self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(self.footnote_reference['ids'], self.footnote_reference['refid'])
-        self.cell.append(link)
+        self.cell.append(self.footnote_reference['link'])
         raise nodes.SkipNode
 
     def depart_footnote_reference(self, node):

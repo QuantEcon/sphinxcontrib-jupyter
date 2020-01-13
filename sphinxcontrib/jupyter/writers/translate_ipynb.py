@@ -112,6 +112,207 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
     def depart_Text(self, node):
         pass
 
+    def visit_image(self, node):
+        """
+        Notes
+        -----
+        1. Should this use .has_attrs()?
+        2. the scale, height and width properties are not combined in this
+        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
+
+        """
+        super().visit_image(node)
+        self.images.append(self.image_dict['uri'])
+        self.cell.append(self.image_dict['image'])
+    
+    def depart_image(self, node):
+        pass
+
+    def visit_math_block(self, node):
+        """directive math"""
+        # visit_math_block is called only with sphinx >= 1.8
+        super().visit_math_block(node)
+
+        if self.list_dict['in'] and node["label"]:
+            self.cell.pop()  #remove entry \n from table builder
+
+    def depart_math_block(self, node):
+        super().depart_math_block(node)
+
+        if self.list_dict['in']:
+            self.cell[-1] = self.cell[-1][:-1]  #remove excess \n
+
+    def depart_paragraph(self, node):
+        super().depart_paragraph(node)
+
+        if self.list_dict['list_level'] > 0:
+            self.cell.append(self.sep_lines)
+        elif self.table_builder:
+            pass
+        elif self.block_quote_dict['block_quote_type'] == "epigraph":
+            try:
+                attribution = node.parent.children[1]
+                self.cell.append("\n>\n")   #Continue block for attribution
+            except:
+                self.cell.append(self.sep_paragraph)
+        else:
+            self.cell.append(self.sep_paragraph)
+
+    def visit_rubric(self, node):
+        super().visit_rubric(node)
+
+        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
+            self.cell.append('**{}**\n\n'.format(node.children[0].astext()))
+            raise nodes.SkipNode
+
+    def visit_target(self, node):
+        super().visit_target(node)
+        self.cell.append("\n<a id='{}'></a>\n".format(self.target_dict['refid']))
+
+    def visit_attribution(self, node):
+        super().visit_attribution(node)
+        self.cell.append("> ")
+
+    def depart_attribution(self, node):
+        super().depart_attribution(node)
+        self.cell.append("\n")
+
+    def depart_caption(self, node):
+        super().depart_caption(node)
+        if self.in_toctree:
+            self.cell.append("\n")
+
+    def visit_field_name(self, node):
+        self.visit_term(node)
+
+    def depart_field_name(self, node):
+        self.depart_term(node)
+
+    def visit_term(self, node):
+        self.cell.append("<dt>")
+
+    def depart_term(self, node):
+        self.cell.append("</dt>\n")
+
+    def visit_label(self, node):
+        super().visit_label(node)
+        if self.footnote_dict['in']:
+            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(self.footnote_dict['id_text'], node.astext()))
+            raise nodes.SkipNode
+
+        if self.citation_dict['in']:
+            self.cell.append("\[")
+
+    def depart_label(self, node):
+        if self.citation_dict['in']:
+            self.cell.append("\] ")
+
+    def visit_block_quote(self, node):
+        super().visit_block_quote(node)
+        if self.list_dict['in']:               #allow for 4 spaces interpreted as block_quote
+            self.cell.append("\n")
+            return
+        self.cell.append("> ")
+
+    def depart_block_quote(self, node):
+        super().depart_block_quote(node)
+        self.cell.append("\n")
+
+    def visit_bullet_list(self, node):
+        super().visit_bullet_list(node)
+        self.list_dict['list_level'] += 1
+
+        # markdown does not have option changing bullet chars
+        self.list_dict['bullets'].append("-")
+        self.list_dict['indents'].append(len(self.list_dict['bullets'][-1] * 2))  #add two per level
+
+
+    def depart_bullet_list(self, node):
+        super().depart_bullet_list(node)
+        if self.list_dict['list_level'] == 0:
+            self.cell.append(self.sep_paragraph)
+            if self.in_topic:
+                self.add_markdown_cell()
+        if len(self.list_dict['bullets']):
+            self.list_dict['bullets'].pop()
+            self.list_dict['indents'].pop()
+
+    def visit_citation(self, node):
+        super().visit_citation(node)
+        self.cell.append("<a id='{}'></a>\n".format(self.citation_dict['id_text']))
+
+    def visit_definition_list(self, node):
+        self.cell.append("\n<dl style='margin: 20px 0;'>\n")
+
+    def depart_definition_list(self, node):
+        self.cell.append("\n</dl>{}".format(self.sep_paragraph))
+
+    def visit_enumerated_list(self, node):
+        super().visit_enumerated_list(node)
+
+        # markdown does not have option changing bullet chars
+        self.list_dict['bullets'].append("1.")
+        self.list_dict['indents'].append(len(self.list_dict['bullets'][-1]))
+
+    def depart_enumerated_list(self, node):
+        super().depart_enumerated_list(node)
+        if self.list_dict['list_level'] == 0:
+            self.cell.append(self.sep_paragraph)
+        self.list_dict['bullets'].pop()
+        self.list_dict['indents'].pop()
+
+    def visit_field_list(self, node):
+        self.visit_definition_list(node)
+
+    def depart_field_list(self, node):
+        self.depart_definition_list(node)
+
+    def depart_figure(self, node):
+        self.cell.append(self.sep_lines)
+
+    def visit_note(self, node):
+        super().visit_note(node)
+        self.cell.append(">**Note**\n>\n>")
+
+    def depart_table(self, node):
+        super().depart_table(node)
+        self.cell.append(table_lines)
+
+    def visit_definition(self, node):
+        self.cell.append("<dd>\n")
+
+    def depart_definition(self, node):
+        self.cell.append("</dd>\n")
+
+    def visit_field_body(self, node):
+        self.visit_definition(node)
+
+    def depart_field_body(self, node):
+        self.depart_definition(node)
+
+    def visit_list_item(self, node):
+        super().visit_list_item(node)
+        self.cell.append(self.list_dict['head'])
+        self.list_dict['list_item_starts'].append(len(self.cell))
+
+    def depart_list_item(self, node):
+        super().depart_list_item(node)
+        list_item_start = self.list_dict['list_item_starts'].pop()
+        br_removed_flag = False
+
+        # remove last breakline
+        if self.cell and self.cell[-1][-1] == "\n":
+            br_removed_flag = True
+            self.cell[-1] = self.cell[-1][:-1]
+
+        for i in range(list_item_start, len(self.cell)):
+            self.cell[i] = self.cell[i].replace(
+                "\n", "\n{}".format(self.list_dict['indent']))
+
+        # add breakline
+        if br_removed_flag:
+            self.cell.append("\n")
+
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
 
