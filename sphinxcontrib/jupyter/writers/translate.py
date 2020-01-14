@@ -526,12 +526,6 @@ class JupyterBaseTranslator(SphinxTranslator):
 
         self.reference_dict['in'] = False
 
-    def visit_strong(self, node):
-        self.cell.append("**")
-
-    def depart_strong(self, node):
-        self.cell.append("**")
-
     def visit_compact_paragraph(self, node):
         try:
             if node.attributes['toctree']:
@@ -549,10 +543,8 @@ class JupyterBaseTranslator(SphinxTranslator):
     def visit_download_reference(self, node):
         self.download_reference_dict['in'] = True
         self.download_reference_dict['html'] = "<a href={} download>".format(node["reftarget"])
-        self.cell.append(self.download_reference_dict['html'])
 
     def depart_download_reference(self, node):
-        self.cell.append("</a>")
         self.download_reference_dict['in'] = False
 
     def visit_only(self, node):

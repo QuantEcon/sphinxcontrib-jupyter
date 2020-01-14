@@ -317,7 +317,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         super().visit_math(node)
         if 'exit' in self.math_dict and self.math_dict['exit']:
             return
-            
+
         formatted_text = "$ {} $".format(self.math_dict['math_text'])
 
         if self.table_builder:
@@ -370,6 +370,19 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         if self.in_toctree:
             self.cell.append("\n")
 
+    def visit_strong(self, node):
+        self.cell.append("**")
+
+    def depart_strong(self, node):
+        self.cell.append("**")
+
+    def visit_download_reference(self, node):
+        super().visit_download_reference(node)
+        self.cell.append(self.download_reference_dict['html'])
+
+    def depart_download_reference(self, node):
+        super().depart_download_reference(node)
+        self.cell.append("</a>")
 
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
