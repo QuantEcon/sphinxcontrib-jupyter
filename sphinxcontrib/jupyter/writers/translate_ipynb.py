@@ -274,9 +274,13 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         super().visit_note(node)
         self.cell.append(">**Note**\n>\n>")
 
+    def visit_table(self, node):
+        super().visit_table(node)
+
     def depart_table(self, node):
         super().depart_table(node)
-        self.cell.append(table_lines)
+        self.cell.append(self.table_builder['table_lines'])
+        self.table_builder = None
 
     def visit_definition(self, node):
         self.cell.append("<dd>\n")

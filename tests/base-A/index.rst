@@ -1,63 +1,56 @@
-Code blocks
------------
+.. sphinxcontrib-jupyter.minimal documentation master file, created by
+   sphinx-quickstart on Tue Jan 30 14:46:58 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-This is a collection to test various code-blocks
+Welcome to sphinxcontrib-jupyter.minimal's documentation!
+=========================================================
 
-This is a **.. code::** directive
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
-.. code:: python
+   code_blocks
+   code_synonyms
+   collapse
+   dependency
+   download
+   equation_labels
+   footnotes
+   ignore
+   images
+   inline
+   jupyter
+   links
+   links_target
+   lists
+   literal_include
+   math
+   notes
+   only
+   quote
+   simple_notebook
+   slides
+   solutions
+   tables
+   tests
 
-    this = 'is a code block'
-    x = 1
-    no = 'really!'
-    p = argwhere(x == 2)
+.. ifconfig:: SPHINX_VERSION[0] >= 2
 
-This is another **.. code::** directive
+    Documents that require ``Sphinx>=2.0``
 
-.. code:: python
+    .. toctree::
+       :maxdepth: 2
 
-    from pylab import linspace
-    t = linspace(0, 1)
-    x = t**2
+       exercises
+       exercise_list_section
+       exercise_list_all
+       exercise_list_labels
+       section2/index
 
-This is a **::** directive
+Indices and tables
+==================
 
-::
-
-    from pylab import *
-    x = logspace(0, 1)
-    y = x**2
-    figure()
-    plot(x, y)
-    show()
-
-This is a **.. code-block:: julia** test with showing snippet for another language *Julia*
-and it is included as a non-execute cell
-
-.. code-block:: julia
-
-    using QuantEcon
-
-~~However this **currently** means **.. code-block:: python** is also included as a non-execute 
-cell [See `issue <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/51>`__]~~
-
-This has been fixed by using jupyter_lang_synonyms = ["python"] in **conf.py** file. So **python**
-will now be included alongside *python3*, *ipython*, and *pycon*.
-
-.. code-block:: python
-
-    import pandas as pd
-
-
-
-A test suite for inline items
-
-Here is some inline python ``import numpy as np`` that should be displayed
-
-and some text that is not code ``here``
-
-Inline maths with inline role: :math:`x^3+\frac{1+\sqrt{2}}{\pi}`
-
-Inline maths using dollar signs (not supported yet): $x^3+\frac{1+\sqrt{2}}{\pi}$ as the 
-backslashes are removed.
-
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

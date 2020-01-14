@@ -397,8 +397,7 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.table_builder['align'] = "center"
 
     def depart_table(self, node):
-        table_lines = "".join(self.table_builder['lines'])
-        self.table_builder = None
+        self.table_builder['table_lines'] = "".join(self.table_builder['lines'])
 
     def visit_entry(self, node):
         pass
@@ -560,6 +559,24 @@ class JupyterBaseTranslator(SphinxTranslator):
     def depart_Text(self, node):
         pass
 
+    def visit_exerciselist_node(self, node):
+        pass
+
+    def depart_exerciselist_node(self, node):
+        pass
+
+    def visit_tgroup(self, node):
+        pass
+
+    def depart_tgroup(self, node):
+        pass
+
+    def visit_tbody(self, node):
+        pass
+
+    def depart_tbody(self, node):
+        pass
+
     def unknown_visit(self, node):
         pass
         # raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
@@ -580,6 +597,11 @@ class JupyterBaseTranslator(SphinxTranslator):
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
         self.new_cell()
+
+    def generate_alignment_line(self, line_length, alignment):
+        left = ":" if alignment != "right" else "-"
+        right = ":" if alignment != "left" else "-"
+        return left + "-" * (line_length - 2) + right
 
      # ================
     # general methods
