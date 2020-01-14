@@ -84,6 +84,9 @@ class JupyterBaseTranslator(SphinxTranslator):
     list_dict['indent'] = list_dict['indent_char'] * 4        #TODO: needed?
     list_dict['indents'] = []                                 #TODO: needed?
 
+    math_dict = dict()
+    math_dict['in'] = False
+
     in_note = False
     in_attribution = False
     in_rubric = False
@@ -91,7 +94,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     in_citation = False
     in_caption = False
     in_toctree = False
-    in_math = False
     in_topic = False
     remove_next_content = False
 
@@ -497,58 +499,22 @@ class JupyterBaseTranslator(SphinxTranslator):
         # we are dealing with a formula.
 
         try: # sphinx < 1.8
-            math_text = node.attributes["latex"].strip()
+            self.math_dict['math_text'] = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
-            self.in_math = True
-
+            self.math_dict['in_math'] = True
             # the flag is raised, the function can be exited.
-            return
-
-        if self.config.jupyter_target_pdf:
-            formatted_text = "${}$".format(math_text) #must remove spaces between $ and math for latex
-        else:
-            formatted_text = "$ {} $".format(math_text)
-
-        if self.table_builder:
-            self.table_builder['line_pending'] += formatted_text
-        else:
-            self.cell.append(formatted_text)
+            self.math_dict['exit'] = True
 
     def depart_math(self, node):
-        self.in_math = False
+        self.math_dict['in_math'] = False
 
     def visit_reference(self, node):
         """anchor link"""
-        ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
-            return
-
         self.reference_dict['in'] = True
-        if self.config.jupyter_target_pdf:
-            if "refuri" in node and "http" in node["refuri"]:
-                self.cell.append("[")
-            elif "refid" in node:
-                if 'equation-' in node['refid']:
-                    self.cell.append("\eqref{")
-                elif self.in_topic:
-                    pass
-                else:
-                    self.cell.append("\hyperlink{")
-            elif "refuri" in node and 'references#' not in node["refuri"]:
-                self.cell.append("[")
-            else:
-                self.cell.append("\hyperlink{")
-        else:
-            self.cell.append("[")
-        self.reference_dict['reference_text_start'] = len(self.cell)
 
     def depart_reference(self, node):
         subdirectory = False
-
-        ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
-            return
 
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
@@ -556,134 +522,7 @@ class JupyterBaseTranslator(SphinxTranslator):
                 self.cell[self.reference_dict['reference_text_start']:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
-            if self.config.jupyter_target_pdf:
-                #Adjust contents (toc) text when targetting html to prevent nbconvert from breaking html on )
-                uri_text = uri_text.replace("(", "%28")
-                uri_text = uri_text.replace(")", "%29")
-            #Format end of reference in topic
-            if self.config.jupyter_target_pdf:
-                uri_text = uri_text.lower()
-                SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
-                                r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–", r"`"]
-                for CHAR in SPECIALCHARS:
-                    uri_text = uri_text.replace(CHAR,"")
-                    uri_text = uri_text.replace("--","-")
-                    uri_text = uri_text.replace(".-",".")
-                formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
-            else:
-                formatted_text = "](#{})".format(uri_text)
-            self.cell.append(formatted_text)
-        else:
-            # if refuri exists, then it includes id reference(#hoge)
-            if "refuri" in node.attributes:
-                refuri = node["refuri"]
-                # add default extension(.ipynb)
-                if "internal" in node.attributes and node.attributes["internal"] == True:
-                    if self.config.jupyter_target_pdf:
-                        refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
-                        ## add url path if it is set
-                        if self.urlpath is not None:
-                            refuri = self.urlpath + refuri
-                    elif self.config.jupyter_target_pdf and 'references#' in refuri:
-                        label = refuri.split("#")[-1]
-                        bibtex = self.cell.pop()
-                        if "hyperlink" in self.cell[-1]:
-                            self.cell.pop()
-                        refuri = "reference-\\cite{" + label
-                        self.add_bib_to_latex(self.output, True)
-                    elif self.config.jupyter_target_pdf and 'references' not in refuri:
-                        if self.source_file_name.split('/')[-2] and 'rst' not in self.source_file_name.split('/')[-2]:
-                            subdirectory = self.source_file_name.split('/')[-2]
-                        if subdirectory: refuri = subdirectory + "/" + refuri
-                        hashIndex = refuri.rfind("#")
-                        if hashIndex > 0:
-                            refuri = refuri[0:hashIndex] + ".html" + refuri[hashIndex:]
-                        else:
-                            refuri = refuri + ".html"
-                        if self.urlpath:
-                            self.cell.append("]({})".format(self.urlpath + refuri))
-                        else:
-                            self.cell.append("]({})".format(refuri))
-                    else:
-                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
-            else:
-                # in-page link
-                if "refid" in node:
-                    refid = node["refid"]
-                    self.in_inpage_reference = True
-                    if not self.config.jupyter_target_pdf:
-                        #markdown doesn't handle closing brackets very well so will replace with %28 and %29
-                        #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
-                        refid = refid.replace("(", "%28")
-                        refid = refid.replace(")", "%29")
-                    if self.config.jupyter_target_pdf:
-                        refuri = refid
-                    else:
-                        #markdown target
-                        refuri = "#{}".format(refid)
-                # error
-                else:
-                    self.error("Invalid reference")
-                    refuri = ""
-
-            #TODO: review if both %28 replacements necessary in this function?
-            #      Propose delete above in-link refuri
-            if not self.config.jupyter_target_pdf:
-                #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
-                refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
-                refuri = refuri.replace(")", "%29")
-            if self.config.jupyter_target_pdf and 'reference-' in refuri:
-                self.cell.append(refuri.replace("reference-","") + "}")
-            elif "refuri" in node.attributes and self.config.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
-                ##### Below code, constructs an index file for the book
-                if self.in_book_index:
-                    if self.cell_trimmed != [] and (all(x in self.cell for x in self.cell_trimmed)): 
-                        ### when the list is not empty and when the list contains chapters or heading from the topic already
-                        self.cell_trimmed = self.cell[len(self.book_index_previous_links) + 2:] ### +2 to preserve '/n's
-                        if '- ' in self.cell[len(self.book_index_previous_links) + 1:]:
-                            text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(), node["refuri"] + ".tex")
-                        else:
-                            text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
-                        self.cell = self.cell[:len(self.cell) - len(self.cell_trimmed)]
-                        self.cell.append(text)
-                        self.cell_trimmed = []
-                        self.cell_trimmed.append(text)
-                    else:
-                        ### when the list is empty the first entry is the topic
-                        text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
-                        self.cell = []
-                        self.cell.append(text)
-                        self.cell_trimmed = copy.deepcopy(self.cell)
-                    self.book_index_previous_links = copy.deepcopy(self.cell)
-
-                    ## check to remove any '- ' left behind during the above operation
-                    if "- " in self.cell:
-                        self.cell.remove("- ")
-
-            elif "refuri" in node.attributes and self.config.jupyter_target_pdf and "http" in node["refuri"]:
-                ### handling extrernal links
-                self.cell.append("]({})".format(refuri))
-                #label = self.cell.pop()
-                # if "\href{" == label:  #no label just a url
-                #     self.cell.append(label + "{" + refuri + "}")
-                # else:
-                #     self.cell.append(refuri + "}" + "{" + label + "}")
-            elif self.config.jupyter_target_pdf and self.in_inpage_reference:
-                labeltext = self.cell.pop()
-                # Check for Equations as they do not need labetext
-                if 'equation-' in refuri:
-                    self.cell.append(refuri + "}")
-                else:
-                    self.cell.append(refuri + "}{" + labeltext + "}")
-            # if self.config.jupyter_target_pdf and self.in_toctree:
-            #     #TODO: this will become an internal link when making a single unified latex file
-            #     formatted_text = " \\ref{" + refuri + "}"
-            #     self.cell.append(formatted_text)
-            else:
-                self.cell.append("]({})".format(refuri))
-
-        if self.in_toctree:
-            self.cell.append("\n")
+            self.reference_dict['uri_text'] = uri_text
 
         self.reference_dict['in'] = False
 

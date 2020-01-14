@@ -85,7 +85,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         if self.literal_block_dict['in'] == False:
             text = text.replace("$", "\$")
 
-        if self.in_math:
+        if self.math_dict['in']:
             text = '$ {} $'.format(text.strip())
         elif self.math_block_dict['in'] and self.math_block_dict['math_block_label']:
             text = "$$\n{0}{1}$${2}".format(
@@ -312,6 +312,64 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         # add breakline
         if br_removed_flag:
             self.cell.append("\n")
+
+    def visit_math(self, node):
+        super().visit_math(node)
+        if 'exit' in self.math_dict and self.math_dict['exit']:
+            return
+            
+        formatted_text = "$ {} $".format(self.math_dict['math_text'])
+
+        if self.table_builder:
+            self.table_builder['line_pending'] += formatted_text
+        else:
+            self.cell.append(formatted_text)
+
+    def visit_reference(self, node):
+        super().visit_reference(node)
+
+        self.cell.append("[")
+        self.reference_dict['reference_text_start'] = len(self.cell)
+
+    def depart_reference(self, node):
+        super().depart_reference(node)
+
+        if self.in_topic:
+            formatted_text = "](#{})".format(self.referenc_dict['uri_text'])
+            self.cell.append(formatted_text)
+        else:
+            # if refuri exists, then it includes id reference
+            if "refuri" in node.attributes:
+                refuri = node["refuri"]
+                # add default extension(.ipynb)
+                if "internal" in node.attributes and node.attributes["internal"] == True:
+                    refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
+            else:
+                # in-page link
+                if "refid" in node:
+                    refid = node["refid"]
+                    self.in_inpage_reference = True
+                    #markdown doesn't handle closing brackets very well so will replace with %28 and %29
+                    #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+                    refid = refid.replace("(", "%28")
+                    refid = refid.replace(")", "%29")
+                    #markdown target
+                    refuri = "#{}".format(refid)
+                # error
+                else:
+                    self.error("Invalid reference")
+                    refuri = ""
+
+            #TODO: review if both %28 replacements necessary in this function?
+            #      Propose delete above in-link refuri
+            #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
+            refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
+            refuri = refuri.replace(")", "%29")
+            self.cell.append("]({})".format(refuri))
+
+        if self.in_toctree:
+            self.cell.append("\n")
+
 
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
