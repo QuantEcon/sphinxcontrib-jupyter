@@ -296,10 +296,10 @@ class JupyterBaseTranslator(SphinxTranslator):
 
     def visit_rubric(self, node):
         self.in_rubric = True
-        self.add_markdown_cell()
+        self.cell_to_notebook()
 
     def depart_rubric(self, node):
-        self.add_markdown_cell()
+        self.cell_to_notebook()
         self.in_rubric = False
 
     def visit_target(self, node):
