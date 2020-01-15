@@ -127,6 +127,13 @@ class JupyterNotebook:
             cell.metadata[k] = v
         return cell
 
+    def add_metadata_notebook(self, metadata):
+        """ Attach Metadata to a notebook """
+        for k,v in metadata.items():
+            self.nb.metadata[k] = v
+
+
+
 #Custom Exceptions
 
 class JupyterKernelNotFound(Exception):

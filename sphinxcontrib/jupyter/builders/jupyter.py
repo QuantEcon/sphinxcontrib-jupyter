@@ -21,7 +21,7 @@ class JupyterBuilder(Builder):
     """
     Builds Jupyter Notebook (FOR TESTING PURPOSES ONLY)  @AAKASH is working on BUILDERS
     """
-    name = "jupytercode"
+    name = "jupyter"
     # name = "jupyter"
     format = "ipynb"            #TODO: best not to override format
     out_suffix = ".ipynb"
@@ -56,8 +56,7 @@ class JupyterBuilder(Builder):
         return docname
 
     def prepare_writing(self, docnames):
-
-        self.config["jupyter_conversion_mode"] = "code"
+        #self.config["jupyter_conversion_mode"] = "code"
         self.writer = self._writer_class(self)
 
         ## copies the dependencies to the notebook folder
@@ -200,7 +199,6 @@ class JupyterBuilderOld(Builder):
 
         ## copies the dependencies to the notebook folder
         copy_dependencies(self)
-
         if (self.config["jupyter_execute_notebooks"]):
              ## copies the dependencies to the executed folder
             copy_dependencies(self, self.executedir)
