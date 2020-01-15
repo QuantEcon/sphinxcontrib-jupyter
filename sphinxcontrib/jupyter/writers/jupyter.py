@@ -2,7 +2,7 @@ from docutils.writers import Writer
 
 from .translate import JupyterBaseTranslator
 from .translate_code import JupyterCodeBlockTranslator
-from .translate_ipynb import JupyterTranslator, JupyterIPYNBTranslator
+from .translate_ipynb import JupyterIPYNBTranslator
 from .translate_html import JupyterHTMLTranslator
 from .translate_pdf import JupyterPDFTranslator
 

@@ -10,11 +10,11 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate_ipynb import JupyterTranslator
+from .translate import JupyterBaseTranslator
 from .utils import JupyterOutputCellGenerators
 
 
-class JupyterHTMLTranslator(JupyterTranslator):
+class JupyterHTMLTranslator(JupyterBaseTranslator):
     """ 
     Jupyter Translator for HTML Support
 
@@ -26,7 +26,7 @@ class JupyterHTMLTranslator(JupyterTranslator):
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
     def __init__(self, builder, document):
-        super(JupyterTranslator, self).__init__(builder, document)
+        super(JupyterBaseTranslator, self).__init__(builder, document)
 
         # Settings
         self.sep_lines = "  \n"
