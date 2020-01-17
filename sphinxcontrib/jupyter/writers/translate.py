@@ -18,7 +18,7 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-class JupyterBaseTranslator(SphinxTranslator):
+class JupyterCodeTranslator(SphinxTranslator):
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 

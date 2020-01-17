@@ -12,10 +12,10 @@ import os
 
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
-from .translate import JupyterBaseTranslator
+from .translate import JupyterCodeTranslator
 from .markdown import MarkdownSyntax
 
-class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
+class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
     
     #Configuration (Slideshow)
     metadata_slide = False
