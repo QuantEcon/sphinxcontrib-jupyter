@@ -101,11 +101,21 @@ class JupyterCodeTranslator(SphinxTranslator):
     
     def __init__(self, document, builder):
         """
-        Base Class for JupyterIPYNBTranslator, JupyterHTMLTranslator, JupyterPDFTranslator
+        Jupyter Code Block Translator
         
-        Handles common nodes and code-blocks for the suite of Jupyter Translators
+        Serves as the translator for writing code-only notebooks, in addition to providing
+        common infrastructure and state variables for downstream classes.
+
+          1. JupyterIPYNBTranslator, 
+          1. JupyterHTMLTranslator, 
+          1. JupyterPDFTranslator
         
-        1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
+        There is currently a SparseNodeTranslator available in translate_code.py. This should
+        be removed once this class builds code-block only notebooks.
+
+        Notes
+        -----
+          1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
         """
         super().__init__(document, builder)
         #-Jupyter Settings-#
