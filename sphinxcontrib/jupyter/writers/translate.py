@@ -18,8 +18,6 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-from .markdown import MarkdownSyntax
-
 class JupyterBaseTranslator(SphinxTranslator):
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
@@ -28,9 +26,6 @@ class JupyterBaseTranslator(SphinxTranslator):
     sep_lines = "  \n"              #TODO: needed?
     sep_paragraph = "\n\n"          #TODO: needed?
     section_level = 0
-
-    ## Dictionary types are used below to store node variables to be used in specific translators  
-
     #Configuration (File)
     default_ext = ".ipynb"
     #Configuration (Math)
@@ -97,12 +92,12 @@ class JupyterBaseTranslator(SphinxTranslator):
     block_quote['block_quote_type'] = "block-quote"
 
     # Slideshow option
-    metadata_slide = False  #False is the value by default for all the notebooks
-    slide = "slide" #value by default
+    metadata_slide = False
+    slide = "slide"
     
     ## pdf book options
-    in_book_index = False
-    cell_trimmed = []
+    in_book_index = False   #TODO: move upstream to PDF Translator
+    cell_trimmed = []       #TODO: move upstream to PDF Translator
     
     def __init__(self, document, builder):
         """
@@ -113,10 +108,6 @@ class JupyterBaseTranslator(SphinxTranslator):
         1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
         """
         super().__init__(document, builder)
-        ### builder variables
-        self.builder = builder
-        self.config = builder.config
-        self.settings = document.settings
         #-Jupyter Settings-#
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
@@ -124,9 +115,7 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.settings._source,
             self.settings.env.srcdir)
 
-        self.md = MarkdownSyntax()
-
-        self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]
+        self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]   #TODO: move upstream to PDF Translator
 
 
     #Document

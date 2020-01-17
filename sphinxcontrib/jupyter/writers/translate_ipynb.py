@@ -13,6 +13,7 @@ import os
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
 from .translate import JupyterBaseTranslator
+from .markdown import MarkdownSyntax
 
 class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
     
@@ -30,6 +31,8 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         available through JupyterHTMLTranslator, JupyterPDFTranslator
         """
         super().__init__(document, builder)
+        #-Markdown-#
+        self.md = MarkdownSyntax()
 
     def visit_jupyter_node(self, node):
         try:
