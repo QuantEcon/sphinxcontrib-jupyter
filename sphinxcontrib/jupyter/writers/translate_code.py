@@ -23,8 +23,10 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
 
     def __init__(self, document, builder):
         """
-        A translator for extracting code-blocks from RST documents 
+        A sparse translator for extracting code-blocks from RST documents 
         and generating a Jupyter Notebook
+
+        #TODO: Deprecate once JupyterCodeTranslator is finished.
         """
         super().__init__(document, builder)  #add document, builder, config and settings to object
         #-Jupyter Settings-#

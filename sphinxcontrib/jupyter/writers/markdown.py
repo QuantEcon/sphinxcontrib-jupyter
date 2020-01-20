@@ -187,3 +187,13 @@ class ListCollector:
     """
     def __init__(self):
         pass
+
+#-Table Builder-#
+
+class TableBuilder:
+
+    def __init__(self):
+        self.table = []
+
+    def add_row(self, row):
+        pass

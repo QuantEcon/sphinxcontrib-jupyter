@@ -1,6 +1,6 @@
 from docutils.writers import Writer
 
-from .translate import JupyterBaseTranslator
+from .translate import JupyterCodeTranslator
 from .translate_code import JupyterCodeBlockTranslator
 from .translate_ipynb import JupyterIPYNBTranslator
 from .translate_html import JupyterHTMLTranslator
@@ -10,13 +10,13 @@ class JupyterWriter(Writer):
     
     builder_translator = {
         #Code Translators
-        'jupytercode' : JupyterCodeBlockTranslator,  #JupyterCodeTranslator
-        "execute" : JupyterCodeBlockTranslator,
+        'jupytercode' : JupyterCodeBlockTranslator,  #TODO: Migrate to JupyterCodeTranslator
+        "execute" : JupyterCodeBlockTranslator,      #TODO: Migrate to JupyterCodeTranslator
         #RST + Code Translators
         'jupyter' : JupyterIPYNBTranslator,
         'jupyterhtml' : JupyterHTMLTranslator,
         'jupyterpdf' : JupyterPDFTranslator,
-        'jupyterbase' : JupyterBaseTranslator
+        'jupyterbase' : JupyterCodeTranslator
     }
 
     def __init__(self, builder):

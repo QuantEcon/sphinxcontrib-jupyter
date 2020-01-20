@@ -12,11 +12,10 @@ import os
 
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
-from .translate import JupyterBaseTranslator
+from .translate import JupyterCodeTranslator
+from .markdown import MarkdownSyntax
 
-from .markdown import MarkdownSyntax, List
-
-class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
+class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
     
     #Configuration (Slideshow)
     metadata_slide = False
@@ -32,6 +31,8 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         available through JupyterHTMLTranslator, JupyterPDFTranslator
         """
         super().__init__(document, builder)
+        #-Markdown-#
+        self.md = MarkdownSyntax()
 
     def visit_jupyter_node(self, node):
         try:
@@ -66,7 +67,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.cell.append(
-                "### {}\n".format(self.title_dict['title']))
+                "### {}\n".format(self.title['title']))
         else:
             ### this makes all the sections go up one level to transform subsections to sections
             self.cell.append(
@@ -84,34 +85,31 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
             return
 
         #Escape Special markdown chars except in code block
-        if self.literal_block_dict['in'] == False:
+        if self.literal_block['in'] == False:
             text = text.replace("$", "\$")
-            
+
+        ## when the text is inside the list handle it with lists object   
         if self.list_obj:
             marker = self.list_obj.get_marker()
             self.list_obj.add_item((marker,node))
         else:
-            if self.math_dict['in']:
+            if self.math['in']:
                 text = '$ {} $'.format(text.strip())
-            elif self.math_block_dict['in'] and self.math_block_dict['math_block_label']:
+            elif self.math_block['in'] and self.math_block['math_block_label']:
                 text = "$$\n{0}{1}$${2}".format(
-                            text.strip(), self.math_block_dict['math_block_label'], self.sep_paragraph
+                            text.strip(), self.math_block['math_block_label'], self.sep_paragraph
                         )
-                self.math_block_dict['math_block_label'] = None
-            elif self.math_block_dict['in']:
+                self.math_block['math_block_label'] = None
+            elif self.math_block['in']:
                 text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
-            if self.literal_block_dict['in']:
+            if self.literal_block['in']:
                 self.cell.append(text)
             elif self.table_builder:
                 self.table_builder['line_pending'] += text
-            elif self.block_quote_dict['in_block_quote'] or self.in_note:
-                if self.block_quote_dict['block_quote_type'] == "epigraph":
-                    self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
-                else:
-                    self.cell.append(text)
-            elif self.in_caption and self.in_toctree:
-                self.cell.append("# {}".format(text))
+            elif self.block_quote['in_block_quote'] or self.in_note:
+                if self.block_quote['block_quote_type'] == "epigraph":
+                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.cell.append(text)
 
@@ -128,8 +126,8 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
         """
         super().visit_image(node)
-        self.images.append(self.image_dict['uri'])
-        self.cell.append(self.image_dict['image'])
+        self.images.append(self.image['uri'])
+        self.cell.append(self.image['image'])
     
     def depart_image(self, node):
         pass
@@ -155,7 +153,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
             self.cell.append(self.sep_lines)
         elif self.table_builder:
             pass
-        elif self.block_quote_dict['block_quote_type'] == "epigraph":
+        elif self.block_quote['block_quote_type'] == "epigraph":
             try:
                 attribution = node.parent.children[1]
                 self.cell.append("\n>\n")   #Continue block for attribution
@@ -173,7 +171,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_target(self, node):
         super().visit_target(node)
-        self.cell.append("\n<a id='{}'></a>\n".format(self.target_dict['refid']))
+        self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
 
     def visit_attribution(self, node):
         super().visit_attribution(node)
@@ -202,15 +200,15 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_label(self, node):
         super().visit_label(node)
-        if self.footnote_dict['in']:
-            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(self.footnote_dict['id_text'], node.astext()))
+        if self.footnote['in']:
+            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(self.footnote['id_text'], node.astext()))
             raise nodes.SkipNode
 
-        if self.citation_dict['in']:
+        if self.citation['in']:
             self.cell.append("\[")
 
     def depart_label(self, node):
-        if self.citation_dict['in']:
+        if self.citation['in']:
             self.cell.append("\] ")
 
     def visit_block_quote(self, node):
@@ -242,7 +240,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_citation(self, node):
         super().visit_citation(node)
-        self.cell.append("<a id='{}'></a>\n".format(self.citation_dict['id_text']))
+        self.cell.append("<a id='{}'></a>\n".format(self.citation['id_text']))
 
     def visit_definition_list(self, node):
         self.cell.append("\n<dl style='margin: 20px 0;'>\n")
@@ -306,10 +304,10 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_math(self, node):
         super().visit_math(node)
-        if 'exit' in self.math_dict and self.math_dict['exit']:
+        if 'exit' in self.math and self.math['exit']:
             return
 
-        formatted_text = "$ {} $".format(self.math_dict['math_text'])
+        formatted_text = "$ {} $".format(self.math['math_text'])
 
         if self.table_builder:
             self.table_builder['line_pending'] += formatted_text
@@ -326,7 +324,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         super().depart_reference(node)
 
         if self.in_topic:
-            formatted_text = "](#{})".format(self.referenc_dict['uri_text'])
+            formatted_text = "](#{})".format(self.reference['uri_text'])
             self.cell.append(formatted_text)
         else:
             # if refuri exists, then it includes id reference
@@ -369,7 +367,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_download_reference(self, node):
         super().visit_download_reference(node)
-        self.cell.append(self.download_reference_dict['html'])
+        self.cell.append(self.download_reference['html'])
 
     def depart_download_reference(self, node):
         super().depart_download_reference(node)

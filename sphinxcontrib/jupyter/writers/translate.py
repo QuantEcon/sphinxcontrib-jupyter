@@ -18,9 +18,7 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-from .markdown import MarkdownSyntax, List
-
-class JupyterBaseTranslator(SphinxTranslator):
+class JupyterCodeTranslator(SphinxTranslator):
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
@@ -28,45 +26,42 @@ class JupyterBaseTranslator(SphinxTranslator):
     sep_lines = "  \n"              #TODO: needed?
     sep_paragraph = "\n\n"          #TODO: needed?
     section_level = 0
-
-    ## Dictionary types are used below to store node variables to be used in specific translators  
-
     #Configuration (File)
     default_ext = ".ipynb"
     #Configuration (Math)
-    math_block_dict = dict()
-    math_block_dict['in'] = False
-    math_block_dict['math_block_label'] = None
+    math_block = dict()
+    math_block['in'] = False
+    math_block['math_block_label'] = None
     #Configuration (Static Assets)
     images = []
     files = []
     #Configuration (Tables)
-    table_builder = None    #TODO: table builder object
+    table_builder = None                                  #TODO: table builder object
     #Configuration (visit/depart)
-    title_dict = dict()
-    title_dict['visit_first_title'] = True
+    title = dict()
+    title['visit_first_title'] = True
 
-    block_quote_dict = dict()
-    block_quote_dict['in_block_quote'] = False
+    block_quote = dict()
+    block_quote['in_block_quote'] = False
 
-    footnote_dict = dict()
-    footnote_dict['in'] = False
+    footnote = dict()
+    footnote['in'] = False
 
     footnote_reference = dict()
     footnote_reference['in'] = False
 
-    download_reference_dict = dict()
-    download_reference_dict['in'] = False
+    download_reference = dict()
+    download_reference['in'] = False
 
-    citation_dict = dict()
-    citation_dict['in'] = False
+    citation = dict()
+    citation['in'] = False
 
-    literal_block_dict = dict()
-    literal_block_dict['in'] = False
-    literal_block_dict['no-execute'] = False
+    literal_block = dict()
+    literal_block['in'] = False
+    literal_block['no-execute'] = False
 
-    image_dict = dict()
-    target_dict = dict()
+    image = dict()
+    target = dict()    #TODO: needed?
 
     list_obj = None
     child_list = None
@@ -82,8 +77,8 @@ class JupyterBaseTranslator(SphinxTranslator):
     list_dict['indent'] = list_dict['indent_char'] * 4        #TODO: needed?
     list_dict['indents'] = []                                 #TODO: needed?
 
-    math_dict = dict()
-    math_dict['in'] = False
+    math = dict()
+    math['in'] = False
 
     in_note = False
     in_attribution = False
@@ -96,29 +91,35 @@ class JupyterBaseTranslator(SphinxTranslator):
     remove_next_content = False
 
     ## options to remove?
-    block_quote_dict['block_quote_type'] = "block-quote"
+    block_quote['block_quote_type'] = "block-quote"
 
     # Slideshow option
-    metadata_slide = False  #False is the value by default for all the notebooks
-    slide = "slide" #value by default
+    metadata_slide = False
+    slide = "slide"
     
     ## pdf book options
-    in_book_index = False
-    cell_trimmed = []
+    in_book_index = False   #TODO: move upstream to PDF Translator
+    cell_trimmed = []       #TODO: move upstream to PDF Translator
     
     def __init__(self, document, builder):
         """
-        Base Class for JupyterIPYNBTranslator, JupyterHTMLTranslator, JupyterPDFTranslator
+        Jupyter Code Block Translator
         
-        Handles common nodes and code-blocks for the suite of Jupyter Translators
+        Serves as the translator for writing code-only notebooks, in addition to providing
+        common infrastructure and state variables for downstream classes.
+
+          1. JupyterIPYNBTranslator, 
+          1. JupyterHTMLTranslator, 
+          1. JupyterPDFTranslator
         
-        1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
+        There is currently a SparseNodeTranslator available in translate_code.py. This should
+        be removed once this class builds code-block only notebooks.
+
+        Notes
+        -----
+          1. `SphinxTranslator <https://github.com/sphinx-doc/sphinx/blob/master/sphinx/util/docutils.py>`__
         """
         super().__init__(document, builder)
-        ### builder variables
-        self.builder = builder
-        self.config = builder.config
-        self.settings = document.settings
         #-Jupyter Settings-#
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
@@ -126,9 +127,7 @@ class JupyterBaseTranslator(SphinxTranslator):
             self.settings._source,
             self.settings.env.srcdir)
 
-        self.md = MarkdownSyntax()
-
-        self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]
+        self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]   #TODO: move upstream to PDF Translator
 
     #Document
     def visit_document(self, node):
@@ -175,9 +174,9 @@ class JupyterBaseTranslator(SphinxTranslator):
         pass
 
     def visit_title(self, node):
-        if self.title_dict['visit_first_title']:
-            self.title_dict['title'] = node.astext()
-        self.title_dict['visit_first_title'] = False
+        if self.title['visit_first_title']:
+            self.title['title'] = node.astext()
+        self.title['visit_first_title'] = False
 
     def depart_title(self, node):
         pass
@@ -200,14 +199,14 @@ class JupyterBaseTranslator(SphinxTranslator):
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
-        self.image_dict['uri'] = node.attributes["uri"]
+        self.image['uri'] = node.attributes["uri"]
         attrs = node.attributes
         if self.config.jupyter_images_markdown:
             #-Construct MD image
-            image = "![{0}]({0})".format(self.image_dict['uri'])
+            image = "![{0}]({0})".format(self.image['uri'])
         else:
             # Construct HTML image
-            image = '<img src="{}" '.format(self.image_dict['uri'])
+            image = '<img src="{}" '.format(self.image['uri'])
             if "alt" in attrs.keys():
                 image += 'alt="{}" '.format(attrs["alt"])
             style = ""
@@ -222,7 +221,7 @@ class JupyterBaseTranslator(SphinxTranslator):
                 image += 'align="{}"'.format(attrs["align"])
             image = image.rstrip() + ">\n\n"  #Add double space for html
         
-        self.image_dict['image'] = image
+        self.image['image'] = image
     
     def depart_image(self, node):
         pass
@@ -232,7 +231,7 @@ class JupyterBaseTranslator(SphinxTranslator):
     ### TODO: figure out if this literal_block definitions should be kept in codeblock translator or here in base translator
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
-        self.literal_block_dict['in'] = True
+        self.literal_block['in'] = True
         self.cell_to_notebook()
         self.cell_type = "code"
 
@@ -245,12 +244,12 @@ class JupyterBaseTranslator(SphinxTranslator):
 
         ## checking if no-execute flag
         if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
-            self.literal_block_dict['no-execute'] = True
+            self.literal_block['no-execute'] = True
         else:
-            self.literal_block_dict['no-execute'] = False
+            self.literal_block['no-execute'] = False
 
         ## Check node language is the same as notebook language else make it markdown
-        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block_dict['no-execute']:
+        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
@@ -259,27 +258,27 @@ class JupyterBaseTranslator(SphinxTranslator):
 
 
     def depart_literal_block(self, node):
-        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block_dict['no-execute']:
+        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             self.cell.append("```")
         self.cell_to_notebook()
-        self.literal_block_dict['in'] = False
+        self.literal_block['in'] = False
 
     ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
     def visit_math_block(self, node):
         """directive math"""
         # visit_math_block is called only with sphinx >= 1.8
 
-        self.math_block_dict['in'] = True
+        self.math_block['in'] = True
 
         #check for labelled math
         if node["label"]:
             #Use \tags in the LaTeX environment
             referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
-            self.math_block_dict['math_block_label'] = referenceBuilder
+            self.math_block['math_block_label'] = referenceBuilder
 
     def depart_math_block(self, node):
-        self.math_block_dict['in'] = False
+        self.math_block['in'] = False
 
     # general paragraph
     def visit_paragraph(self, node):
@@ -301,7 +300,7 @@ class JupyterBaseTranslator(SphinxTranslator):
 
     def visit_target(self, node):
         if "refid" in node.attributes:
-            self.target_dict['refid'] = node.attributes["refid"]
+            self.target['refid'] = node.attributes["refid"]
 
     def visit_attribution(self, node):
         self.in_attribution = True
@@ -319,26 +318,26 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_label(self, node):
-        if self.footnote_dict['in']:
+        if self.footnote['in']:
             ids = node.parent.attributes["ids"]
             id_text = ""
             for id_ in ids:
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.footnote_dict['ids'] = node.parent.attributes["ids"]
-            self.footnote_dict['id_text'] = id_text
+            self.footnote['ids'] = node.parent.attributes["ids"]
+            self.footnote['id_text'] = id_text
 
 
     def visit_block_quote(self, node):
-        self.block_quote_dict['in_block_quote'] = True
+        self.block_quote['in_block_quote'] = True
         if "epigraph" in node.attributes["classes"]:
-            self.block_quote_dict['block_quote_type'] = "epigraph"
+            self.block_quote['block_quote_type'] = "epigraph"
 
     def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
-            self.block_quote_dict['block_quote_type'] = "block-quote"
-        self.block_quote_dict['in_block_quote'] = False
+            self.block_quote['block_quote_type'] = "block-quote"
+        self.block_quote['in_block_quote'] = False
 
     def visit_bullet_list(self, node):
         pass
@@ -347,19 +346,19 @@ class JupyterBaseTranslator(SphinxTranslator):
         pass
 
     def visit_citation(self, node):
-        self.citation_dict['in'] = True
+        self.citation['in'] = True
         if "ids" in node.attributes:
-            self.citation_dict['ids'] = node.attributes["ids"]
+            self.citation['ids'] = node.attributes["ids"]
             id_text = ""
             for id_ in ids:
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
 
-            self.citation_dict['id_text'] = id_text
+            self.citation['id_text'] = id_text
 
     def depart_citation(self, node):
-        self.citation_dict['in'] = False
+        self.citation['in'] = False
 
     def visit_enumerated_list(self, node):
         pass
@@ -371,10 +370,10 @@ class JupyterBaseTranslator(SphinxTranslator):
         pass
     
     def visit_footnote(self, node):
-        self.footnote_dict['in'] = True
+        self.footnote['in'] = True
 
     def depart_footnote(self, node):
-        self.footnote_dict['in'] = False
+        self.footnote['in'] = False
     
     def visit_note(self, node):
         self.in_note = True
@@ -477,12 +476,12 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.footnote_reference['in'] = False
     
     def visit_literal(self, node):
-        if self.download_reference_dict['in']:
+        if self.download_reference['in']:
             return
         self.cell.append("`")
 
     def depart_literal(self, node):
-        if self.download_reference_dict['in']:
+        if self.download_reference['in']:
             return
         self.cell.append("`")
 
@@ -497,15 +496,15 @@ class JupyterBaseTranslator(SphinxTranslator):
         # we are dealing with a formula.
 
         try: # sphinx < 1.8
-            self.math_dict['math_text'] = node.attributes["latex"].strip()
+            self.math['math_text'] = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
-            self.math_dict['in_math'] = True
+            self.math['in_math'] = True
             # the flag is raised, the function can be exited.
-            self.math_dict['exit'] = True
+            self.math['exit'] = True
 
     def depart_math(self, node):
-        self.math_dict['in_math'] = False
+        self.math['in_math'] = False
 
     def visit_reference(self, node):
         """anchor link"""
@@ -538,11 +537,11 @@ class JupyterBaseTranslator(SphinxTranslator):
             pass
 
     def visit_download_reference(self, node):
-        self.download_reference_dict['in'] = True
-        self.download_reference_dict['html'] = "<a href={} download>".format(node["reftarget"])
+        self.download_reference['in'] = True
+        self.download_reference['html'] = "<a href={} download>".format(node["reftarget"])
 
     def depart_download_reference(self, node):
-        self.download_reference_dict['in'] = False
+        self.download_reference['in'] = False
 
     def visit_only(self, node):
         pass
