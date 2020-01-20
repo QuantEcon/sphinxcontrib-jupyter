@@ -89,36 +89,33 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
             text = text.replace("$", "\$")
 
         ## when the text is inside the list handle it with lists object   
-        if self.list_obj:
-            pass
-        else:
-            if self.math['in']:
-                text = '$ {} $'.format(text.strip())
-            elif self.math_block['in'] and self.math_block['math_block_label']:
-                text = "$$\n{0}{1}$${2}".format(
-                            text.strip(), self.math_block['math_block_label'], self.sep_paragraph
-                        )
-                self.math_block['math_block_label'] = None
-            elif self.math_block['in']:
-                text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
+        if self.math['in']:
+            text = '$ {} $'.format(text.strip())
+        elif self.math_block['in'] and self.math_block['math_block_label']:
+            text = "$$\n{0}{1}$${2}".format(
+                        text.strip(), self.math_block['math_block_label'], self.sep_paragraph
+                    )
+            self.math_block['math_block_label'] = None
+        elif self.math_block['in']:
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
-            if self.literal_block['in']:
-                self.cell.append(text)
-            elif self.table_builder:
-                self.table_builder['line_pending'] += text
-            elif self.block_quote['in_block_quote'] or self.in_note:
-                if self.block_quote['block_quote_type'] == "epigraph":
-                    self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
-            else:
-                self.cell.append(text)
+        if self.list_obj:
+            marker = self.list_obj.get_marker()
+            self.list_obj.add_item((marker,text))
+        elif self.literal_block['in']:
+            self.cell.append(text)
+        elif self.table_builder:
+            self.table_builder['line_pending'] += text
+        elif self.block_quote['in_block_quote'] or self.in_note:
+            if self.block_quote['block_quote_type'] == "epigraph":
+                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+        else:
+            self.cell.append(text)
 
     def depart_Text(self, node):
         pass
 
     def visit_paragraph(self, node):
-        # if "lists" in self.source_file_name:
-        #     import pdb;
-        #     pdb.set_trace()
         pass
 
     def visit_image(self, node):
@@ -147,26 +144,26 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
     def depart_math_block(self, node):
         super().depart_math_block(node)
-        if self.list_obj:
-            self.list_obj.append_to_last_item("$$" + node.astext() + "$$") ## appending the math block to the list
+        # if self.list_obj:
+        #     self.list_obj.append_to_last_item("$$" + node.astext() + "$$") ## appending the math block to the list
 
     def depart_paragraph(self, node):
         super().depart_paragraph(node)
         if self.list_obj:
-            marker = self.list_obj.get_marker()
-            self.list_obj.add_item((marker,node))
-        if self.list_dict['list_level'] > 0:
-            self.cell.append(self.sep_lines)
-        elif self.table_builder:
             pass
-        elif self.block_quote['block_quote_type'] == "epigraph":
-            try:
-                attribution = node.parent.children[1]
-                self.cell.append("\n>\n")   #Continue block for attribution
-            except:
-                self.cell.append(self.sep_paragraph)
         else:
-            self.cell.append(self.sep_paragraph)
+            if self.list_dict['list_level'] > 0:
+                self.cell.append(self.sep_lines)
+            elif self.table_builder:
+                pass
+            elif self.block_quote['block_quote_type'] == "epigraph":
+                try:
+                    attribution = node.parent.children[1]
+                    self.cell.append("\n>\n")   #Continue block for attribution
+                except:
+                    self.cell.append(self.sep_paragraph)
+            else:
+                self.cell.append(self.sep_paragraph)
 
     def visit_rubric(self, node):
         super().visit_rubric(node)
@@ -177,7 +174,11 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
     def visit_target(self, node):
         super().visit_target(node)
-        self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
+        # if "lists" in self.source_file_name:
+        #     import pdb;
+        #     pdb.set_trace()
+        # if self.target['refid']:
+        #     self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
 
     def visit_attribution(self, node):
         super().visit_attribution(node)
@@ -303,20 +304,21 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
     def visit_list_item(self, node):
         super().visit_list_item(node)
-        self.list_obj.set_marker(node)
         # if "lists" in self.source_file_name:
         #     import pdb;
         #     pdb.set_trace()
+        self.list_obj.set_marker(node)
 
     def depart_list_item(self, node):
         super().depart_list_item(node)
 
     def visit_math(self, node):
         super().visit_math(node)
+
         if 'exit' in self.math and self.math['exit']:
             return
 
-        formatted_text = "$ {} $".format(self.math['math_text'])
+        formatted_text = "$ {} $".format(node.astext())
 
         if self.table_builder:
             self.table_builder['line_pending'] += formatted_text
@@ -326,8 +328,12 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
     def visit_reference(self, node):
         super().visit_reference(node)
 
-        self.cell.append("[")
-        self.in_reference['reference_text_start'] = len(self.cell)
+        if self.list_obj:
+            marker = self.list_obj.get_marker()
+            self.list_obj.add_item((marker,"["))
+        else:
+            self.cell.append("[")
+            self.in_reference['reference_text_start'] = len(self.cell)
 
     def depart_reference(self, node):
         super().depart_reference(node)
@@ -363,7 +369,12 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            self.cell.append("]({})".format(refuri))
+            if self.list_obj:
+                marker = self.list_obj.get_marker()
+                text = "]({})".format(refuri)
+                self.list_obj.add_item((marker,text))
+            else:
+                self.cell.append("]({})".format(refuri))
 
         if self.in_toctree:
             self.cell.append("\n")

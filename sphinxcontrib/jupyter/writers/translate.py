@@ -499,12 +499,12 @@ class JupyterCodeTranslator(SphinxTranslator):
             self.math['math_text'] = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
-            self.math['in_math'] = True
+            self.math['in'] = True
             # the flag is raised, the function can be exited.
             self.math['exit'] = True
 
     def depart_math(self, node):
-        self.math['in_math'] = False
+        self.math['in'] = False
 
     def visit_reference(self, node):
         """anchor link"""

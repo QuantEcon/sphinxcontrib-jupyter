@@ -91,6 +91,7 @@ class List:
     indentation = " "*2
     marker = "*"
     markers = dict()
+    item_no = 0
 
     def __init__(self, level, markers):
         """
@@ -126,31 +127,47 @@ class List:
         item : str or List
                add an element or a list object
         """
-        self.items.append((item[0], self.level, item[1]))
+        itemtuple = (item[0], self.item_no, self.level, item[1])
+        if len(self.items) > 0:
+            last_item = self.items.pop()
+            ### checking if the new item is a child of the same list item
+            if self.item_no == last_item[1] and last_item[2] == self.level:
+                last_item_text = last_item[3]
+                item_text = item[1]
+                if not isinstance(last_item_text, str):
+                    last_item_text = last_item_text.astext()
+                if not isinstance(item_text, str):
+                    item_text = item_text.astext()
+                content = last_item_text + item_text
+                itemtuple = (item[0], self.item_no, self.level, content)
+            else:
+                self.items.append(last_item)
+        self.items.append(itemtuple)
 
     def append_to_last_item(self, lines):
-        item = self.items.pop()
-        content = item[2].astext() + lines
-        self.items.append((item[0], item[1], content))
+        if len(self.items):
+            item = self.items.pop()
+            content = item[3]
+            if not isinstance(item[3], str):
+                content = item[3].astext()
+            content += lines
+            self.items.append((item[0], self.item_no, item[2], content))
 
     def to_markdown(self):
         markdown = []
         for item in self.items:
-            indent = self.indentation * item[1]
+            indent = self.indentation * item[2]
             marker = item[0]
             if isinstance(item[0], int):
                 marker = str(item[0]) + "."
 
             ### handling inline math list items
             content = ""
-            for children in item[2]:
-                if isinstance(children, nodes.math):
-                    content += "${}$".format(children.astext())
+            for children in item[3]:
+                if isinstance(children, str) or isinstance(children, int):
+                    content +=  children
                 else:
-                    if isinstance(children, str) or isinstance(children, int):
-                        content +=  children
-                    else:
-                        content +=  children.astext()
+                    content +=  children.astext()
             markdown.append("{}{} {}".format(indent, marker, content))
         
         ## need a new line at the end
@@ -175,6 +192,7 @@ class List:
                 self.markers[self.level] = 1
         else:
             self.markers[self.level] = "*"
+        self.item_no += 1
 
     def itemlist(self):
         return self.items 
