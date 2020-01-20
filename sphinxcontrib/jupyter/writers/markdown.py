@@ -128,6 +128,11 @@ class List:
         """
         self.items.append((item[0], self.level, item[1]))
 
+    def append_to_last_item(self, lines):
+        item = self.items.pop()
+        content = item[2].astext() + lines
+        self.items.append((item[0], item[1], content))
+
     def to_markdown(self):
         markdown = []
         for item in self.items:
@@ -135,7 +140,18 @@ class List:
             marker = item[0]
             if isinstance(item[0], int):
                 marker = str(item[0]) + "."
-            markdown.append("{}{} {}".format(indent, marker, item[2].astext()))
+
+            ### handling inline math list items
+            content = ""
+            for children in item[2]:
+                if isinstance(children, nodes.math):
+                    content += "${}$".format(children.astext())
+                else:
+                    if isinstance(children, str) or isinstance(children, int):
+                        content +=  children
+                    else:
+                        content +=  children.astext()
+            markdown.append("{}{} {}".format(indent, marker, content))
         
         ## need a new line at the end
         markdown.append("\n")

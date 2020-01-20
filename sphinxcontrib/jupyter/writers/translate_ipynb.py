@@ -13,7 +13,7 @@ import os
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
 from .translate import JupyterCodeTranslator
-from .markdown import MarkdownSyntax
+from .markdown import MarkdownSyntax, List
 
 class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
     
@@ -90,8 +90,7 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
         ## when the text is inside the list handle it with lists object   
         if self.list_obj:
-            marker = self.list_obj.get_marker()
-            self.list_obj.add_item((marker,node))
+            pass
         else:
             if self.math['in']:
                 text = '$ {} $'.format(text.strip())
@@ -109,11 +108,17 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
                 self.table_builder['line_pending'] += text
             elif self.block_quote['in_block_quote'] or self.in_note:
                 if self.block_quote['block_quote_type'] == "epigraph":
-                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+                    self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.cell.append(text)
 
     def depart_Text(self, node):
+        pass
+
+    def visit_paragraph(self, node):
+        # if "lists" in self.source_file_name:
+        #     import pdb;
+        #     pdb.set_trace()
         pass
 
     def visit_image(self, node):
@@ -136,19 +141,20 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
         """directive math"""
         # visit_math_block is called only with sphinx >= 1.8
         super().visit_math_block(node)
-
-        if self.list_dict['in'] and node["label"]:
-            self.cell.pop()  #remove entry \n from table builder
+        
+        # if self.list_dict['in'] and node["label"]:
+        #     self.cell.pop()  #remove entry \n from table builder
 
     def depart_math_block(self, node):
         super().depart_math_block(node)
-
-        if self.list_dict['in']:
-            self.cell[-1] = self.cell[-1][:-1]  #remove excess \n
+        if self.list_obj:
+            self.list_obj.append_to_last_item("$$" + node.astext() + "$$") ## appending the math block to the list
 
     def depart_paragraph(self, node):
         super().depart_paragraph(node)
-
+        if self.list_obj:
+            marker = self.list_obj.get_marker()
+            self.list_obj.add_item((marker,node))
         if self.list_dict['list_level'] > 0:
             self.cell.append(self.sep_lines)
         elif self.table_builder:
@@ -298,6 +304,9 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
     def visit_list_item(self, node):
         super().visit_list_item(node)
         self.list_obj.set_marker(node)
+        # if "lists" in self.source_file_name:
+        #     import pdb;
+        #     pdb.set_trace()
 
     def depart_list_item(self, node):
         super().depart_list_item(node)
