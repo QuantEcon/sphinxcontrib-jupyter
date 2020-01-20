@@ -18,7 +18,7 @@ from .notebook import JupyterNotebook
 
 logger = logging.getLogger(__name__)
 
-from .markdown import MarkdownSyntax
+from .markdown import MarkdownSyntax, List
 
 class JupyterBaseTranslator(SphinxTranslator):
 
@@ -68,6 +68,8 @@ class JupyterBaseTranslator(SphinxTranslator):
     image_dict = dict()
     target_dict = dict()
 
+    list_obj = None
+    child_list = None
     list_dict = dict()
     list_dict['in'] = False
     list_dict['skip_next_content'] = False
@@ -127,7 +129,6 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.md = MarkdownSyntax()
 
         self.list_dict['content_depth'] = self.config["jupyter_pdf_showcontentdepth"]
-
 
     #Document
     def visit_document(self, node):
@@ -340,10 +341,10 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.block_quote_dict['in_block_quote'] = False
 
     def visit_bullet_list(self, node):
-        self.list_dict['list_level'] += 1
+        pass
 
     def depart_bullet_list(self, node):
-        self.list_dict['list_level'] -= 1
+        pass
 
     def visit_citation(self, node):
         self.citation_dict['in'] = True
@@ -361,10 +362,10 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.citation_dict['in'] = False
 
     def visit_enumerated_list(self, node):
-        self.list_dict['list_level'] += 1
+        pass
 
     def depart_enumerated_list(self, node):
-        self.list_dict['list_level'] -= 1
+        pass
 
     def visit_figure(self, node):
         pass
@@ -402,34 +403,36 @@ class JupyterBaseTranslator(SphinxTranslator):
         self.table_builder['line_pending'] += "|"
 
     def visit_list_item(self, node):
-
+        pass
         ## do not add this list item to the list
-        if self.list_dict['skip_next_content']:
-           self.cell = copy.deepcopy(self.list_dict['initial_lines'])
-           self.list_dict['skip_next_content'] = False
+        # if self.list_dict['skip_next_content']:
+        #    self.cell = copy.deepcopy(self.list_dict['initial_lines'])
+        #    self.list_dict['skip_next_content'] = False
         
-        ## if we do not want to add the items in this depth to the list
-        if self.list_dict['content_depth'] == self.list_dict['content_depth_to_skip']:
-           self.list_dict['initial_lines'] = copy.deepcopy(self.cell)
-           self.list_dict['skip_next_content'] = True
-           self.list_dict['content_depth_to_skip'] = None
+        # ## if we do not want to add the items in this depth to the list
+        # if self.list_dict['content_depth'] == self.list_dict['content_depth_to_skip']:
+        #    self.list_dict['initial_lines'] = copy.deepcopy(self.cell)
+        #    self.list_dict['skip_next_content'] = True
+        #    self.list_dict['content_depth_to_skip'] = None
 
-           ## only one item in this content depth to remove 
-           self.list_dict['content_depth'] -= 1
-           return
+        #    ## only one item in this content depth to remove 
+        #    self.list_dict['content_depth'] -= 1
+        #    return
 
-        ## check if there is a list level
-        if not len(self.list_dict['bullets']):
-            return
-        self.list_dict['in'] = True
-        self.list_dict['head'] = "{} ".format(self.list_dict['bullets'][-1])
+        # ## check if there is a list level
+        # if not len(self.list_dict['bullets']):
+        #     return
+        # self.list_dict['in'] = True
+        # #print(self.list_dict['bullets'], "bullets")
+        # self.list_dict['head'] = "{} ".format(self.list_dict['bullets'][-1])
 
     def depart_list_item(self, node):
         ## check if there is a list level
-        if not len(self.list_dict['list_item_starts']):
-            return
-        self.list_dict['in'] = False
-        self.list_dict['indent'] = self.list_dict['indent_char'] * self.list_dict['indents'][-1]
+        # if not len(self.list_dict['list_item_starts']):
+        #     return
+        # self.list_dict['in'] = False
+        # self.list_dict['indent'] = self.list_dict['indent_char'] * self.list_dict['indents'][-1]
+        pass
 
 
     def visit_row(self, node):

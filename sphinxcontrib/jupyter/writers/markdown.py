@@ -1,6 +1,7 @@
 """
 Contains Markdown Syntax and Object Accumulators
 """
+from docutils import nodes
 
 class MarkdownSyntax:
     """
@@ -89,8 +90,9 @@ class List:
 
     indentation = " "*2
     marker = "*"
+    markers = dict()
 
-    def __init__(self, level):
+    def __init__(self, level, markers):
         """
         List Object
 
@@ -110,6 +112,7 @@ class List:
         """
         self.items = []
         self.level = level
+        self.markers = markers
 
     def __repr__(self):
         return self.to_markdown()
@@ -123,17 +126,45 @@ class List:
         item : str or List
                add an element or a list object
         """
-        self.items.append(item)
+        self.items.append((item[0], self.level, item[1]))
 
     def to_markdown(self):
         markdown = []
-        indent = self.indentation * self.level
         for item in self.items:
-            if issubclass(type(item), List):
-                markdown.append("{}".format(item))
-            else:
-                markdown.append("{}{} {}".format(indent, self.marker, item))
+            indent = self.indentation * item[1]
+            marker = item[0]
+            if isinstance(item[0], int):
+                marker = str(item[0]) + "."
+            markdown.append("{}{} {}".format(indent, marker, item[2].astext()))
+        
+        ## need a new line at the end
+        markdown.append("\n")
         return "\n".join(markdown)
+
+    def increment_level(self):
+        self.level += 1
+
+    def decrement_level(self):
+        self.level -= 1
+
+    def get_marker(self):
+        return self.markers[self.level]
+
+    def set_marker(self, node):
+        if isinstance(node.parent, nodes.enumerated_list):
+            if self.level in self.markers:
+                count = self.markers[self.level]
+                self.markers[self.level] = count + 1
+            else:
+                self.markers[self.level] = 1
+        else:
+            self.markers[self.level] = "*"
+
+    def itemlist(self):
+        return self.items 
+
+    def getlevel(self):
+        return self.level
 
 class EnumeratedList(List):
 

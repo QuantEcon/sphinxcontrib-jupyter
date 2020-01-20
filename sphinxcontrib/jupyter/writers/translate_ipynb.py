@@ -14,6 +14,8 @@ from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators
 from .translate import JupyterBaseTranslator
 
+from .markdown import MarkdownSyntax, List
+
 class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
     
     #Configuration (Slideshow)
@@ -84,30 +86,34 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         #Escape Special markdown chars except in code block
         if self.literal_block_dict['in'] == False:
             text = text.replace("$", "\$")
+            
+        if self.list_obj:
+            marker = self.list_obj.get_marker()
+            self.list_obj.add_item((marker,node))
+        else:
+            if self.math_dict['in']:
+                text = '$ {} $'.format(text.strip())
+            elif self.math_block_dict['in'] and self.math_block_dict['math_block_label']:
+                text = "$$\n{0}{1}$${2}".format(
+                            text.strip(), self.math_block_dict['math_block_label'], self.sep_paragraph
+                        )
+                self.math_block_dict['math_block_label'] = None
+            elif self.math_block_dict['in']:
+                text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
-        if self.math_dict['in']:
-            text = '$ {} $'.format(text.strip())
-        elif self.math_block_dict['in'] and self.math_block_dict['math_block_label']:
-            text = "$$\n{0}{1}$${2}".format(
-                        text.strip(), self.math_block_dict['math_block_label'], self.sep_paragraph
-                    )
-            self.math_block_dict['math_block_label'] = None
-        elif self.math_block_dict['in']:
-            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
-
-        if self.literal_block_dict['in']:
-            self.cell.append(text)
-        elif self.table_builder:
-            self.table_builder['line_pending'] += text
-        elif self.block_quote_dict['in_block_quote'] or self.in_note:
-            if self.block_quote_dict['block_quote_type'] == "epigraph":
-                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+            if self.literal_block_dict['in']:
+                self.cell.append(text)
+            elif self.table_builder:
+                self.table_builder['line_pending'] += text
+            elif self.block_quote_dict['in_block_quote'] or self.in_note:
+                if self.block_quote_dict['block_quote_type'] == "epigraph":
+                    self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+                else:
+                    self.cell.append(text)
+            elif self.in_caption and self.in_toctree:
+                self.cell.append("# {}".format(text))
             else:
                 self.cell.append(text)
-        elif self.in_caption and self.in_toctree:
-            self.cell.append("# {}".format(text))
-        else:
-            self.cell.append(text)
 
     def depart_Text(self, node):
         pass
@@ -209,7 +215,7 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_block_quote(self, node):
         super().visit_block_quote(node)
-        if self.list_dict['in']:               #allow for 4 spaces interpreted as block_quote
+        if self.list_obj:               #allow for 4 spaces interpreted as block_quote
             self.cell.append("\n")
             return
         self.cell.append("> ")
@@ -219,23 +225,20 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         self.cell.append("\n")
 
     def visit_bullet_list(self, node):
-        super().visit_bullet_list(node)
-        self.list_dict['list_level'] += 1
-
-        # markdown does not have option changing bullet chars
-        self.list_dict['bullets'].append("-")
-        self.list_dict['indents'].append(len(self.list_dict['bullets'][-1] * 2))  #add two per level
+        if not self.list_obj:
+            self.list_obj = List(level=0,markers=dict())
+        self.list_obj.increment_level()
 
 
     def depart_bullet_list(self, node):
-        super().depart_bullet_list(node)
-        if self.list_dict['list_level'] == 0:
-            self.cell.append(self.sep_paragraph)
-            if self.in_topic:
-                self.add_markdown_cell()
-        if len(self.list_dict['bullets']):
-            self.list_dict['bullets'].pop()
-            self.list_dict['indents'].pop()
+        if self.list_obj is not None:
+            self.list_obj.decrement_level()
+        if self.list_obj.level == 0:
+            markdown = self.list_obj.to_markdown()
+            self.cell.append(markdown)
+            self.list_obj = None
+
+
 
     def visit_citation(self, node):
         super().visit_citation(node)
@@ -248,18 +251,18 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
         self.cell.append("\n</dl>{}".format(self.sep_paragraph))
 
     def visit_enumerated_list(self, node):
-        super().visit_enumerated_list(node)
-
-        # markdown does not have option changing bullet chars
-        self.list_dict['bullets'].append("1.")
-        self.list_dict['indents'].append(len(self.list_dict['bullets'][-1]))
+        if not self.list_obj:
+            self.list_obj = List(level=0,markers=dict())
+        self.list_obj.increment_level()
+        #self.list_obj.set_marker(node)
 
     def depart_enumerated_list(self, node):
-        super().depart_enumerated_list(node)
-        if self.list_dict['list_level'] == 0:
-            self.cell.append(self.sep_paragraph)
-        self.list_dict['bullets'].pop()
-        self.list_dict['indents'].pop()
+        if self.list_obj is not None:
+            self.list_obj.decrement_level()
+        if self.list_obj.level == 0:
+            markdown = self.list_obj.to_markdown()
+            self.cell.append(markdown)
+            self.list_obj = None
 
     def visit_field_list(self, node):
         self.visit_definition_list(node)
@@ -296,26 +299,10 @@ class JupyterIPYNBTranslator(JupyterBaseTranslator):  #->NEW
 
     def visit_list_item(self, node):
         super().visit_list_item(node)
-        self.cell.append(self.list_dict['head'])
-        self.list_dict['list_item_starts'].append(len(self.cell))
+        self.list_obj.set_marker(node)
 
     def depart_list_item(self, node):
         super().depart_list_item(node)
-        list_item_start = self.list_dict['list_item_starts'].pop()
-        br_removed_flag = False
-
-        # remove last breakline
-        if self.cell and self.cell[-1][-1] == "\n":
-            br_removed_flag = True
-            self.cell[-1] = self.cell[-1][:-1]
-
-        for i in range(list_item_start, len(self.cell)):
-            self.cell[i] = self.cell[i].replace(
-                "\n", "\n{}".format(self.list_dict['indent']))
-
-        # add breakline
-        if br_removed_flag:
-            self.cell.append("\n")
 
     def visit_math(self, node):
         super().visit_math(node)

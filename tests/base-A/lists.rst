@@ -70,7 +70,7 @@ Currently mixed lists require `4 spaces` of indentation
 
     * foo1
     * foo 2
-  
+
 2. bla2
 
     * foo
