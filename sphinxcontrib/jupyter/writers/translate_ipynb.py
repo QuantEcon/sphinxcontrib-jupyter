@@ -100,8 +100,7 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
             text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
         if self.list_obj:
-            marker = self.list_obj.get_marker()
-            self.list_obj.add_item((marker,text))
+            self.list_obj.add_item(text)
         elif self.literal_block['in']:
             self.cell.append(text)
         elif self.table_builder:
@@ -138,14 +137,9 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
         """directive math"""
         # visit_math_block is called only with sphinx >= 1.8
         super().visit_math_block(node)
-        
-        # if self.list_dict['in'] and node["label"]:
-        #     self.cell.pop()  #remove entry \n from table builder
 
     def depart_math_block(self, node):
         super().depart_math_block(node)
-        # if self.list_obj:
-        #     self.list_obj.append_to_last_item("$$" + node.astext() + "$$") ## appending the math block to the list
 
     def depart_paragraph(self, node):
         super().depart_paragraph(node)
@@ -174,11 +168,8 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
     def visit_target(self, node):
         super().visit_target(node)
-        # if "lists" in self.source_file_name:
-        #     import pdb;
-        #     pdb.set_trace()
-        # if self.target['refid']:
-        #     self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
+        if self.target['refid']:
+            self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
 
     def visit_attribution(self, node):
         super().visit_attribution(node)
@@ -230,15 +221,13 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
         self.cell.append("\n")
 
     def visit_bullet_list(self, node):
-        if not self.list_obj:
-            self.list_obj = List(level=0,markers=dict())
-        self.list_obj.increment_level()
+        super().visit_bullet_list(node)
+        pass
 
 
     def depart_bullet_list(self, node):
-        if self.list_obj is not None:
-            self.list_obj.decrement_level()
-        if self.list_obj.level == 0:
+        super().depart_bullet_list(node)
+        if self.list_obj and self.list_obj.level == 0:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
             self.list_obj = None
@@ -256,14 +245,11 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
         self.cell.append("\n</dl>{}".format(self.sep_paragraph))
 
     def visit_enumerated_list(self, node):
-        if not self.list_obj:
-            self.list_obj = List(level=0,markers=dict())
-        self.list_obj.increment_level()
-        #self.list_obj.set_marker(node)
+        super().visit_enumerated_list(node)
+        pass
 
     def depart_enumerated_list(self, node):
-        if self.list_obj is not None:
-            self.list_obj.decrement_level()
+        super().depart_enumerated_list(node)
         if self.list_obj.level == 0:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
@@ -304,9 +290,6 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
     def visit_list_item(self, node):
         super().visit_list_item(node)
-        # if "lists" in self.source_file_name:
-        #     import pdb;
-        #     pdb.set_trace()
         self.list_obj.set_marker(node)
 
     def depart_list_item(self, node):
@@ -330,7 +313,7 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
 
         if self.list_obj:
             marker = self.list_obj.get_marker()
-            self.list_obj.add_item((marker,"["))
+            self.list_obj.add_item("[")
         else:
             self.cell.append("[")
             self.in_reference['reference_text_start'] = len(self.cell)
@@ -372,7 +355,7 @@ class JupyterIPYNBTranslator(JupyterCodeTranslator):  #->NEW
             if self.list_obj:
                 marker = self.list_obj.get_marker()
                 text = "]({})".format(refuri)
-                self.list_obj.add_item((marker,text))
+                self.list_obj.add_item(text)
             else:
                 self.cell.append("]({})".format(refuri))
 

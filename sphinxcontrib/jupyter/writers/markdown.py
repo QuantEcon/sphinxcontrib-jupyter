@@ -93,7 +93,7 @@ class List:
     markers = dict()
     item_no = 0
 
-    def __init__(self, level, markers):
+    def __init__(self, level, markers, item_no=0):
         """
         List Object
 
@@ -101,7 +101,9 @@ class List:
         ----------
         level : int
                 Specify Level for List (base level=0)
-        marker : str, optional(default="*")
+        markers : dict
+                A dictionary of markers with keys as levels and values as the current marker in that level
+        item_no : stores at what count the current item came in the list, if we consider the list as a queue of items
 
         Example
         -------
@@ -114,6 +116,7 @@ class List:
         self.items = []
         self.level = level
         self.markers = markers
+        self.item_no = item_no
 
     def __repr__(self):
         return self.to_markdown()
@@ -127,31 +130,23 @@ class List:
         item : str or List
                add an element or a list object
         """
-        itemtuple = (item[0], self.item_no, self.level, item[1])
+        marker = self.markers[self.level]
+        itemtuple = (marker, self.item_no, self.level, item)
         if len(self.items) > 0:
             last_item = self.items.pop()
             ### checking if the new item is a child of the same list item
             if self.item_no == last_item[1] and last_item[2] == self.level:
                 last_item_text = last_item[3]
-                item_text = item[1]
+                item_text = item
                 if not isinstance(last_item_text, str):
                     last_item_text = last_item_text.astext()
                 if not isinstance(item_text, str):
                     item_text = item_text.astext()
                 content = last_item_text + item_text
-                itemtuple = (item[0], self.item_no, self.level, content)
+                itemtuple = (marker, self.item_no, self.level, content)
             else:
                 self.items.append(last_item)
         self.items.append(itemtuple)
-
-    def append_to_last_item(self, lines):
-        if len(self.items):
-            item = self.items.pop()
-            content = item[3]
-            if not isinstance(item[3], str):
-                content = item[3].astext()
-            content += lines
-            self.items.append((item[0], self.item_no, item[2], content))
 
     def to_markdown(self):
         markdown = []
@@ -161,7 +156,6 @@ class List:
             if isinstance(item[0], int):
                 marker = str(item[0]) + "."
 
-            ### handling inline math list items
             content = ""
             for children in item[3]:
                 if isinstance(children, str) or isinstance(children, int):
@@ -181,10 +175,10 @@ class List:
         self.level -= 1
 
     def get_marker(self):
-        return self.markers[self.level]
+        return self.markers
 
     def set_marker(self, node):
-        if isinstance(node.parent, nodes.enumerated_list):
+        if isinstance(node.parent, nodes.enumerated_list) or isinstance(node.parent.parent, nodes.enumerated_list):
             if self.level in self.markers:
                 count = self.markers[self.level]
                 self.markers[self.level] = count + 1
@@ -199,19 +193,6 @@ class List:
 
     def getlevel(self):
         return self.level
-
-class EnumeratedList(List):
-
-    def to_markdown(self):
-        markdown = []
-        indent = self.indentation * self.level
-        for num, item in enumerate(self.items):
-            if issubclass(type(item), List):
-                markdown.append("{}".format(item))
-            else:
-                self.marker = "{}.".format(num+1)
-                markdown.append("{}{} {}".format(indent, self.marker, item))
-        return "\n".join(markdown)
 
 #-> Use above in Translator and if requried develop a ListCollector
 

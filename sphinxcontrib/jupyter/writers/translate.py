@@ -15,6 +15,7 @@ from sphinx.util.docutils import SphinxTranslator
 
 from .utils import LanguageTranslator, JupyterOutputCellGenerators, get_source_file_name
 from .notebook import JupyterNotebook
+from .markdown import List
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,10 @@ class JupyterCodeTranslator(SphinxTranslator):
     #Configuration (Static Assets)
     images = []
     files = []
+    in_literal_block_list = False
+    current_level = None
+    current_marker = None
+    current_item_no = None
     #Configuration (Tables)
     table_builder = None                                  #TODO: table builder object
     #Configuration (visit/depart)
@@ -232,6 +237,17 @@ class JupyterCodeTranslator(SphinxTranslator):
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
         self.literal_block['in'] = True
+
+        ### if the code block is inside a list, append the contents till here to the cell, and make a new cell for code block
+        if self.list_obj:
+            markdown = self.list_obj.to_markdown()
+            self.cell.append(markdown)
+            self.current_level = self.list_obj.level
+            self.current_marker = self.list_obj.get_marker()
+            self.current_item_no = self.list_obj.item_no
+            self.list_obj = None
+            self.in_literal_block_list = True
+
         self.cell_to_notebook()
         self.cell_type = "code"
 
@@ -262,6 +278,12 @@ class JupyterCodeTranslator(SphinxTranslator):
             self.cell.append("```")
         self.cell_to_notebook()
         self.literal_block['in'] = False
+
+        ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
+        if self.in_literal_block_list:
+            self.list_obj = List(self.current_level, self.current_marker, self.current_item_no)
+            self.in_literal_block_list = False
+
 
     ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
     def visit_math_block(self, node):
@@ -340,10 +362,13 @@ class JupyterCodeTranslator(SphinxTranslator):
         self.block_quote['in_block_quote'] = False
 
     def visit_bullet_list(self, node):
-        pass
+        if not self.list_obj:
+            self.list_obj = List(level=0,markers=dict())
+        self.list_obj.increment_level()
 
     def depart_bullet_list(self, node):
-        pass
+        if self.list_obj is not None:
+            self.list_obj.decrement_level()
 
     def visit_citation(self, node):
         self.citation['in'] = True
@@ -361,10 +386,13 @@ class JupyterCodeTranslator(SphinxTranslator):
         self.citation['in'] = False
 
     def visit_enumerated_list(self, node):
-        pass
+        if not self.list_obj:
+            self.list_obj = List(level=0,markers=dict())
+        self.list_obj.increment_level()
 
     def depart_enumerated_list(self, node):
-        pass
+        if self.list_obj is not None:
+            self.list_obj.decrement_level()
 
     def visit_figure(self, node):
         pass
