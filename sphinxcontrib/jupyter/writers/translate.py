@@ -36,10 +36,9 @@ class JupyterCodeTranslator(SphinxTranslator):
     #Configuration (Static Assets)
     images = []
     files = []
-    in_literal_block_list = False
-    current_level = None
-    current_marker = None
-    current_item_no = None
+
+    #A dictionary to save states
+    saved_state = dict()
     #Configuration (Tables)
     table_builder = None                                  #TODO: table builder object
     #Configuration (visit/depart)
@@ -242,11 +241,10 @@ class JupyterCodeTranslator(SphinxTranslator):
         if self.list_obj:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
-            self.current_level = self.list_obj.level
-            self.current_marker = self.list_obj.get_marker()
-            self.current_item_no = self.list_obj.item_no
+            self.saved_state['list_level'] = self.list_obj.level
+            self.saved_state['list_marker'] = self.list_obj.get_marker()
+            self.saved_state['list_item_no'] = self.list_obj.item_no
             self.list_obj = None
-            self.in_literal_block_list = True
 
         self.cell_to_notebook()
         self.cell_type = "code"
@@ -280,9 +278,11 @@ class JupyterCodeTranslator(SphinxTranslator):
         self.literal_block['in'] = False
 
         ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
-        if self.in_literal_block_list:
-            self.list_obj = List(self.current_level, self.current_marker, self.current_item_no)
-            self.in_literal_block_list = False
+        if "list_level" in self.saved_state:
+            self.list_obj = List(self.saved_state["list_level"], self.saved_state["list_marker"], self.saved_state["list_item_no"])
+            del self.saved_state["list_level"]
+            del self.saved_state["list_marker"]
+            del self.saved_state["list_item_no"]
 
 
     ### NOTE: special case to be handled for pdf in pdf only translators, check other translators for reference
