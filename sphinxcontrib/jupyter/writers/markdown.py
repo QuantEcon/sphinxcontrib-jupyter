@@ -149,6 +149,9 @@ class List:
         self.items.append(itemtuple)
 
     def to_markdown(self):
+        """
+        converts the list items to markdown
+        """
         markdown = []
         for item in self.items:
             indent = self.indentation * item[2]
@@ -178,6 +181,13 @@ class List:
         return self.markers
 
     def set_marker(self, node):
+        """
+        sets the updated marker for the current level in the self.markers dictionary
+
+        Parameters
+        ----------
+        node : the node object under whose visit/depart method this function was called
+        """
         if isinstance(node.parent, nodes.enumerated_list) or isinstance(node.parent.parent, nodes.enumerated_list):
             if self.level in self.markers:
                 count = self.markers[self.level]
@@ -193,6 +203,9 @@ class List:
 
     def getlevel(self):
         return self.level
+    
+    def get_item_no(self):
+        return self.item_no
 
 #-> Use above in Translator and if requried develop a ListCollector
 

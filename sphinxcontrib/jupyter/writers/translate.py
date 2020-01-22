@@ -241,9 +241,9 @@ class JupyterCodeTranslator(SphinxTranslator):
         if self.list_obj:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
-            self.saved_state['list_level'] = self.list_obj.level
+            self.saved_state['list_level'] = self.list_obj.getlevel()
             self.saved_state['list_marker'] = self.list_obj.get_marker()
-            self.saved_state['list_item_no'] = self.list_obj.item_no
+            self.saved_state['list_item_no'] = self.list_obj.get_item_no()
             self.list_obj = None
 
         self.cell_to_notebook()
