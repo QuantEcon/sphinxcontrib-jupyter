@@ -41,11 +41,11 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     #A dictionary to save states
     saved_state = dict()
+    saved_state['visit_first_title'] = True
+    saved_state['reference_text_start'] = 0
+
     #Configuration (Tables)
     table_builder = None                                  #TODO: table builder object
-    #Configuration (visit/depart)
-    title = dict()
-    title['visit_first_title'] = True
 
     block_quote = dict()
     block_quote['in_block_quote'] = False
@@ -70,18 +70,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     target = dict()    #TODO: needed?
 
     list_obj = None
-    child_list = None
-    list_dict = dict()
-    list_dict['in'] = False
-    list_dict['skip_next_content'] = False
-    list_dict['list_item_starts'] = []
-    list_dict['initial_lines'] = []
-    list_dict['content_depth_to_skip'] = None
-    list_dict['list_level'] = 0
-    list_dict['bullets'] = []
-    list_dict['indent_char'] = " "                            #TODO: needed?
-    list_dict['indent'] = list_dict['indent_char'] * 4        #TODO: needed?
-    list_dict['indents'] = []                                 #TODO: needed?
 
     math = dict()
     math['in'] = False
@@ -190,15 +178,15 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             pass
 
     def visit_title(self, node):
-        if self.title['visit_first_title']:
-            self.title['title'] = node.astext()
-        self.title['visit_first_title'] = False
+        if self.saved_state['visit_first_title']:
+            title = node.astext()
+        self.saved_state['visit_first_title'] = False
         if self.in_topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
             self.cell.append(
-                "### {}\n".format(self.title['title']))
+                "### {}\n".format(node.astext()))
         else:
             ### this makes all the sections go up one level to transform subsections to sections
             self.cell.append(
@@ -224,7 +212,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.literal_block['in'] == False:
             text = text.replace("$", "\$")
 
-        ## when the text is inside the list handle it with lists object   
         if self.math['in']:
             text = '$ {} $'.format(text.strip())
         elif self.math_block['in'] and self.math_block['math_block_label']:
@@ -236,6 +223,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
         if self.list_obj:
+            ## when the text is inside the list handle it with lists object   
             self.list_obj.add_item(text)
         elif self.literal_block['in']:
             self.cell.append(text)
@@ -244,6 +232,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         elif self.block_quote['in_block_quote'] or self.in_note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+            else:
+                self.cell.append(text)
+        elif self.in_caption and self.in_toctree:
+            self.cell.append("# {}".format(text))
         else:
             self.cell.append(text)
 
@@ -259,31 +251,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
-        self.image['uri'] = node.attributes["uri"]
+        uri = node.attributes["uri"]
         attrs = node.attributes
-        if self.config.jupyter_images_markdown:
-            #-Construct MD image
-            image = "![{0}]({0})".format(self.image['uri'])
-        else:
-            # Construct HTML image
-            image = '<img src="{}" '.format(self.image['uri'])
-            if "alt" in attrs.keys():
-                image += 'alt="{}" '.format(attrs["alt"])
-            style = ""
-            if "width" in attrs.keys():
-                style += "width:{};".format(attrs["width"])
-            if "height" in attrs.keys():
-                style += "height:{};".format(attrs["height"])
-            if "scale" in attrs.keys():
-                style = "width:{0}%;height:{0}%".format(attrs["scale"])
-            image += 'style="{}" '.format(style)
-            if "align" in attrs.keys():
-                image += 'align="{}"'.format(attrs["align"])
-            image = image.rstrip() + ">\n\n"  #Add double space for html
         
-        self.image['image'] = image
-        self.images.append(self.image['uri'])
-        self.cell.append(self.image['image'])
+        image = "![{0}]({0})".format(uri)
+    
+        self.images.append(uri)
+        self.cell.append(image)
     
     def depart_image(self, node):
         pass
@@ -309,6 +283,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             self.nodelang = node.attributes["language"].strip()
         else:
             self.cell_type = "markdown"
+
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook language
 
@@ -363,7 +338,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.list_obj:
             pass
         else:
-            if self.list_dict['list_level'] > 0:
+            if self.list_obj and self.list_obj.getlevel() > 0:
                 self.cell.append(self.sep_lines)
             elif self.table_builder:
                 pass
@@ -392,9 +367,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def visit_target(self, node):
         if "refid" in node.attributes:
-            self.target['refid'] = node.attributes["refid"]
-        if self.target['refid']:
-            self.cell.append("\n<a id='{}'></a>\n".format(self.target['refid']))
+            self.cell.append("\n<a id='{}'></a>\n".format(node.attributes["refid"]))
 
     def visit_attribution(self, node):
         self.in_attribution = True
@@ -435,9 +408,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.footnote['ids'] = node.parent.attributes["ids"]
-            self.footnote['id_text'] = id_text
-            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(self.footnote['id_text'], node.astext()))
+            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
             raise nodes.SkipNode
 
         if self.citation['in']:
@@ -481,15 +452,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     def visit_citation(self, node):
         self.citation['in'] = True
         if "ids" in node.attributes:
-            self.citation['ids'] = node.attributes["ids"]
             id_text = ""
-            for id_ in ids:
+            for id_ in node.attributes["ids"]:
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-
-            self.citation['id_text'] = id_text
-        self.cell.append("<a id='{}'></a>\n".format(self.citation['id_text']))
+        self.cell.append("<a id='{}'></a>\n".format(id_text))
 
     def depart_citation(self, node):
         self.citation['in'] = False
@@ -508,6 +476,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     def depart_enumerated_list(self, node):
         if self.list_obj is not None:
             self.list_obj.decrement_level()
+
         if self.list_obj.level == 0:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
@@ -610,17 +579,14 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         # we are dealing with a formula.
 
         try: # sphinx < 1.8
-            self.math['math_text'] = node.attributes["latex"].strip()
+            math_text = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
             self.math['in'] = True
             # the flag is raised, the function can be exited.
-            self.math['exit'] = True
-
-        if 'exit' in self.math and self.math['exit']:
             return
 
-        formatted_text = "$ {} $".format(node.astext())
+        formatted_text = "$ {} $".format(math_text)
 
         if self.table_builder:
             self.table_builder['line_pending'] += formatted_text
@@ -632,14 +598,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def visit_reference(self, node):
         self.in_reference = dict()
-        self.in_reference['reference_text_start'] = 0
 
         if self.list_obj:
             marker = self.list_obj.get_marker()
             self.list_obj.add_item("[")
         else:
             self.cell.append("[")
-            self.in_reference['reference_text_start'] = len(self.cell)
+            self.saved_state['reference_text_start'] = len(self.cell)
 
     def depart_reference(self, node):
         subdirectory = False
@@ -647,7 +612,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
-                self.cell[self.in_reference['reference_text_start']:]).strip()
+                self.cell[self.saved_state['reference_text_start']:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             self.in_reference['uri_text'] = uri_text
@@ -707,8 +672,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def visit_download_reference(self, node):
         self.download_reference['in'] = True
-        self.download_reference['html'] = "<a href={} download>".format(node["reftarget"])
-        self.cell.append(self.download_reference['html'])
+        html = "<a href={} download>".format(node["reftarget"])
+        self.cell.append(html)
 
     def depart_download_reference(self, node):
         self.download_reference['in'] = False
@@ -752,12 +717,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def visit_footnote_reference(self, node):
         self.footnote_reference['in'] = True
-        self.footnote_reference['refid'] = node.attributes['refid']
-        self.footnote_reference['ids'] = node.astext()
-        if self.config.jupyter_target_pdf:
-            self.footnote_reference['link'] = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(self.footnote_reference['refid'], self.footnote_reference['refid'], self.footnote_reference['ids'])
-        else:
-            self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(self.footnote_reference['ids'], self.footnote_reference['refid'])
+        refid = node.attributes['refid']
+        ids = node.astext()
+        self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(ids, refid)
         self.cell.append(self.footnote_reference['link'])
         raise nodes.SkipNode
 
