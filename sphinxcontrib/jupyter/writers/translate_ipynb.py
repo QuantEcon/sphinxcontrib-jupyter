@@ -15,7 +15,6 @@ from sphinx.util.docutils import SphinxTranslator
 
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators, get_source_file_name
-from .translate import JupyterCodeTranslator
 from .notebook import JupyterNotebook
 from .markdown import MarkdownSyntax, List
 

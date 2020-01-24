@@ -1,5 +1,9 @@
 """
 Base Jupyter Translator
+
+.. note: DEPRECATED
+
+    This code is deprecated and merged with `translate_ipynb.py`
 """
 
 import re
