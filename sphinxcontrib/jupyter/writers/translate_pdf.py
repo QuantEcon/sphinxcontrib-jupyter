@@ -11,9 +11,9 @@ import copy
 import os
 
 from .utils import JupyterOutputCellGenerators
-from .translate import JupyterCodeTranslator
+from .translate_ipynb import JupyterIPYNBTranslator
 
-class JupyterPDFTranslator(JupyterCodeTranslator):
+class JupyterPDFTranslator(JupyterIPYNBTranslator):
     """ 
     Jupyter Translator for PDF Support
 

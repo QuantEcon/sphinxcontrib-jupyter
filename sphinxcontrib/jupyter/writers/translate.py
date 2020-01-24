@@ -19,7 +19,7 @@ from .markdown import List
 
 logger = logging.getLogger(__name__)
 
-class JupyterCodeTranslator(SphinxTranslator):
+class JupyterCodeTranslator(SphinxTranslator):   #->Deprecated
 
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 

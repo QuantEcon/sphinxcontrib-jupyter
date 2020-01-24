@@ -10,8 +10,8 @@ class JupyterWriter(Writer):
     
     builder_translator = {
         #Code Translators
-        'jupytercode' : JupyterCodeBlockTranslator,  #TODO: Migrate to JupyterCodeTranslator
-        "execute" : JupyterCodeBlockTranslator,      #TODO: Migrate to JupyterCodeTranslator
+        'jupytercode' : JupyterCodeBlockTranslator,
+        "execute" : JupyterCodeBlockTranslator,
         #RST + Code Translators
         'jupyter' : JupyterIPYNBTranslator,
         'jupyterhtml' : JupyterHTMLTranslator,

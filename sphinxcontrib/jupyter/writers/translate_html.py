@@ -10,11 +10,11 @@ from shutil import copyfile
 import copy
 import os
 
-from .translate import JupyterCodeTranslator
+from .translate_ipynb import JupyterIPYNBTranslator
 from .utils import JupyterOutputCellGenerators
 
 
-class JupyterHTMLTranslator(JupyterCodeTranslator):
+class JupyterHTMLTranslator(JupyterIPYNBTranslator):
     """ 
     Jupyter Translator for HTML Support
 

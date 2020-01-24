@@ -38,11 +38,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     #Configuration (Static Assets)
     images = []
     files = []
+    #Configuration (Titles)
+    visit_first_title = True
+    #Configuration (references)
+    reference_text_start = 0
 
-    #A dictionary to save states
-    saved_state = dict()
-    saved_state['visit_first_title'] = True
-    saved_state['reference_text_start'] = 0
+    #A dictionary to cache states to support nested blocks
+    cached_state = dict()
 
     #Configuration (Tables)
     table_builder = None                                  #TODO: table builder object
@@ -178,9 +180,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             pass
 
     def visit_title(self, node):
-        if self.saved_state['visit_first_title']:
+        if self.visit_first_title:
             title = node.astext()
-        self.saved_state['visit_first_title'] = False
+        self.visit_first_title = False
         if self.in_topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
@@ -271,9 +273,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.list_obj:
             markdown = self.list_obj.to_markdown()
             self.cell.append(markdown)
-            self.saved_state['list_level'] = self.list_obj.getlevel()
-            self.saved_state['list_marker'] = self.list_obj.get_marker()
-            self.saved_state['list_item_no'] = self.list_obj.get_item_no()
+            self.cached_state['list_level'] = self.list_obj.getlevel()
+            self.cached_state['list_marker'] = self.list_obj.get_marker()
+            self.cached_state['list_item_no'] = self.list_obj.get_item_no()
             self.list_obj = None
 
         self.cell_to_notebook()
@@ -309,11 +311,11 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         self.literal_block['in'] = False
 
         ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
-        if "list_level" in self.saved_state:
-            self.list_obj = List(self.saved_state["list_level"], self.saved_state["list_marker"], self.saved_state["list_item_no"])
-            del self.saved_state["list_level"]
-            del self.saved_state["list_marker"]
-            del self.saved_state["list_item_no"]
+        if "list_level" in self.cached_state:
+            self.list_obj = List(self.cached_state["list_level"], self.cached_state["list_marker"], self.cached_state["list_item_no"])
+            del self.cached_state["list_level"]
+            del self.cached_state["list_marker"]
+            del self.cached_state["list_item_no"]
 
     def visit_math_block(self, node):
         """directive math"""
@@ -604,7 +606,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             self.list_obj.add_item("[")
         else:
             self.cell.append("[")
-            self.saved_state['reference_text_start'] = len(self.cell)
+            self.reference_text_start = len(self.cell)
 
     def depart_reference(self, node):
         subdirectory = False
@@ -612,7 +614,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.in_topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
-                self.cell[self.saved_state['reference_text_start']:]).strip()
+                self.cell[self.reference_text_start:]).strip()
             uri_text = re.sub(
                 self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
             self.in_reference['uri_text'] = uri_text
