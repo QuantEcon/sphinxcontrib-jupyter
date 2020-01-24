@@ -1,5 +1,5 @@
 """
-Translators for RST to IPYNB Conversion
+Translator for RST to IPYNB Conversion
 """
 
 from __future__ import unicode_literals
@@ -20,77 +20,78 @@ from .markdown import MarkdownSyntax, List
 
 logger = logging.getLogger(__name__)
 
-class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
+class JupyterIPYNBTranslator(SphinxTranslator):
     
     SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
+    #Configuration (Attribution)
+    attribution = False
+    #Configuration (Block Quote)
+    block_quote = dict()
+    block_quote['in'] = False
+    block_quote['block_quote_type'] = "block-quote"      #TODO: can this be removed?
+    #Configuration(Caption)
+    caption = False
+    #Configuration(Citation)
+    citation = dict()
+    citation['in'] = False
+    #Configuration (Download)
+    download_reference = dict()
+    download_reference['in'] = False
     #Configuration (Formatting)
     sep_lines = "  \n"              #TODO: needed?
     sep_paragraph = "\n\n"          #TODO: needed?
     section_level = 0
-    #Configuration (File)
-    default_ext = ".ipynb"
-    #Configuration (Math)
-    math_block = dict()
-    math_block['in'] = False
-    math_block['math_block_label'] = None
-    #Configuration (Static Assets)
-    images = []
-    files = []
-    #Configuration (Titles)
-    visit_first_title = True
-    #Configuration (references)
-    reference_text_start = 0
-
-    #A dictionary to cache states to support nested blocks
-    cached_state = dict()
-
-    #Configuration (Tables)
-    table_builder = None                                  #TODO: table builder object
-
-    block_quote = dict()
-    block_quote['in_block_quote'] = False
-
+    #Configuration (Footnote)
     footnote = dict()
     footnote['in'] = False
-
     footnote_reference = dict()
     footnote_reference['in'] = False
-
-    download_reference = dict()
-    download_reference['in'] = False
-
-    citation = dict()
-    citation['in'] = False
-
+    #Configuration (File)
+    default_ext = ".ipynb"
+    #Configuration (Image)
+    image = dict()
+    #Configuration (List)
+    list_obj = None
+    #Configuration (Literal Block)
     literal_block = dict()
     literal_block['in'] = False
     literal_block['no-execute'] = False
-
-    image = dict()
-    target = dict()    #TODO: needed?
-
-    list_obj = None
-
+    #Configuration (Math)
     math = dict()
     math['in'] = False
+    math_block = dict()
+    math_block['in'] = False
+    math_block['math_block_label'] = None
+    #Configuration (Note)
+    note = False
+    #Configuration (References)
+    reference_text_start = 0
+    inpage_reference = False
+    #Configuration (Rubric)
+    rubric = False
+    #Configuration (Static Assets)
+    images = []
+    files = []
+    #Configuration (Tables)
+    table_builder = None         #TODO: construct table builder object
+    #Configuration (Titles)
+    visit_first_title = True
+    #Configuration (Toctree)
+    toctree = False
+    #Configuration (Topic)
+    topic = False    
 
-    in_note = False
-    in_attribution = False
-    in_rubric = False
-    in_inpage_reference = False
-    in_citation = False
-    in_caption = False
-    in_toctree = False
-    in_topic = False
-    remove_next_content = False
+    #->Review Options
 
-    ## options to remove?
-    block_quote['block_quote_type'] = "block-quote"
+    remove_next_content = False  #TODO: what is this?
+    target = dict()    #TODO: needed?
 
     # Slideshow option
-    metadata_slide = False
-    slide = "slide"
+    metadata_slide = False    #TODO: move to JupyterSlideTranslator
+    slide = "slide"           #TODO: move to JupyterSlideTranslator
+
+    cached_state = dict()   #A dictionary to cache states to support nested blocks
 
     def __init__(self, document, builder):
         """
@@ -98,8 +99,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
         This translator supports the construction of Jupyter notebooks
         with an emphasis on readability. It uses markdown structures
-        wherever possible. Notebooks geared towards HTML or PDF are 
-        available through JupyterHTMLTranslator, JupyterPDFTranslator
+        wherever possible. 
+        
+        Notebooks geared towards HTML or PDF are available:
+          1. JupyterHTMLTranslator, 
+          2. JupyterPDFTranslator
+
+        This builds on SphinxTranslator
         """
         super().__init__(document, builder)
         #-Jupyter Settings-#
@@ -111,7 +117,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def visit_document(self, node):
         self.output = JupyterNotebook(language=self.language)
-        self.new_cell()     #Initialise Cell
+        self.new_cell()
 
     def depart_document(self, node):
         self.cell_to_notebook()
@@ -123,10 +129,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         self.section_level -= 1
 
     def visit_topic(self, node):
-        self.in_topic = True
+        self.topic = True
 
     def depart_topic(self, node):
-        self.in_topic = False
+        self.topic = False
 
     def visit_exercise_node(self, node):
         pass
@@ -182,7 +188,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         if self.visit_first_title:
             title = node.astext()
         self.visit_first_title = False
-        if self.in_topic:
+        if self.topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
         elif self.table_builder:
@@ -230,12 +236,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             self.cell.append(text)
         elif self.table_builder:
             self.table_builder['line_pending'] += text
-        elif self.block_quote['in_block_quote'] or self.in_note:
+        elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
             else:
                 self.cell.append(text)
-        elif self.in_caption and self.in_toctree:
+        elif self.caption and self.toctree:
             self.cell.append("# {}".format(text))
         else:
             self.cell.append(text)
@@ -356,7 +362,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         pass
 
     def visit_rubric(self, node):
-        self.in_rubric = True
+        self.rubric = True
         self.cell_to_notebook()
         if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
             self.cell.append('**{}**\n\n'.format(node.children[0].astext()))
@@ -364,26 +370,26 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
 
     def depart_rubric(self, node):
         self.cell_to_notebook()
-        self.in_rubric = False
+        self.rubric = False
 
     def visit_target(self, node):
         if "refid" in node.attributes:
             self.cell.append("\n<a id='{}'></a>\n".format(node.attributes["refid"]))
 
     def visit_attribution(self, node):
-        self.in_attribution = True
+        self.attribution = True
         self.cell.append("> ")
 
     def depart_attribution(self, node):
-        self.in_attribution = False
+        self.attribution = False
         self.cell.append("\n")
 
     def visit_caption(self, node):
-        self.in_caption = True
+        self.caption = True
 
     def depart_caption(self, node):
-        self.in_caption = False
-        if self.in_toctree:
+        self.caption = False
+        if self.toctree:
             self.cell.append("\n")
 
     def visit_colspec(self, node):
@@ -420,7 +426,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             self.cell.append("\] ")
 
     def visit_block_quote(self, node):
-        self.block_quote['in_block_quote'] = True
+        self.block_quote['in'] = True
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "epigraph"
         if self.list_obj:               #allow for 4 spaces interpreted as block_quote
@@ -431,7 +437,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "block-quote"
-        self.block_quote['in_block_quote'] = False
+        self.block_quote['in'] = False
         self.cell.append("\n")
 
     def visit_bullet_list(self, node):
@@ -502,11 +508,11 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
         self.cell.append(self.sep_lines)
 
     def visit_note(self, node):
-        self.in_note = True
+        self.note = True
         self.cell.append(">**Note**\n>\n>")
 
     def depart_note(self, node):
-        self.in_note = False
+        self.note = False
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -610,7 +616,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
     def depart_reference(self, node):
         subdirectory = False
 
-        if self.in_topic:
+        if self.topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
                 self.cell[self.reference_text_start:]).strip()
@@ -630,7 +636,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
-                    self.in_inpage_reference = True
+                    self.inpage_reference = True
                     #markdown doesn't handle closing brackets very well so will replace with %28 and %29
                     #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
                     refid = refid.replace("(", "%28")
@@ -654,20 +660,20 @@ class JupyterIPYNBTranslator(SphinxTranslator):  #->NEW
             else:
                 self.cell.append("]({})".format(refuri))
 
-        if self.in_toctree:
+        if self.toctree:
             self.cell.append("\n")
 
     def visit_compact_paragraph(self, node):
         try:
             if node.attributes['toctree']:
-                self.in_toctree = True
+                self.toctree = True
         except:
             pass  #Should this execute visit_compact_paragragh in BaseTranslator?
 
     def depart_compact_paragraph(self, node):
         try:
             if node.attributes['toctree']:
-                self.in_toctree = False
+                self.toctree = False
         except:
             pass
 
