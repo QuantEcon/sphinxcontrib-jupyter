@@ -349,6 +349,16 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_list_item(self, node):
         pass
 
+    def visit_literal(self, node):
+        if self.download_reference['in']:
+            return
+        self.cell.append("`")
+
+    def depart_literal(self, node):
+        if self.download_reference['in']:
+            return
+        self.cell.append("`")
+
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
         self.literal_block['in'] = True
@@ -452,6 +462,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_note(self, node):
         self.note = False
 
+    def visit_only(self, node):
+        pass
+
+    def depart_only(self, node):
+        pass
+
     def visit_paragraph(self, node):
         pass
 
@@ -547,6 +563,32 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_target(self, node):
         pass
 
+    def visit_tgroup(self, node):
+        pass
+
+    def depart_tgroup(self, node):
+        pass
+
+    def visit_tbody(self, node):
+        pass
+
+    def depart_tbody(self, node):
+        pass
+
+    #Text
+
+    def visit_emphasis(self, node):
+        self.cell.append("*")
+
+    def depart_emphasis(self, node):
+        self.cell.append("*")
+
+    def visit_strong(self, node):
+        self.cell.append("**")
+
+    def depart_strong(self, node):
+        self.cell.append("**")
+
     def visit_Text(self, node):
         text = node.astext()
 
@@ -615,6 +657,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_topic(self, node):
         self.topic = False
 
+    #References
+
     def visit_reference(self, node):
         self.in_reference = dict()
 
@@ -675,10 +719,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.toctree:
             self.cell.append("\n")
 
-
-    #-> SORT BELOW <-#
-
-
     def visit_download_reference(self, node):
         self.download_reference['in'] = True
         html = "<a href={} download>".format(node["reftarget"])
@@ -687,42 +727,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_download_reference(self, node):
         self.download_reference['in'] = False
         self.cell.append("</a>")
-
-    def visit_only(self, node):
-        pass
-
-    def depart_only(self, node):
-        pass
-
-    def visit_strong(self, node):
-        self.cell.append("**")
-
-    def depart_strong(self, node):
-        self.cell.append("**")
-
-    def visit_exerciselist_node(self, node):
-        pass
-
-    def depart_exerciselist_node(self, node):
-        pass
-
-    def visit_tgroup(self, node):
-        pass
-
-    def depart_tgroup(self, node):
-        pass
-
-    def visit_tbody(self, node):
-        pass
-
-    def depart_tbody(self, node):
-        pass
-
-    def visit_emphasis(self, node):
-        self.cell.append("*")
-
-    def depart_emphasis(self, node):
-        self.cell.append("*")
 
     def visit_footnote_reference(self, node):
         self.footnote_reference['in'] = True
@@ -734,17 +738,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_footnote_reference(self, node):
         self.footnote_reference['in'] = False
-
-    def visit_literal(self, node):
-        if self.download_reference['in']:
-            return
-        self.cell.append("`")
-
-    def depart_literal(self, node):
-        if self.download_reference['in']:
-            return
-        self.cell.append("`")
-
+    
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
 
@@ -757,6 +751,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def depart_exercise_node(self, node):
+        pass
+
+    def visit_exerciselist_node(self, node):
+        pass
+
+    def depart_exerciselist_node(self, node):
         pass
 
     # Nodes (Review if Needed)
