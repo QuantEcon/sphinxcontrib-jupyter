@@ -11,9 +11,9 @@ import copy
 import os
 
 from .utils import JupyterOutputCellGenerators
-from .translate import JupyterCodeTranslator
+from .translate_ipynb import JupyterIPYNBTranslator
 
-class JupyterPDFTranslator(JupyterCodeTranslator):
+class JupyterPDFTranslator(JupyterIPYNBTranslator):
     """ 
     Jupyter Translator for PDF Support
 
@@ -900,15 +900,6 @@ class JupyterPDFTranslator(JupyterCodeTranslator):
                 return "{}{}#{}".format(uri, ext, id_)
 
         return uri
-
-    @classmethod
-    def get_filename(cls,path):
-        if "." in path and "/" in path:
-            index = path.rfind('/')
-            index1 = path.rfind('.')
-            return path[index + 1:index1]
-        else:
-            return path
 
 
 
