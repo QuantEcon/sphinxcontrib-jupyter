@@ -570,6 +570,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         markdown = self.table_builder_obj.to_markdown()
         self.cell.append(markdown)
         self.table_builder_obj = None
+        self.add_newline
 
 
     def visit_thead(self, node):
