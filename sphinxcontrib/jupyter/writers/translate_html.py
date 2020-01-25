@@ -1,5 +1,5 @@
 """
-Translator to Support HTML and Website Support
+Translator to Support IPYNB(HTML) and Website Support
 """
 
 from __future__ import unicode_literals
@@ -15,184 +15,75 @@ from .utils import JupyterOutputCellGenerators
 
 
 class JupyterHTMLTranslator(JupyterIPYNBTranslator):
-    """ 
-    Jupyter Translator for HTML Support
 
-    This will generate IPYNB files emphasis on HTML and 
-    build to work with the `nbconvert` template to support
-    website construction
-    """
-
-    SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
 
     def __init__(self, builder, document):
-        super(JupyterCodeTranslator, self).__init__(builder, document)
+        """ 
+        Jupyter Translator for HTML End Target Support
 
-        # Settings
-        self.sep_lines = "  \n"
-        self.sep_paras = "\n\n"
-        self.indent_char = " "
-        self.indent = self.indent_char * 4
-        self.default_ext = ".ipynb"
+        This will generate IPYNB files emphasis on HTML that are 
+        built to work with the `nbconvert` template to support website 
+        construction
+        """
+        super().__init__(builder, document)
+        # HTML Settings
         self.html_ext = ".html"
         self.urlpath = builder.urlpath
-        # Variables used in visit/depart
-        self.in_code_block = False  # if False, it means in markdown_cell
-        self.in_block_quote = False
-        self.block_quote_type = "block-quote"
-        self.in_note = False
-        self.in_attribution = False
-        self.in_rubric = False
-        self.in_footnote = False
-        self.in_footnote_reference = False
-        self.in_download_reference = False
-        self.in_inpage_reference = False
-        self.in_caption = False
-        self.in_toctree = False
-        self.in_list = False
-        self.in_math = False
-        self.in_math_block = False
 
-        self.code_lines = []
-        self.markdown_lines = []
+        self.skip_next_content = False          #TODO: Needed? PDF
 
-        self.indents = []
-        self.section_level = 0
-        self.bullets = []
-        self.list_item_starts = []
-        self.in_topic = False
-        self.reference_text_start = 0
-        self.in_reference = False
-        self.list_level = 0
-        self.skip_next_content = False
-        self.content_depth = self.jupyter_pdf_showcontentdepth
-        self.content_depth_to_skip = None
-        self.remove_next_content = False
-        self.in_citation = False
-        self.math_block_label = None
+    #-Nodes-#
 
-        self.images = []
-        self.files = []
-        self.table_builder = None
-
-        # Slideshow option
-        self.metadata_slide = False  #False is the value by default for all the notebooks
-        self.slide = "slide" #value by default
-        
-        ## pdf book options
-        self.in_book_index = False
-        self.book_index_previous_links = []
-        self.markdown_lines_trimmed = []
-
-
-    # specific visit and depart methods
-    # ---------------------------------
-
-    def visit_document(self, node):
-        """at start
-        """
-        JupyterCodeTranslator.visit_document(self, node)
-
-        ## if the source file parsed is book index file and target is pdf
-        if self.book_index is not None and self.book_index in self.source_file_name and self.jupyter_pdf_book:
-            self.in_book_index = True
-
-
-
-
-    def depart_document(self, node):
-        """at end
-        Almost the exact same implementation as that of the superclass.
-
-
-        Notes
-        -----
-        [1] if copyfile is not graceful should catch exception if file not found / issue warning in sphinx
-        [2] should this be moved to CodeTranslator for support files when producing code only notebooks?
-        """
-        self.add_markdown_cell()
-        #Parse .. jupyter-dependency::
-        if len(self.files) > 0:
-            for fl in self.files:
-                src_fl = os.path.join(self.builder.srcdir, fl)
-                out_fl = os.path.join(self.builder.outdir, os.path.basename(fl))   #copy file to same location as notebook (remove dir structure)
-                #Check if output directory exists
-                out_dir = os.path.dirname(out_fl)
-                if not os.path.exists(out_dir):
-                    os.makedirs(out_dir)
-                print("Copying {} to {}".format(src_fl, out_fl))
-                copyfile(src_fl, out_fl)
-        #Run Parent Method
-        JupyterCodeTranslator.depart_document(self, node)
-    
-    # =========
-    # Sections
-    # =========
-
-    def visit_only(self, node):
-        pass
-
-    def depart_only(self, node):
-        pass
-
-    def visit_topic(self, node):
-        self.in_topic = True
-
-    def depart_topic(self, node):
-        self.in_topic = False
-
-    def visit_section(self, node):
-        self.section_level += 1
-
-    def depart_section(self, node):
-        self.section_level -= 1
-
-    #=================
-    # Inline elements
-    #=================
-    def visit_Text(self, node):
-
-        text = node.astext()
-
-        ## removing references from index file book
-        if self.in_book_index and 'references' in text.lower():
+    def visit_block_quote(self, node):
+        if self.list:               #allow for 4 spaces interpreted as block_quote
+            self.markdown_lines.append("\n")
             return
+        self.block_quote = True
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "epigraph"
+        self.markdown_lines.append("> ")
 
-        #Escape Special markdown chars except in code block
-        if self.in_code_block == False:
-            text = text.replace("$", "\$")
+    def depart_block_quote(self, node):
+        if "epigraph" in node.attributes["classes"]:
+            self.block_quote_type = "block-quote"
+        self.markdown_lines.append("\n")
+        self.block_quote = False
 
-        if self.in_math:
-            if self.jupyter_target_pdf:
-                text = '${}$'.format(text.strip())  #must remove spaces between $ and math for latex
+    def visit_citation(self, node):
+        self.citation = True
+        if "ids" in node.attributes:
+            ids = node.attributes["ids"]
+            id_text = ""
+            for id_ in ids:
+                id_text += "{} ".format(id_)
             else:
-                text = '$ {} $'.format(text.strip())
-        elif self.in_math_block and self.math_block_label:
-            text = "$$\n{0}{1}$${2}".format(
-                        text.strip(), self.math_block_label, self.sep_paras
-                    )
-            self.math_block_label = None
-        elif self.in_math_block:
-            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
+                id_text = id_text[:-1]
 
-        if self.in_code_block:
-            self.code_lines.append(text)
-        elif self.table_builder:
-            self.table_builder['line_pending'] += text
-        elif self.in_block_quote or self.in_note:
-            if self.block_quote_type == "epigraph":
-                self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
-            else:
-                self.markdown_lines.append(text)
-        elif self.in_caption and self.in_toctree:
-            self.markdown_lines.append("# {}".format(text))
-        else:
-            self.markdown_lines.append(text)
+            self.markdown_lines.append(
+                "<a id='{}'></a>\n".format(id_text))
 
-    def depart_Text(self, node):
+    def depart_citation(self, node):
+        self.citation = False
+
+
+    def visit_definition(self, node):
+        self.markdown_lines.append("<dd>\n")
+
+    def depart_definition(self, node):
+        self.markdown_lines.append("</dd>\n")
+
+    def visit_definition_list(self, node):
+        self.markdown_lines.append("\n<dl style='margin: 20px 0;'>\n")
+
+    def depart_definition_list(self, node):
+        self.markdown_lines.append("\n</dl>{}".format(self.sep_paras))
+
+    def visit_figure(self, node):
         pass
 
-    # image
+    def depart_figure(self, node):
+        self.markdown_lines.append(self.sep_lines)
+
     def visit_image(self, node):
         """
         Notes
@@ -203,7 +94,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         """
         ### preventing image from the index file at the moment
-        if self.in_book_index:
+        if self.book_index:
             return
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
@@ -238,7 +129,132 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         if self.jupyter_target_pdf:
             self.markdown_lines.append("\n")
 
-    # math
+    def visit_label(self, node):
+        if self.footnote:
+            ids = node.parent.attributes["ids"]
+            id_text = ""
+            for id_ in ids:
+                id_text += "{} ".format(id_)
+            else:
+                id_text = id_text[:-1]
+            if self.jupyter_target_html:
+                self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
+            else:
+                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            raise nodes.SkipNode
+        if self.citation:
+            self.markdown_lines.append("\[")
+
+    def depart_label(self, node):
+        if self.citation:
+            self.markdown_lines.append("\] ")
+
+    #List(Start)
+
+    def visit_bullet_list(self, node):
+        ## trying to return if it is in the topmost depth and it is more than 1
+        if self.jupyter_target_pdf and (self.content_depth == self.jupyter_pdf_showcontentdepth) and self.content_depth > 1:
+            self.content_depth_to_skip = self.content_depth
+            self.initial_lines = []
+            return
+
+        self.list_level += 1
+
+        # markdown does not have option changing bullet chars
+        self.bullets.append("-")
+        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
+
+    def depart_bullet_list(self, node):
+        self.list_level -= 1
+        if self.list_level == 0:
+            self.markdown_lines.append(self.sep_paras)
+            if self.topic:
+                self.add_markdown_cell()
+        if len(self.bullets):
+            self.bullets.pop()
+            self.indents.pop()
+
+    def visit_enumerated_list(self, node):
+        self.list_level += 1
+        # markdown does not have option changing bullet chars
+        self.bullets.append("1.")
+        self.indents.append(len(self.bullets[-1]))
+
+    def depart_enumerated_list(self, node):
+        self.list_level -= 1
+        if self.list_level == 0:
+            self.markdown_lines.append(self.sep_paras)
+        self.bullets.pop()
+        self.indents.pop()
+
+    def visit_list_item(self, node):
+
+        ## do not add this list item to the list
+        if self.skip_next_content is True:
+           self.markdown_lines = copy.deepcopy(self.initial_lines)
+           self.skip_next_content = False
+        
+        ## if we do not want to add the items in this depth to the list
+        if self.content_depth == self.content_depth_to_skip:
+           self.initial_lines = copy.deepcopy(self.markdown_lines)
+           self.skip_next_content = True
+           self.content_depth_to_skip = None
+
+           ## only one item in this content depth to remove 
+           self.content_depth -= 1
+           return
+
+        ## check if there is a list level
+        if not len(self.bullets):
+            return
+        self.list = True
+        head = "{} ".format(self.bullets[-1])
+        self.markdown_lines.append(head)
+        self.list_item_starts.append(len(self.markdown_lines))
+
+    def depart_list_item(self, node):
+        ## check if there is a list level
+        if not len(self.list_item_starts):
+            return
+        self.list = False
+        list_item_start = self.list_item_starts.pop()
+        indent = self.indent_char * self.indents[-1]
+        br_removed_flag = False
+
+        # remove last breakline
+        if self.markdown_lines and self.markdown_lines[-1][-1] == "\n":
+            br_removed_flag = True
+            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]
+
+        for i in range(list_item_start, len(self.markdown_lines)):
+            self.markdown_lines[i] = self.markdown_lines[i].replace(
+                "\n", "\n{}".format(indent))
+
+        # add breakline
+        if br_removed_flag:
+            self.markdown_lines.append("\n")
+
+    #List(End)
+
+    def visit_literal(self, node):
+        if self.download_reference:
+            return
+        self.markdown_lines.append("`")
+
+    def depart_literal(self, node):
+        if self.download_reference:
+            return
+        self.markdown_lines.append("`")
+
+    def visit_literal_block(self, node):
+        JupyterCodeTranslator.visit_literal_block(self, node)
+        if self.code_block:
+            self.add_markdown_cell()
+
+    def depart_literal_block(self, node):
+        JupyterCodeTranslator.depart_literal_block(self, node)
+
+
     def visit_math(self, node):
         """inline math"""
 
@@ -253,7 +269,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             math_text = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
-            self.in_math = True
+            self.math = True
 
             # the flag is raised, the function can be exited.
             return
@@ -269,7 +285,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             self.markdown_lines.append(formatted_text)
 
     def depart_math(self, node):
-        self.in_math = False
+        self.math = False
 
     def visit_displaymath(self, node):
         """directive math"""
@@ -277,7 +293,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         math_text = node.attributes["latex"].strip()
 
-        if self.in_list and node["label"]:
+        if self.list and node["label"]:
             self.markdown_lines.pop()  #remove entry \n from table builder
 
         if self.list_level == 0:
@@ -300,16 +316,16 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         self.markdown_lines.append(formatted_text)
 
     def depart_displaymath(self, node):
-        if self.in_list:
+        if self.list:
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
     def visit_math_block(self, node):
         """directive math"""
         # visit_math_block is called only with sphinx >= 1.8
 
-        self.in_math_block = True
+        self.math_block = True
 
-        if self.in_list and node["label"]:
+        if self.list and node["label"]:
             self.markdown_lines.pop()  #remove entry \n from table builder
 
         #check for labelled math
@@ -324,10 +340,71 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             self.math_block_label = referenceBuilder
 
     def depart_math_block(self, node):
-        if self.in_list:
+        if self.list:
             self.markdown_lines[-1] = self.markdown_lines[-1][:-1]  #remove excess \n
 
-        self.in_math_block = False
+        self.math_block = False
+
+    def visit_note(self, node):
+        self.note = True
+        self.markdown_lines.append(">**Note**\n>\n>")
+
+    def depart_note(self, node):
+        self.note = False
+
+    def visit_paragraph(self, node):
+        pass
+
+    def depart_paragraph(self, node):
+        if self.list_level > 0:
+            self.markdown_lines.append(self.sep_lines)
+        elif self.table_builder:
+            pass
+        elif self.block_quote_type == "epigraph":
+            try:
+                attribution = node.parent.children[1]
+                self.markdown_lines.append("\n>\n")   #Continue block for attribution
+            except:
+                self.markdown_lines.append(self.sep_paras)
+        else:
+            self.markdown_lines.append(self.sep_paras)
+
+    def visit_raw(self, node):
+        pass
+
+    def depart_raw(self, node):
+        if self.jupyter_target_pdf:
+            for attr in node.attributes:
+                if attr == 'format' and node.attributes[attr] == 'html':
+                    self.markdown_lines = []
+                    return
+        self.markdown_lines.append("\n\n")
+
+    def visit_rubric(self, node):
+        self.rubric = True
+        self.add_markdown_cell()
+        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
+            self.markdown_lines.append('**{}**\n\n'.format(node.children[0].astext()))
+            raise nodes.SkipNode
+
+    def depart_rubric(self, node):
+        self.add_markdown_cell()
+        self.rubric = False
+
+    #Table(Start)
+
+    def visit_entry(self, node):
+        pass
+
+    def depart_entry(self, node):
+        self.table_builder['line_pending'] += "|"
+
+    def visit_row(self, node):
+        self.table_builder['line_pending'] = "|"
+
+    def depart_row(self, node):
+        finished_line = self.table_builder['line_pending'] + "\n"
+        self.table_builder['lines'].append(finished_line)
 
     def visit_table(self, node):
         self.table_builder = dict()
@@ -359,100 +436,80 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         self.table_builder['lines'].append(header_line + "\n")
 
-    def generate_alignment_line(self, line_length, alignment):
-        left = ":" if alignment != "right" else "-"
-        right = ":" if alignment != "left" else "-"
-        return left + "-" * (line_length - 2) + right
+    #Table(End)
 
-    def visit_row(self, node):
-        self.table_builder['line_pending'] = "|"
+    def visit_target(self, node):
+        if "refid" in node.attributes:
+            refid = node.attributes["refid"]
+            self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
 
-    def depart_row(self, node):
-        finished_line = self.table_builder['line_pending'] + "\n"
-        self.table_builder['lines'].append(finished_line)
+    #Text(Start)
 
-    def visit_entry(self, node):
-        pass
+    def visit_emphasis(self, node):
+        self.markdown_lines.append("*")
 
-    def depart_entry(self, node):
-        self.table_builder['line_pending'] += "|"
+    def depart_emphasis(self, node):
+        self.markdown_lines.append("*")
 
-    def visit_raw(self, node):
-        pass
+    def visit_strong(self, node):
+        self.markdown_lines.append("**")
 
+    def depart_strong(self, node):
+        self.markdown_lines.append("**")
 
-    def visit_rubric(self, node):
-        self.in_rubric = True
-        self.add_markdown_cell()
-        if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
-            self.markdown_lines.append('**{}**\n\n'.format(node.children[0].astext()))
-            raise nodes.SkipNode
+    def visit_Text(self, node):
 
-    def depart_rubric(self, node):
-        self.add_markdown_cell()
-        self.in_rubric = False
+        text = node.astext()
 
-    def visit_footnote_reference(self, node):
-        self.in_footnote_reference = True
-        refid = node.attributes['refid']
-        ids = node.astext()
-        if self.jupyter_target_html:
-            link = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(refid, refid, ids)
-        else:
-            link = "<sup>[{}](#{})</sup>".format(ids, refid)
-        self.markdown_lines.append(link)
-        raise nodes.SkipNode
+        ## removing references from index file book
+        if self.book_index and 'references' in text.lower():
+            return
 
-    def depart_footnote_reference(self, node):
-        self.in_footnote_reference = False
+        #Escape Special markdown chars except in code block
+        if self.code_block == False:
+            text = text.replace("$", "\$")
 
-    def visit_footnote(self, node):
-        self.in_footnote = True
+        if self.math:
+            if self.jupyter_target_pdf:
+                text = '${}$'.format(text.strip())  #must remove spaces between $ and math for latex
+            else:
+                text = '$ {} $'.format(text.strip())
+        elif self.math_block and self.math_block_label:
+            text = "$$\n{0}{1}$${2}".format(
+                        text.strip(), self.math_block_label, self.sep_paras
+                    )
+            self.math_block_label = None
+        elif self.math_block:
+            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paras)
 
-    def depart_footnote(self, node):
-        self.in_footnote = False
-
-    def visit_download_reference(self, node):
-        self.in_download_reference = True
-        html = "<a href={} download>".format(node["reftarget"])
-        self.markdown_lines.append(html)
-
-    def depart_download_reference(self, node):
-        self.markdown_lines.append("</a>")
-        self.in_download_reference = False
-
-    #================
-    # markdown cells
-    #================
-
-    # general paragraph
-    def visit_paragraph(self, node):
-        pass
-
-    def depart_paragraph(self, node):
-        if self.list_level > 0:
-            self.markdown_lines.append(self.sep_lines)
+        if self.code_block:
+            self.code_lines.append(text)
         elif self.table_builder:
-            pass
-        elif self.block_quote_type == "epigraph":
-            try:
-                attribution = node.parent.children[1]
-                self.markdown_lines.append("\n>\n")   #Continue block for attribution
-            except:
-                self.markdown_lines.append(self.sep_paras)
+            self.table_builder['line_pending'] += text
+        elif self.block_quote or self.note:
+            if self.block_quote_type == "epigraph":
+                self.markdown_lines.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+            else:
+                self.markdown_lines.append(text)
+        elif self.caption and self.toctree:
+            self.markdown_lines.append("# {}".format(text))
         else:
-            self.markdown_lines.append(self.sep_paras)
+            self.markdown_lines.append(text)
 
-    # title(section)
+    def depart_Text(self, node):
+        pass
+
+    #Text(End)
+
     def visit_title(self, node):
         JupyterCodeTranslator.visit_title(self, node)
 
         ### to remove the main title from ipynb as they are already added by metadata
-        if self.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
+        if self.jupyter_target_pdf and self.section_level == 1 and not self.topic:
             return
         else:
             self.add_markdown_cell()
-        if self.in_topic:
+        if self.topic:
             ### this prevents from making it a subsection from section
             if self.jupyter_target_pdf and self.section_level == 1:
                 self.markdown_lines.append(
@@ -476,57 +533,26 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         if not self.table_builder:
 
             ### to remove the main title from ipynb as they are already added by metadata
-            if self.jupyter_target_pdf and self.section_level == 1 and not self.in_topic:
+            if self.jupyter_target_pdf and self.section_level == 1 and not self.topic:
                 self.markdown_lines = []
                 return
             self.markdown_lines.append(self.sep_paras)
 
-    # emphasis(italic)
-    def visit_emphasis(self, node):
-        self.markdown_lines.append("*")
-
-    def depart_emphasis(self, node):
-        self.markdown_lines.append("*")
-
-    # strong(bold)
-    def visit_strong(self, node):
-        self.markdown_lines.append("**")
-
-    def depart_strong(self, node):
-        self.markdown_lines.append("**")
-
-    def visit_literal(self, node):
-        if self.in_download_reference:
-            return
-        self.markdown_lines.append("`")
-
-    def depart_literal(self, node):
-        if self.in_download_reference:
-            return
-        self.markdown_lines.append("`")
-
-    # figures
-    def visit_figure(self, node):
-        pass
-
-    def depart_figure(self, node):
-        self.markdown_lines.append(self.sep_lines)
-
-    # reference
+    #References(Start)
     def visit_reference(self, node):
         """anchor link"""
         ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+        if self.book_index and node.attributes['refuri'] == 'zreferences':
             return
 
-        self.in_reference = True
+        self.reference = True
         if self.jupyter_target_pdf:
             if "refuri" in node and "http" in node["refuri"]:
                 self.markdown_lines.append("[")
             elif "refid" in node:
                 if 'equation-' in node['refid']:
                     self.markdown_lines.append("\eqref{")
-                elif self.in_topic:
+                elif self.topic:
                     pass
                 else:
                     self.markdown_lines.append("\hyperlink{")
@@ -542,10 +568,10 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         subdirectory = False
 
         ## removing zreferences from the index file
-        if self.in_book_index and node.attributes['refuri'] == 'zreferences':
+        if self.book_index and node.attributes['refuri'] == 'zreferences':
             return
 
-        if self.in_topic:
+        if self.topic:
             # Jupyter Notebook uses the target text as its id
             uri_text = "".join(
                 self.markdown_lines[self.reference_text_start:]).strip()
@@ -605,7 +631,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
                 # in-page link
                 if "refid" in node:
                     refid = node["refid"]
-                    self.in_inpage_reference = True
+                    self.inpage_reference = True
                     if not self.jupyter_target_pdf:
                         #markdown doesn't handle closing brackets very well so will replace with %28 and %29
                         #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
@@ -631,7 +657,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
                 self.markdown_lines.append(refuri.replace("reference-","") + "}")
             elif "refuri" in node.attributes and self.jupyter_target_pdf and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
                 ##### Below code, constructs an index file for the book
-                if self.in_book_index:
+                if self.book_index:
                     if self.markdown_lines_trimmed != [] and (all(x in self.markdown_lines for x in self.markdown_lines_trimmed)): 
                         ### when the list is not empty and when the list contains chapters or heading from the topic already
                         self.markdown_lines_trimmed = self.markdown_lines[len(self.book_index_previous_links) + 2:] ### +2 to preserve '/n's
@@ -663,325 +689,44 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
                 #     self.markdown_lines.append(label + "{" + refuri + "}")
                 # else:
                 #     self.markdown_lines.append(refuri + "}" + "{" + label + "}")
-            elif self.jupyter_target_pdf and self.in_inpage_reference:
+            elif self.jupyter_target_pdf and self.inpage_reference:
                 labeltext = self.markdown_lines.pop()
                 # Check for Equations as they do not need labetext
                 if 'equation-' in refuri:
                     self.markdown_lines.append(refuri + "}")
                 else:
                     self.markdown_lines.append(refuri + "}{" + labeltext + "}")
-            # if self.jupyter_target_pdf and self.in_toctree:
+            # if self.jupyter_target_pdf and self.toctree:
             #     #TODO: this will become an internal link when making a single unified latex file
             #     formatted_text = " \\ref{" + refuri + "}"
             #     self.markdown_lines.append(formatted_text)
             else:
                 self.markdown_lines.append("]({})".format(refuri))
 
-        if self.in_toctree:
+        if self.toctree:
             self.markdown_lines.append("\n")
 
-        self.in_reference = False
+        self.reference = False
 
-    # target: make anchor
-    def visit_target(self, node):
-        if "refid" in node.attributes:
-            refid = node.attributes["refid"]
-            self.markdown_lines.append("\n<a id='{}'></a>\n".format(refid))
+    def visit_download_reference(self, node):
+        self.download_reference = True
+        html = "<a href={} download>".format(node["reftarget"])
+        self.markdown_lines.append(html)
 
-    # list items
-    def visit_bullet_list(self, node):
-        ## trying to return if it is in the topmost depth and it is more than 1
-        if self.jupyter_target_pdf and (self.content_depth == self.jupyter_pdf_showcontentdepth) and self.content_depth > 1:
-            self.content_depth_to_skip = self.content_depth
-            self.initial_lines = []
-            return
+    def depart_download_reference(self, node):
+        self.markdown_lines.append("</a>")
+        self.download_reference = False
 
-        self.list_level += 1
-
-        # markdown does not have option changing bullet chars
-        self.bullets.append("-")
-        self.indents.append(len(self.bullets[-1] * 2))  #add two per level
-
-    def depart_bullet_list(self, node):
-        self.list_level -= 1
-        if self.list_level == 0:
-            self.markdown_lines.append(self.sep_paras)
-            if self.in_topic:
-                self.add_markdown_cell()
-        if len(self.bullets):
-            self.bullets.pop()
-            self.indents.pop()
-        
-
-    def visit_enumerated_list(self, node):
-        self.list_level += 1
-        # markdown does not have option changing bullet chars
-        self.bullets.append("1.")
-        self.indents.append(len(self.bullets[-1]))
-
-    def depart_enumerated_list(self, node):
-        self.list_level -= 1
-        if self.list_level == 0:
-            self.markdown_lines.append(self.sep_paras)
-        self.bullets.pop()
-        self.indents.pop()
-
-    def visit_list_item(self, node):
-
-        ## do not add this list item to the list
-        if self.skip_next_content is True:
-           self.markdown_lines = copy.deepcopy(self.initial_lines)
-           self.skip_next_content = False
-        
-        ## if we do not want to add the items in this depth to the list
-        if self.content_depth == self.content_depth_to_skip:
-           self.initial_lines = copy.deepcopy(self.markdown_lines)
-           self.skip_next_content = True
-           self.content_depth_to_skip = None
-
-           ## only one item in this content depth to remove 
-           self.content_depth -= 1
-           return
-
-        ## check if there is a list level
-        if not len(self.bullets):
-            return
-        self.in_list = True
-        head = "{} ".format(self.bullets[-1])
-        self.markdown_lines.append(head)
-        self.list_item_starts.append(len(self.markdown_lines))
-
-    def depart_list_item(self, node):
-        ## check if there is a list level
-        if not len(self.list_item_starts):
-            return
-        self.in_list = False
-        list_item_start = self.list_item_starts.pop()
-        indent = self.indent_char * self.indents[-1]
-        br_removed_flag = False
-
-        # remove last breakline
-        if self.markdown_lines and self.markdown_lines[-1][-1] == "\n":
-            br_removed_flag = True
-            self.markdown_lines[-1] = self.markdown_lines[-1][:-1]
-
-        for i in range(list_item_start, len(self.markdown_lines)):
-            self.markdown_lines[i] = self.markdown_lines[i].replace(
-                "\n", "\n{}".format(indent))
-
-        # add breakline
-        if br_removed_flag:
-            self.markdown_lines.append("\n")
-
-    # definition list
-    def visit_definition_list(self, node):
-        self.markdown_lines.append("\n<dl style='margin: 20px 0;'>\n")
-
-    def depart_definition_list(self, node):
-        self.markdown_lines.append("\n</dl>{}".format(self.sep_paras))
-
-    def visit_term(self, node):
-        self.markdown_lines.append("<dt>")
-
-    def depart_term(self, node):
-        self.markdown_lines.append("</dt>\n")
-
-    def visit_definition(self, node):
-        self.markdown_lines.append("<dd>\n")
-
-    def depart_definition(self, node):
-        self.markdown_lines.append("</dd>\n")
-
-    # field list
-    def visit_field_list(self, node):
-        self.visit_definition_list(node)
-
-    def depart_field_list(self, node):
-        self.depart_definition_list(node)
-
-    def visit_field_body(self, node):
-        self.visit_definition(node)
-
-    def depart_field_body(self, node):
-        self.depart_definition(node)
-
-    # citation
-    def visit_citation(self, node):
-        self.in_citation = True
-        if "ids" in node.attributes:
-            ids = node.attributes["ids"]
-            id_text = ""
-            for id_ in ids:
-                id_text += "{} ".format(id_)
-            else:
-                id_text = id_text[:-1]
-
-            self.markdown_lines.append(
-                "<a id='{}'></a>\n".format(id_text))
-
-    def depart_citation(self, node):
-        self.in_citation = False
-
-    # label
-    def visit_label(self, node):
-        if self.in_footnote:
-            ids = node.parent.attributes["ids"]
-            id_text = ""
-            for id_ in ids:
-                id_text += "{} ".format(id_)
-            else:
-                id_text = id_text[:-1]
-            if self.jupyter_target_html:
-                self.markdown_lines.append("<p><a id={} href=#{}-link><strong>[{}]</strong></a> ".format(id_text, id_text, node.astext()))
-            else:
-                self.markdown_lines.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
-            raise nodes.SkipNode
-        if self.in_citation:
-            self.markdown_lines.append("\[")
-
-    def depart_label(self, node):
-        if self.in_citation:
-            self.markdown_lines.append("\] ")
-
-    # ===============================================
-    #  code blocks are implemented in the superclass
-    # ===============================================
-
-    def visit_block_quote(self, node):
-        if self.in_list:               #allow for 4 spaces interpreted as block_quote
-            self.markdown_lines.append("\n")
-            return
-        self.in_block_quote = True
-        if "epigraph" in node.attributes["classes"]:
-            self.block_quote_type = "epigraph"
-        self.markdown_lines.append("> ")
-
-    def depart_block_quote(self, node):
-        if "epigraph" in node.attributes["classes"]:
-            self.block_quote_type = "block-quote"
-        self.markdown_lines.append("\n")
-        self.in_block_quote = False
-
-    def visit_literal_block(self, node):
-        JupyterCodeTranslator.visit_literal_block(self, node)
-        if self.in_code_block:
-            self.add_markdown_cell()
-
-    def depart_literal_block(self, node):
-        JupyterCodeTranslator.depart_literal_block(self, node)
-    def visit_note(self, node):
-        self.in_note = True
-        self.markdown_lines.append(">**Note**\n>\n>")
-
-    def depart_note(self, node):
-        self.in_note = False
-
-    def depart_raw(self, node):
-        if self.jupyter_target_pdf:
-            for attr in node.attributes:
-                if attr == 'format' and node.attributes[attr] == 'html':
-                    self.markdown_lines = []
-                    return
-        self.markdown_lines.append("\n\n")
-        
-
-    # =============
-    # Jupyter Nodes
-    # =============
-
-    def visit_jupyter_node(self, node):
-        try:
-            if 'cell-break' in node.attributes:
-                self.add_markdown_cell()
-            if 'slide' in node.attributes:
-                self.metadata_slide = node['slide'] # this activates the slideshow metadata for the notebook
-            if 'slide-type' in node.attributes:
-                if "fragment" in node['slide-type']:
-                    self.add_markdown_cell(slide_type=node['slide-type'])   #start a new cell
-                self.slide = node['slide-type'] # replace the default value
-        except:
-            pass
-        #Parse jupyter_dependency directive (TODO: Should this be a separate node type?)
-        try:
-            self.files.append(node['uri'])
-        except:
-            pass
-
-    def depart_jupyter_node(self, node):
-        if 'cell-break' in node.attributes:
-            pass
-        if 'slide' in node.attributes:
-            pass
-        if 'slide-type' in node.attributes:
-            pass
-
-    def visit_comment(self, node):
+    def visit_footnote_reference(self, node):
+        self.footnote_reference = True
+        refid = node.attributes['refid']
+        ids = node.astext()
+        if self.jupyter_target_html:
+            link = "<sup><a href=#{} id={}-link>[{}]</a></sup>".format(refid, refid, ids)
+        else:
+            link = "<sup>[{}](#{})</sup>".format(ids, refid)
+        self.markdown_lines.append(link)
         raise nodes.SkipNode
 
-    def visit_compact_paragraph(self, node):
-        try:
-            if node.attributes['toctree']:
-                self.in_toctree = True
-        except:
-            pass  #Should this execute visit_compact_paragragh in BaseTranslator?
-
-    def depart_compact_paragraph(self, node):
-        try:
-            if node.attributes['toctree']:
-                self.in_toctree = False
-        except:
-            pass
-
-    # ================
-    # general methods
-    # ================
-    def add_markdown_cell(self, slide_type="slide", title=False):
-        """split a markdown cell here
-
-        * add the slideshow metadata
-        * append `markdown_lines` to notebook
-        * reset `markdown_lines`
-        """
-        line_text = "".join(self.markdown_lines)
-        formatted_line_text = self.strip_blank_lines_in_end_of_block(line_text)
-        slide_info = {'slide_type': self.slide}
-
-        if len(formatted_line_text.strip()) > 0:
-            new_md_cell = nbformat.v4.new_markdown_cell(formatted_line_text)
-            if self.metadata_slide:  # modify the slide metadata on each cell
-                new_md_cell.metadata["slideshow"] = slide_info
-                self.slide = slide_type
-            if title:
-                new_md_cell.metadata["hide-input"] = True
-            self.output["cells"].append(new_md_cell)
-            self.markdown_lines = []
-
-    @classmethod
-    def split_uri_id(cls, uri):
-        return re.search(cls.SPLIT_URI_ID_REGEX, uri).groups()
-
-    @classmethod
-    def add_extension_to_inline_link(cls, uri, ext):
-        if "." not in uri:
-            if len(uri) > 0 and uri[0] == "#":
-                return uri
-            uri, id_ = cls.split_uri_id(uri)
-            if len(id_) == 0:
-                return "{}{}".format(uri, ext)
-            else:
-                return "{}{}#{}".format(uri, ext, id_)
-        #adjust relative references
-        elif "../" in uri:
-            # uri = uri.replace("../", "")
-            uri, id_ = cls.split_uri_id(uri)
-            if len(id_) == 0:
-                return "{}{}".format(uri, ext)
-            else:
-                return "{}{}#{}".format(uri, ext, id_)
-
-        return uri
-
-
-
-
-
+    def depart_footnote_reference(self, node):
+        self.footnote_reference = False
