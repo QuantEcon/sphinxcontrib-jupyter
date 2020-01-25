@@ -220,8 +220,21 @@ class ListCollector:
 
 class TableBuilder:
 
+    column_widths = []
+    lines = []
+    line_pending = ""
+    align = "center"
     def __init__(self):
         self.table = []
 
+    def __repr__(self):
+        return self.to_markdown()
+
     def add_row(self, row):
         pass
+
+    def to_markdown(self):
+        """
+        converts the table items to markdown
+        """
+        return "".join(self.lines)
