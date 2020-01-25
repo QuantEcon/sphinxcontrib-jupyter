@@ -50,7 +50,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #Configuration (Image)
     image = dict()
     #Configuration (List)
-    list_obj = None
+    List = None
     #Configuration (Literal Block)
     literal_block = dict()
     literal_block['in'] = False
@@ -111,6 +111,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.language_synonyms = self.config['jupyter_language_synonyms']
         src_dir = self.settings.env.srcdir
         self.source_file_name = self.settings._source.replace(src_dir+"/", "")
+        #-Syntax-#
+        self.syntax = MarkdownSyntax()
 
     #-Document-#
 
@@ -136,26 +138,26 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_attribution(self, node):
         self.attribution = True
-        self.cell.append("> ")
+        self.cell.append(self.syntax.visit_attribution())
 
     def depart_attribution(self, node):
         self.attribution = False
-        self.cell.append("\n")
+        self.add_newline
 
     def visit_block_quote(self, node):
         self.block_quote['in'] = True
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "epigraph"
-        if self.list_obj:               #allow for 4 spaces interpreted as block_quote
-            self.cell.append("\n")
+        if self.List:
+            self.add_newline
             return
-        self.cell.append("> ")
+        self.cell.append(self.syntax.visit_block_quote())
 
     def depart_block_quote(self, node):
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "block-quote"
         self.block_quote['in'] = False
-        self.cell.append("\n")
+        self.add_newline
 
     def visit_caption(self, node):
         self.caption = True
@@ -173,7 +175,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-        self.cell.append("<a id='{}'></a>\n".format(id_text))
+        self.cell.append(self.syntax.visit_citation(id_text))
 
     def depart_citation(self, node):
         self.citation['in'] = False
@@ -202,16 +204,22 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def visit_definition(self, node):
-        self.cell.append("<dd>\n")
+        self.cell.append(self.syntax.visit_definition())
+        self.add_newline
 
     def depart_definition(self, node):
-        self.cell.append("</dd>\n")
+        self.cell.append(self.syntax.depart_definition())
+        self.add_newline
 
     def visit_definition_list(self, node):
-        self.cell.append("\n<dl style='margin: 20px 0;'>\n")
+        self.add_newline
+        self.cell.append(self.syntax.visit_definition_list())
+        self.add_newline
 
     def depart_definition_list(self, node):
-        self.cell.append("\n</dl>{}".format(self.sep_paragraph))
+        self.add_newline
+        self.cell.append(self.syntax.depart_definition_list())  
+        self.add_newparagraph
 
     def visit_definition_list_item(self, node):
         pass
@@ -229,7 +237,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def depart_figure(self, node):
-        self.cell.append(self.sep_lines)
+        self.add_newline
 
     def visit_field_body(self, node):
         self.visit_definition(node)
@@ -251,20 +259,16 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_image(self, node):
         """
-        Notes
-        -----
-        1. Should this use .has_attrs()?
-        2. the scale, height and width properties are not combined in this
-        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
+        .. notes::
+
+            1. Should this use .has_attrs()?
+            2. the scale, height and width properties are not combined in this
+            implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
 
         """
         uri = node.attributes["uri"]
-        attrs = node.attributes
-        
-        image = "![{0}]({0})".format(uri)
-    
         self.images.append(uri)
-        self.cell.append(image)
+        self.cell.append(self.syntax.visit_image(uri))
     
     def depart_image(self, node):
         pass
@@ -301,6 +305,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if 'slide-type' in node.attributes:
             pass
 
+    #->MIGRATING TO use self.syntax HERE<-#
+
     def visit_label(self, node):
         if self.footnote['in']:
             ids = node.parent.attributes["ids"]
@@ -322,35 +328,35 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #List(Start)
 
     def visit_bullet_list(self, node):
-        if not self.list_obj:
-            self.list_obj = List(level=0,markers=dict())
-        self.list_obj.increment_level()
+        if not self.List:
+            self.List = List(level=0,markers=dict())
+        self.List.increment_level()
 
 
     def depart_bullet_list(self, node):
-        if self.list_obj is not None:
-            self.list_obj.decrement_level()
-        if self.list_obj and self.list_obj.level == 0:
-            markdown = self.list_obj.to_markdown()
+        if self.List is not None:
+            self.List.decrement_level()
+        if self.List and self.List.level == 0:
+            markdown = self.List.to_markdown()
             self.cell.append(markdown)
-            self.list_obj = None
+            self.List = None
 
     def visit_enumerated_list(self, node):
-        if not self.list_obj:
-            self.list_obj = List(level=0,markers=dict())
-        self.list_obj.increment_level()
+        if not self.List:
+            self.List = List(level=0,markers=dict())
+        self.List.increment_level()
 
     def depart_enumerated_list(self, node):
-        if self.list_obj is not None:
-            self.list_obj.decrement_level()
+        if self.List is not None:
+            self.List.decrement_level()
 
-        if self.list_obj.level == 0:
-            markdown = self.list_obj.to_markdown()
+        if self.List.level == 0:
+            markdown = self.List.to_markdown()
             self.cell.append(markdown)
-            self.list_obj = None
+            self.List = None
 
     def visit_list_item(self, node):
-        self.list_obj.set_marker(node)
+        self.List.set_marker(node)
 
     def depart_list_item(self, node):
         pass
@@ -372,13 +378,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.literal_block['in'] = True
 
         ### if the code block is inside a list, append the contents till here to the cell, and make a new cell for code block
-        if self.list_obj:
-            markdown = self.list_obj.to_markdown()
+        if self.List:
+            markdown = self.List.to_markdown()
             self.cell.append(markdown)
-            self.cached_state['list_level'] = self.list_obj.getlevel()
-            self.cached_state['list_marker'] = self.list_obj.get_marker()
-            self.cached_state['list_item_no'] = self.list_obj.get_item_no()
-            self.list_obj = None
+            self.cached_state['list_level'] = self.List.getlevel()
+            self.cached_state['list_marker'] = self.List.get_marker()
+            self.cached_state['list_item_no'] = self.List.get_item_no()
+            self.List = None
 
         self.cell_to_notebook()
         self.new_cell(cell_type = "code")
@@ -415,7 +421,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
         ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
         if "list_level" in self.cached_state:
-            self.list_obj = List(self.cached_state["list_level"], self.cached_state["list_marker"], self.cached_state["list_item_no"])
+            self.List = List(self.cached_state["list_level"], self.cached_state["list_marker"], self.cached_state["list_item_no"])
             del self.cached_state["list_level"]
             del self.cached_state["list_marker"]
             del self.cached_state["list_item_no"]
@@ -481,10 +487,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def depart_paragraph(self, node):
-        if self.list_obj:
+        if self.List:
             pass
         else:
-            if self.list_obj and self.list_obj.getlevel() > 0:
+            if self.List and self.List.getlevel() > 0:
                 self.cell.append(self.sep_lines)
             elif self.table_builder:
                 pass
@@ -619,9 +625,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         elif self.math_block['in']:
             text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
 
-        if self.list_obj:
+        if self.List:
             ## when the text is inside the list handle it with lists object   
-            self.list_obj.add_item(text)
+            self.List.add_item(text)
         elif self.literal_block['in']:
             self.cell.append(text)
         elif self.table_builder:
@@ -671,9 +677,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def visit_reference(self, node):
         self.in_reference = dict()
 
-        if self.list_obj:
-            marker = self.list_obj.get_marker()
-            self.list_obj.add_item("[")
+        if self.List:
+            marker = self.List.get_marker()
+            self.List.add_item("[")
         else:
             self.cell.append("[")
             self.reference_text_start = len(self.cell)
@@ -718,10 +724,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            if self.list_obj:
-                marker = self.list_obj.get_marker()
+            if self.List:
+                marker = self.List.get_marker()
                 text = "]({})".format(refuri)
-                self.list_obj.add_item(text)
+                self.List.add_item(text)
             else:
                 self.cell.append("]({})".format(refuri))
 
@@ -803,6 +809,15 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
 
+    @property
+    def add_newline(self):
+        self.cell.append("\n")
+
+    @property
+    def add_newparagraph(self):
+        self.cell.append("\n\n")
+
+    #TODO: is this needed?
     def add_markdown_cell(self, slide_type="slide", title=False):
         """split a markdown cell here
         * add the slideshow metadata
