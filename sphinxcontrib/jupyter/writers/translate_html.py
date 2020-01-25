@@ -12,7 +12,7 @@ import os
 
 from .translate_ipynb import JupyterIPYNBTranslator
 from .utils import JupyterOutputCellGenerators
-
+from .html import HTMLSyntax
 
 class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
@@ -29,7 +29,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         # HTML Settings
         self.html_ext = ".html"
         self.urlpath = builder.urlpath
-
+        self.syntax = HTMLSyntax()
         self.skip_next_content = False          #TODO: Needed? PDF
 
     #-Nodes-#
