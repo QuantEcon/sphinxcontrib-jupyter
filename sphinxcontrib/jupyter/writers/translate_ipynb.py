@@ -319,7 +319,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.citation['in']:
             self.cell.append("\] ")
 
-    #List Items(Start)
+    #List(Start)
 
     def visit_bullet_list(self, node):
         if not self.list_obj:
