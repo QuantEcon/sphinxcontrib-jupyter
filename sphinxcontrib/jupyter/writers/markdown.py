@@ -21,11 +21,50 @@ class MarkdownSyntax:
     def __init__(self):
         pass
 
+    def visit_attribution(self):
+        return "> "
+
+    def visit_block_quote(self):
+        return "> "
+
     def visit_bold(self):
         return "**"
     
     def end_bold(self):
         return "**"
+
+    def visit_citation(self, id_text):
+        return "<a id='{}'></a>\n".format(id_text)
+
+    def visit_code_block(self, language):
+        return "``` {}".format(language)
+    
+    def depart_code_block(self):
+        return "```"
+
+    def visit_definition(self):
+        return "<dd>"               #TODO: Is there a MD equivalent?
+
+    def depart_definition(self):
+        return "</dd>"              #TODO: Is there a MD equivalent?
+
+    def visit_definition_list(self):
+        return "<dl style='margin: 20px 0;'>"
+
+    def depart_definition_list(self):
+        return "</dl>"
+
+    def visit_horizontal_rule(self):
+        return "---"
+
+    def visit_image(self, uri):
+        return "![{0}]({0})".format(uri)
+
+    def visit_inline_code(self):
+        return "`"
+
+    def depart_inline_code(self):
+        return "`"
 
     def visit_italic(self):
         return "*"
@@ -36,55 +75,25 @@ class MarkdownSyntax:
     def visit_heading(self, depth):
         return "#"*depth
 
-    def visit_link(self, text, link):
-        return "[text](link)"
-
-    def visit_code_block(self, language):
-        return "``` {}".format(language)
-    
-    def depart_code_block(self):
-        return "```"
-
-    def visit_block_quote(self):
-        return "> "
-
-    def visit_list(self):
-        return "* "
-
-    def visit_enumerated_list(self):
-        return "1. "
-
-    def visit_horizontal_rule(self):
-        return "---"
-
-    #-Inline-#
-
-    def visit_inline_code(self):
-        return "`"
-
-    def depart_inline_code(self):
-        return "`"
-    
-    def visit_image(self, text, link):
-        return "!"
-
     def visit_label(self):
         return "["
 
     def depart_label(self):
         return "]"
 
+    def visit_link(self, text, link):
+        return "[text](link)"
+
+    #List(Start)
+    #Note: Not required as implemented as an Accumulator Object List()
+
     def visit_reference(self):
-        #TODO: consider context for different reference types in markdown
         return "("
     
     def depart_reference(self):
-        #TODO: consider context for different reference types in markdown
         return ")"
 
 #-Accumulator Objects-#
-# List, Enumerated List
-# TODO: TableBuilder, Image(?)
 
 class List:
 
