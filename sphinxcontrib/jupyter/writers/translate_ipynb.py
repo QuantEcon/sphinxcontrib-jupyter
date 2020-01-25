@@ -371,7 +371,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.list_obj = None
 
         self.cell_to_notebook()
-        self.cell_type = "code"
+        self.new_cell(cell_type = "code")
 
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
@@ -400,6 +400,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             self.cell.append("```")
         self.cell_to_notebook()
+        self.new_cell(cell_type="markdown")
         self.literal_block['in'] = False
 
         ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
@@ -492,12 +493,14 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def visit_rubric(self, node):
         self.rubric = True
         self.cell_to_notebook()
+        self.new_cell(cell_type="markdown")
         if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
             self.cell.append('**{}**\n\n'.format(node.children[0].astext()))
             raise nodes.SkipNode
 
     def depart_rubric(self, node):
         self.cell_to_notebook()
+        self.new_cell(cell_type="markdown")
         self.rubric = False
 
     def visit_section(self, node):
@@ -779,9 +782,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     #Utilities(Jupyter)
 
-    def new_cell(self):
+    def new_cell(self, cell_type=None):
         self.cell = []
-        self.cell_type = None
+        self.cell_type = cell_type
 
     def cell_to_notebook(self):
         ## default cell type when no cell type is specified
@@ -789,7 +792,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.cell_type = "markdown"
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
-        self.new_cell()
 
     def add_markdown_cell(self, slide_type="slide", title=False):
         """split a markdown cell here
