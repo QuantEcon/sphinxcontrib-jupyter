@@ -981,14 +981,6 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         return uri
 
-    @classmethod
-    def get_filename(cls,path):
-        if "." in path and "/" in path:
-            index = path.rfind('/')
-            index1 = path.rfind('.')
-            return path[index + 1:index1]
-        else:
-            return path
 
 
 

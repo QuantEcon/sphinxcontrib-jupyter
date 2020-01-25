@@ -22,8 +22,6 @@ logger = logging.getLogger(__name__)
 
 class JupyterIPYNBTranslator(SphinxTranslator):
     
-    SPLIT_URI_ID_REGEX = re.compile(r"([^\#]*)\#?(.*)")
-
     #Configuration (Attribution)
     attribution = False
     #Configuration (Block Quote)
@@ -84,8 +82,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     #->Review Options
 
-    remove_next_content = False  #TODO: what is this?
-    target = dict()    #TODO: needed?
+    remove_next_content = False  #TODO: what is this? PDF
+    target = dict()              #TODO: needed?
 
     # Slideshow option
     metadata_slide = False    #TODO: move to JupyterSlideTranslator
@@ -149,20 +147,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.block_quote['in'] = False
         self.cell.append("\n")
 
-    def visit_bullet_list(self, node):
-        if not self.list_obj:
-            self.list_obj = List(level=0,markers=dict())
-        self.list_obj.increment_level()
-
-
-    def depart_bullet_list(self, node):
-        if self.list_obj is not None:
-            self.list_obj.decrement_level()
-        if self.list_obj and self.list_obj.level == 0:
-            markdown = self.list_obj.to_markdown()
-            self.cell.append(markdown)
-            self.list_obj = None
-
     def visit_caption(self, node):
         self.caption = True
 
@@ -183,7 +167,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_citation(self, node):
         self.citation['in'] = False
-
 
     def visit_comment(self, node):
         raise nodes.SkipNode
@@ -237,7 +220,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_figure(self, node):
         self.cell.append(self.sep_lines)
-
 
     def visit_field_body(self, node):
         self.visit_definition(node)
@@ -327,7 +309,21 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.citation['in']:
             self.cell.append("\] ")
 
-    #List Items
+    #List Items(Start)
+
+    def visit_bullet_list(self, node):
+        if not self.list_obj:
+            self.list_obj = List(level=0,markers=dict())
+        self.list_obj.increment_level()
+
+
+    def depart_bullet_list(self, node):
+        if self.list_obj is not None:
+            self.list_obj.decrement_level()
+        if self.list_obj and self.list_obj.level == 0:
+            markdown = self.list_obj.to_markdown()
+            self.cell.append(markdown)
+            self.list_obj = None
 
     def visit_enumerated_list(self, node):
         if not self.list_obj:
@@ -348,6 +344,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_list_item(self, node):
         pass
+
+    #List(End)
 
     def visit_literal(self, node):
         if self.download_reference['in']:
@@ -508,7 +506,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_section(self, node):
         self.section_level -= 1
 
-    #Table
+    #Table(Start)
 
     def visit_colspec(self, node):
         self.table_builder['column_widths'].append(node['colwidth'])
@@ -556,13 +554,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
         self.table_builder['lines'].append(header_line + "\n")
 
-    def visit_target(self, node):
-        if "refid" in node.attributes:
-            self.cell.append("\n<a id='{}'></a>\n".format(node.attributes["refid"]))
-
-    def depart_target(self, node):
-        pass
-
     def visit_tgroup(self, node):
         pass
 
@@ -575,7 +566,16 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_tbody(self, node):
         pass
 
-    #Text
+    #Table(End)
+
+    def visit_target(self, node):
+        if "refid" in node.attributes:
+            self.cell.append("\n<a id='{}'></a>\n".format(node.attributes["refid"]))
+
+    def depart_target(self, node):
+        pass
+
+    #Text(Start)
 
     def visit_emphasis(self, node):
         self.cell.append("*")
@@ -626,6 +626,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_Text(self, node):
         pass
 
+    #Text(End)
+
     def visit_title(self, node):
         if self.visit_first_title:
             title = node.astext()
@@ -645,19 +647,13 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if not self.table_builder:
             self.cell.append(self.sep_paragraph)
 
-    def visit_title_reference(self, node):
-        pass
-
-    def depart_title_reference(self, node):
-        pass
-
     def visit_topic(self, node):
         self.topic = True
 
     def depart_topic(self, node):
         self.topic = False
 
-    #References
+    #References(Start)
 
     def visit_reference(self, node):
         self.in_reference = dict()
@@ -719,6 +715,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.toctree:
             self.cell.append("\n")
 
+    def visit_title_reference(self, node):
+        pass
+
+    def depart_title_reference(self, node):
+        pass
+
     def visit_download_reference(self, node):
         self.download_reference['in'] = True
         html = "<a href={} download>".format(node["reftarget"])
@@ -739,6 +741,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_footnote_reference(self, node):
         self.footnote_reference['in'] = False
     
+    #References(End)
+
     def unknown_visit(self, node):
         raise NotImplementedError('Unknown node: ' + node.__class__.__name__)
 
@@ -773,7 +777,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_term(self, node):
         self.cell.append("</dt>\n")
 
-    # Utilities
+    #Utilities(Jupyter)
 
     def new_cell(self):
         self.cell = []
@@ -786,11 +790,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
         self.new_cell()
-
-    def generate_alignment_line(self, line_length, alignment):
-        left = ":" if alignment != "right" else "-"
-        right = ":" if alignment != "left" else "-"
-        return left + "-" * (line_length - 2) + right
 
     def add_markdown_cell(self, slide_type="slide", title=False):
         """split a markdown cell here
@@ -811,14 +810,29 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                 new_md_cell.metadata["hide-input"] = True
             self.cell_type = "markdown"
             self.output.add_cell(new_md_cell, self.cell_type)
-            self.cell = []
+            self.new_cell()
+
+    #Utilities(Formatting)
+
+    def generate_alignment_line(self, line_length, alignment):     #TODO: migrate to Table Builder
+        left = ":" if alignment != "right" else "-"
+        right = ":" if alignment != "left" else "-"
+        return left + "-" * (line_length - 2) + right
 
     @classmethod
-    def split_uri_id(cls, uri):
-        return re.search(cls.SPLIT_URI_ID_REGEX, uri).groups()
+    def split_uri_id(cls, uri):                   #TODO: required?
+        regex = re.compile(r"([^\#]*)\#?(.*)")
+        return re.search(regex, uri).groups()
 
     @classmethod
     def add_extension_to_inline_link(cls, uri, ext):
+        """
+        Removes an extension such as `html` and replaces with `ipynb`
+        
+        .. todo::
+
+            improve implementation for references (looks hardcoded)
+        """
         if "." not in uri:
             if len(uri) > 0 and uri[0] == "#":
                 return uri
@@ -837,15 +851,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                 return "{}{}#{}".format(uri, ext, id_)
 
         return uri
-
-    @classmethod
-    def get_filename(cls,path):
-        if "." in path and "/" in path:
-            index = path.rfind('/')
-            index1 = path.rfind('.')
-            return path[index + 1:index1]
-        else:
-            return path
 
     # ===================
     #  general methods
