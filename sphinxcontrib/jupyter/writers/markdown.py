@@ -207,31 +207,54 @@ class List:
     def get_item_no(self):
         return self.item_no
 
-#-> Use above in Translator and if requried develop a ListCollector
-
-class ListCollector:
-    """
-    An automatic list collector object to remove the need to track levels
-    """
-    def __init__(self):
-        pass
-
 #-Table Builder-#
 
 class TableBuilder:
 
-    column_widths = []
-    lines = []
-    line_pending = ""
     align = "center"
-    def __init__(self):
+    def __init__(self, node):
         self.table = []
+        self.current_line = 0
+        self.lines = []
+        self.line_pending = ""
+        self.column_widths = []
+        if 'align' in node:
+            self.align = node['align']
 
     def __repr__(self):
         return self.to_markdown()
 
     def add_row(self, row):
         pass
+
+    def add_title(self, node):
+        self.lines.append("### {}\n".format(node.astext()))
+
+    def add_column_width(self, colwidth):
+        self.column_widths.append(colwidth)
+
+    def add_line_pending(self, type, text=None):
+        if type == "start":
+            self.line_pending = "|"
+        elif type == "append":
+            self.line_pending += "|"
+        elif type == "finish":
+            self.line_pending += "\n"
+            self.lines.append(self.line_pending)
+        elif type == "add_text":
+            self.line_pending += text
+
+    def generate_alignment_line(self, line_length, alignment):     #TODO: migrate to Table Builder
+        left = ":" if alignment != "right" else "-"
+        right = ":" if alignment != "left" else "-"
+        return left + "-" * (line_length - 2) + right
+
+    def add_header(self, header_line):
+        for col_width in self.column_widths:
+            header_line += self.generate_alignment_line(
+                col_width, self.align)
+            header_line += "|"
+        self.lines.append(header_line + "\n")
 
     def to_markdown(self):
         """

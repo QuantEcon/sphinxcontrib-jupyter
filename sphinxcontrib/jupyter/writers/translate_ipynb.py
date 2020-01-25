@@ -16,7 +16,7 @@ from sphinx.util.docutils import SphinxTranslator
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators, get_source_file_name
 from .notebook import JupyterNotebook
-from .markdown import MarkdownSyntax, List
+from .markdown import MarkdownSyntax, List, TableBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     images = []
     files = []
     #Configuration (Tables)
-    table_builder = None         #TODO: construct table builder object
+    table_builder_obj = None         
     #Configuration (Titles)
     visit_first_title = True
     #Configuration (Toctree)
@@ -440,8 +440,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
         formatted_text = "$ {} $".format(math_text)
 
-        if self.table_builder:
-            self.table_builder['line_pending'] += formatted_text
+        if self.table_builder_obj:
+            self.table_builder_obj.add_line_pending('add_text',formatted_text)
         else:
             self.cell.append(formatted_text)
 
@@ -486,7 +486,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         else:
             if self.list_obj and self.list_obj.getlevel() > 0:
                 self.cell.append(self.sep_lines)
-            elif self.table_builder:
+            elif self.table_builder_obj:
                 pass
             elif self.block_quote['block_quote_type'] == "epigraph":
                 try:
@@ -522,50 +522,65 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #Table(Start)
 
     def visit_colspec(self, node):
-        self.table_builder['column_widths'].append(node['colwidth'])
+        self.table_builder_obj.add_column_width(node['colwidth'])
+        #self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_entry(self, node):
         pass
 
     def depart_entry(self, node):
-        self.table_builder['line_pending'] += "|"
+        self.table_builder_obj.add_line_pending("append")
+        #self.table_builder['line_pending'] += "|"
     
     def visit_row(self, node):
-            self.table_builder['line_pending'] = "|"
+        self.table_builder_obj.add_line_pending("start")
+        #self.table_builder['line_pending'] = "|"
 
     def depart_row(self, node):
-        finished_line = self.table_builder['line_pending'] + "\n"
-        self.table_builder['lines'].append(finished_line)
+        self.table_builder_obj.add_line_pending("finish")
+        # finished_line = self.table_builder['line_pending'] + "\n"
+        # self.table_builder['lines'].append(finished_line)
 
     def visit_table(self, node):
-        self.table_builder = dict()
-        self.table_builder['column_widths'] = []
-        self.table_builder['lines'] = []
-        self.table_builder['line_pending'] = ""
+        # self.table_builder = dict()
+        # self.table_builder['column_widths'] = []
+        # self.table_builder['lines'] = []
+        # self.table_builder['line_pending'] = ""
 
-        if 'align' in node:
-            self.table_builder['align'] = node['align']
-        else:
-            self.table_builder['align'] = "center"
+        # if 'align' in node:
+        #     self.table_builder['align'] = node['align']
+        # else:
+        #     self.table_builder['align'] = "center"
+
+        ## New Code
+        self.table_builder_obj = TableBuilder(node)
 
     def depart_table(self, node):
-        self.table_builder['table_lines'] = "".join(self.table_builder['lines'])
-        self.cell.append(self.table_builder['table_lines'])
-        self.table_builder = None
+        # self.table_builder['table_lines'] = "".join(self.table_builder['lines'])
+        # self.cell.append(self.table_builder['table_lines'])
+        # self.table_builder = None
+
+        ## New Code
+        markdown = self.table_builder_obj.to_markdown()
+        self.cell.append(markdown)
+        self.table_builder_obj = None
+
 
     def visit_thead(self, node):
         """ Table Header """
-        self.table_builder['current_line'] = 0
+        pass
+        #self.table_builder['current_line'] = 0
 
     def depart_thead(self, node):
         """ create the header line which contains the alignment for each column """
-        header_line = "|"
-        for col_width in self.table_builder['column_widths']:
-            header_line += self.generate_alignment_line(
-                col_width, self.table_builder['align'])
-            header_line += "|"
+        self.table_builder_obj.add_header("|")
+        # header_line = "|"
+        # for col_width in self.table_builder['column_widths']:
+        #     header_line += self.generate_alignment_line(
+        #         col_width, self.table_builder['align'])
+        #     header_line += "|"
 
-        self.table_builder['lines'].append(header_line + "\n")
+        # self.table_builder['lines'].append(header_line + "\n")
 
     def visit_tgroup(self, node):
         pass
@@ -624,8 +639,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.list_obj.add_item(text)
         elif self.literal_block['in']:
             self.cell.append(text)
-        elif self.table_builder:
-            self.table_builder['line_pending'] += text
+        elif self.table_builder_obj:
+            self.table_builder_obj.add_line_pending('add_text',text)
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
@@ -648,16 +663,17 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
-        elif self.table_builder:
-            self.cell.append(
-                "### {}\n".format(node.astext()))
+        elif self.table_builder_obj:
+            self.table_builder_obj.add_title(node)
+            # self.cell.append(
+            #     "### {}\n".format(node.astext()))
         else:
             ### this makes all the sections go up one level to transform subsections to sections
             self.cell.append(
                     "{} ".format("#" * self.section_level))
 
     def depart_title(self, node):
-        if not self.table_builder:
+        if not self.table_builder_obj:
             self.cell.append(self.sep_paragraph)
 
     def visit_topic(self, node):
@@ -825,11 +841,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.new_cell()
 
     #Utilities(Formatting)
-
-    def generate_alignment_line(self, line_length, alignment):     #TODO: migrate to Table Builder
-        left = ":" if alignment != "right" else "-"
-        right = ":" if alignment != "left" else "-"
-        return left + "-" * (line_length - 2) + right
 
     @classmethod
     def split_uri_id(cls, uri):                   #TODO: required?
