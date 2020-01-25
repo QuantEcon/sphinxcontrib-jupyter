@@ -109,9 +109,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         #-Jupyter Settings-#
         self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
         self.language_synonyms = self.config['jupyter_language_synonyms']
-        self.source_file_name = get_source_file_name(
-            self.settings._source,
-            self.settings.env.srcdir)
+        src_dir = self.settings.env.srcdir
+        self.source_file_name = self.settings._source.replace(src_dir+"/", "")
 
     #-Document-#
 
@@ -121,6 +120,17 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_document(self, node):
         self.cell_to_notebook()
+        #TODO: Should this be in the `builder` (otherwise helper function should be used)
+        if len(self.files) > 0:
+            for fl in self.files:
+                src_fl = os.path.join(self.builder.srcdir, fl)
+                out_fl = os.path.join(self.builder.outdir, os.path.basename(fl))   #copy file to same location as notebook (remove dir structure)
+                #Check if output directory exists
+                out_dir = os.path.dirname(out_fl)
+                if not os.path.exists(out_dir):
+                    os.makedirs(out_dir)
+                print("Copying {} to {}".format(src_fl, out_fl))
+                copyfile(src_fl, out_fl)
 
     #-Nodes-#
 
