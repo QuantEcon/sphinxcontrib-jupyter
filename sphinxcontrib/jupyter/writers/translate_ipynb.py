@@ -72,7 +72,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     images = []
     files = []
     #Configuration (Tables)
-    table_builder_obj = None         
+    Table = None
     #Configuration (Titles)
     visit_first_title = True
     #Configuration (Toctree)
@@ -103,7 +103,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):
           1. JupyterHTMLTranslator, 
           2. JupyterPDFTranslator
 
-        This builds on SphinxTranslator
+        Notes
+        -----
+        1. A capitalised variable name (i.e. List, Table) are attributes that
+           use an accumulator object to assist with constructing the object
         """
         super().__init__(document, builder)
         #-Jupyter Settings-#
@@ -446,8 +449,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
         formatted_text = "$ {} $".format(math_text)
 
-        if self.table_builder_obj:
-            self.table_builder_obj.add_item(formatted_text)
+        if self.Table:
+            self.Table.add_item(formatted_text)
         else:
             self.cell.append(formatted_text)
 
@@ -492,7 +495,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         else:
             if self.List and self.List.getlevel() > 0:
                 self.cell.append(self.sep_lines)
-            elif self.table_builder_obj:
+            elif self.Table:
                 pass
             elif self.block_quote['block_quote_type'] == "epigraph":
                 try:
@@ -528,7 +531,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #Table(Start)
 
     def visit_colspec(self, node):
-        self.table_builder_obj.add_column_width(node['colwidth'])
+        self.Table.add_column_width(node['colwidth'])
         #self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_entry(self, node):
@@ -538,18 +541,18 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
     
     def visit_row(self, node):
-        self.table_builder_obj.start_row()
+        self.Table.start_row()
 
     def depart_row(self, node):
-        self.table_builder_obj.end_row()
+        self.Table.end_row()
 
     def visit_table(self, node):
-        self.table_builder_obj = TableBuilder(node)
+        self.Table = TableBuilder(node)
 
     def depart_table(self, node):
-        markdown = self.table_builder_obj.to_markdown()
+        markdown = self.Table.to_markdown()
         self.cell.append(markdown)
-        self.table_builder_obj = None
+        self.Table = None
         self.add_newline
 
 
@@ -559,7 +562,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_thead(self, node):
         """ create the header line which contains the alignment for each column """
-        self.table_builder_obj.add_header_line("|")
+        self.Table.add_header_line("|")
 
     def visit_tgroup(self, node):
         pass
@@ -618,8 +621,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.List.add_item(text)
         elif self.literal_block['in']:
             self.cell.append(text)
-        elif self.table_builder_obj:
-            self.table_builder_obj.add_item(text)
+        elif self.Table:
+            self.Table.add_item(text)
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
@@ -642,8 +645,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.topic:
             ### this prevents from making it a subsection from section
             self.cell.append("{} ".format("#" * (self.section_level + 1)))
-        elif self.table_builder_obj:
-            self.table_builder_obj.add_title(node)
+        elif self.Table:
+            self.Table.add_title(node)
             # self.cell.append(
             #     "### {}\n".format(node.astext()))
         else:
@@ -652,7 +655,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                     "{} ".format("#" * self.section_level))
 
     def depart_title(self, node):
-        if not self.table_builder_obj:
+        if not self.Table:
             self.cell.append(self.sep_paragraph)
 
     def visit_topic(self, node):
