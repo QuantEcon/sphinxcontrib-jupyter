@@ -16,7 +16,8 @@ from sphinx.util.docutils import SphinxTranslator
 from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators, get_source_file_name
 from .notebook import JupyterNotebook
-from .markdown import MarkdownSyntax, List, TableBuilder
+from .markdown import MarkdownSyntax
+from .accumulators import List, TableBuilder
 
 logger = logging.getLogger(__name__)
 
