@@ -30,7 +30,7 @@ class MarkdownSyntax:
     def visit_bold(self):
         return "**"
     
-    def end_bold(self):
+    def depart_bold(self):
         return "**"
 
     def visit_citation(self, id_text):
@@ -76,10 +76,10 @@ class MarkdownSyntax:
         return "#"*depth
 
     def visit_label(self):
-        return "["
+        return "\["
 
     def depart_label(self):
-        return "]"
+        return "\]"
 
     def visit_link(self, text, link):
         return "[text](link)"
@@ -87,11 +87,35 @@ class MarkdownSyntax:
     #List(Start)
     #Note: Not required as implemented as an Accumulator Object List()
 
-    def visit_reference(self):
-        return "("
+    def visit_literal(self):
+        return "`"
+
+    def depart_literal(self):
+        return "`"
+
+    def visit_literal_block(self, language=None):
+        if language is None:
+            return "```"
+        else:
+            return "``` {}".format(language)
+
+    def depart_literal_block(self):
+        return "```"
+
+    def visit_math(self, text):
+        return "$ {} $".format(text)
+
+    def visit_math_block(self, text, label=None):
+        if label:
+            return "$$\n{0} {1}$$".format(text, label)
+        else:
+            return "$$\n{0}\n$$".format(text)
+
+    def visit_note(self):
+        return ">**Note**\n>\n>"
     
-    def depart_reference(self):
-        return ")"
+    def visit_title(self, level):
+        return "#" * level
 
 #-Accumulator Objects-#
 

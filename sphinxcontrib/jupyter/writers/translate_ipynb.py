@@ -145,14 +145,14 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_attribution(self, node):
         self.attribution = False
-        self.add_newline
+        self.add_newline()
 
     def visit_block_quote(self, node):
         self.block_quote['in'] = True
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "epigraph"
         if self.List:
-            self.add_newline
+            self.add_newline()
             return
         self.cell.append(self.syntax.visit_block_quote())
 
@@ -160,7 +160,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if "epigraph" in node.attributes["classes"]:
             self.block_quote['block_quote_type'] = "block-quote"
         self.block_quote['in'] = False
-        self.add_newline
+        self.add_newline()
 
     def visit_caption(self, node):
         self.caption = True
@@ -208,21 +208,21 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_definition(self, node):
         self.cell.append(self.syntax.visit_definition())
-        self.add_newline
+        self.add_newline()
 
     def depart_definition(self, node):
         self.cell.append(self.syntax.depart_definition())
-        self.add_newline
+        self.add_newline()
 
     def visit_definition_list(self, node):
-        self.add_newline
+        self.add_newline()
         self.cell.append(self.syntax.visit_definition_list())
-        self.add_newline
+        self.add_newline()
 
     def depart_definition_list(self, node):
-        self.add_newline
+        self.add_newline()
         self.cell.append(self.syntax.depart_definition_list())  
-        self.add_newparagraph
+        self.add_newparagraph()
 
     def visit_definition_list_item(self, node):
         pass
@@ -240,7 +240,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def depart_figure(self, node):
-        self.add_newline
+        self.add_newline()
 
     def visit_field_body(self, node):
         self.visit_definition(node)
@@ -308,9 +308,11 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if 'slide-type' in node.attributes:
             pass
 
-    #->MIGRATING TO use self.syntax HERE<-#
-
     def visit_label(self, node):
+        """
+        Notes: footnote requires `html` to create links within the 
+        notebooks as there is no markdown equivalent 
+        """
         if self.footnote['in']:
             ids = node.parent.attributes["ids"]
             id_text = ""
@@ -322,11 +324,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             raise nodes.SkipNode
 
         if self.citation['in']:
-            self.cell.append("\[")
+            self.cell.append(self.syntax.visit_label())
 
     def depart_label(self, node):
         if self.citation['in']:
-            self.cell.append("\] ")
+            self.cell.append(self.syntax.depart_label())
+            self.add_space()
 
     #List(Start)
 
@@ -368,19 +371,21 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_literal(self, node):
         if self.download_reference['in']:
-            return
-        self.cell.append("`")
+            return            #TODO: can we just raise Skipnode?
+        self.cell.append(self.syntax.visit_literal())
 
     def depart_literal(self, node):
         if self.download_reference['in']:
             return
-        self.cell.append("`")
+        self.cell.append(self.syntax.depart_literal())
 
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
         self.literal_block['in'] = True
 
-        ### if the code block is inside a list, append the contents till here to the cell, and make a new cell for code block
+        # Check if inside a list.
+        # if in list append the contents till here to the cell, 
+        # and make a new cell for code block
         if self.List:
             markdown = self.List.to_markdown()
             self.cell.append(markdown)
@@ -389,18 +394,19 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.cached_state['list_item_no'] = self.List.get_item_no()
             self.List = None
 
+        #Start new cell and add add current cell to notebook
         self.cell_to_notebook()
         self.new_cell(cell_type = "code")
 
+        #Check Code Language
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
         else:
             self.cell_type = "markdown"
-
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook language
 
-        ## checking if no-execute flag
+        #Check for no-execute status
         if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
             self.literal_block['no-execute'] = True
         else:
@@ -411,15 +417,17 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
-            self.cell.append("``` {} \n".format(self.nodelang))
+            self.cell.append(self.syntax.visit_literal_block(self.nodelang))
+            self.add_newline()
             self.cell_type = "markdown"
 
 
     def depart_literal_block(self, node):
         if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
-            self.cell.append("```")
+            self.cell.append(self.syntax.depart_literal_block())
         self.cell_to_notebook()
-        self.new_cell(cell_type="markdown")
+        #Initialise new cell
+        self.new_cell()
         self.literal_block['in'] = False
 
         ## If this code block was inside a list, then resume the list again just in case there are more items in the list.
@@ -430,25 +438,30 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             del self.cached_state["list_item_no"]
 
     def visit_math(self, node):
-        """inline math"""
+        """
+        Inline Math
+        
+        Notes
+        -----
+        With sphinx < 1.8, a math node has a 'latex' attribute, from which the
+        formula can be obtained and added to the text.
 
-        # With sphinx < 1.8, a math node has a 'latex' attribute, from which the
-        # formula can be obtained and added to the text.
+        With sphinx >= 1.8, a math node has no 'latex' attribute, which mean
+        that a flag has to be raised, so that the in visit_Text() we know that
+        we are dealing with a formula.
 
-        # With sphinx >= 1.8, a math node has no 'latex' attribute, which mean
-        # that a flag has to be raised, so that the in visit_Text() we know that
-        # we are dealing with a formula.
-
+        TODO:
+            1. Deprecate support for sphinx < 1.8
+        """
+        self.math['in'] = True
         try: # sphinx < 1.8
             math_text = node.attributes["latex"].strip()
         except KeyError:
             # sphinx >= 1.8
-            self.math['in'] = True
             # the flag is raised, the function can be exited.
-            return
+            return                                              #TODO: raise nodes.SkipNode?
 
         formatted_text = "$ {} $".format(math_text)
-
         if self.Table:
             self.Table.add_item(formatted_text)
         else:
@@ -458,24 +471,26 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.math['in'] = False
 
     def visit_math_block(self, node):
-        """directive math"""
-        # visit_math_block is called only with sphinx >= 1.8
+        """
+        Math from Directives
 
+        Notes:
+        ------
+        visit_math_block is called only with sphinx >= 1.8
+        """
         self.math_block['in'] = True
-
         #check for labelled math
         if node["label"]:
-            #Use \tags in the LaTeX environment
-            referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
-            #node["ids"] should always exist for labelled displaymath
-            self.math_block['math_block_label'] = referenceBuilder
+            #Use \tags in the embedded LaTeX environment
+            #Haven't included this in self.syntax.MardownSyntax as it should be general across HTML (mathjax), PDF (latex)
+            self.math_block['math_block_label'] = "\\tag{" + str(node["number"]) + "}\n"
 
     def depart_math_block(self, node):
         self.math_block['in'] = False
 
     def visit_note(self, node):
         self.note = True
-        self.cell.append(">**Note**\n>\n>")
+        self.cell.append(self.syntax.visit_note())
 
     def depart_note(self, node):
         self.note = False
@@ -493,8 +508,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.List:
             pass
         else:
-            if self.List and self.List.getlevel() > 0:
-                self.cell.append(self.sep_lines)
+            if self.List and self.List.getlevel() > 0:           #TODO: is this ever reach given above if statement?
+                self.add_newline()
             elif self.Table:
                 pass
             elif self.block_quote['block_quote_type'] == "epigraph":
@@ -502,9 +517,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                     attribution = node.parent.children[1]
                     self.cell.append("\n>\n")   #Continue block for attribution
                 except:
-                    self.cell.append(self.sep_paragraph)
+                    self.add_newparagraph()
             else:
-                self.cell.append(self.sep_paragraph)
+                self.add_newparagraph()
 
     def visit_raw(self, node):
         pass
@@ -514,7 +529,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.cell_to_notebook()
         self.new_cell(cell_type="markdown")
         if len(node.children) == 1 and node.children[0].astext() in ['Footnotes']:
-            self.cell.append('**{}**\n\n'.format(node.children[0].astext()))
+            self.cell.append('**{}**\n\n'.format(node.children[0].astext()))            #TODO: add to MarkdownSyntax?
             raise nodes.SkipNode
 
     def depart_rubric(self, node):
@@ -532,7 +547,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_colspec(self, node):
         self.Table.add_column_width(node['colwidth'])
-        #self.table_builder['column_widths'].append(node['colwidth'])
 
     def visit_entry(self, node):
         pass
@@ -553,8 +567,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         markdown = self.Table.to_markdown()
         self.cell.append(markdown)
         self.Table = None
-        self.add_newline
-
+        self.add_newline()
 
     def visit_thead(self, node):
         """ Table Header """
@@ -588,16 +601,16 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #Text(Start)
 
     def visit_emphasis(self, node):
-        self.cell.append("*")
+        self.cell.append(self.syntax.visit_italic())
 
     def depart_emphasis(self, node):
-        self.cell.append("*")
+        self.cell.append(self.syntax.depart_italic())
 
     def visit_strong(self, node):
-        self.cell.append("**")
+        self.cell.append(self.syntax.visit_bold())
 
     def depart_strong(self, node):
-        self.cell.append("**")
+        self.cell.append(self.syntax.depart_bold())
 
     def visit_Text(self, node):
         text = node.astext()
@@ -605,30 +618,32 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         #Escape Special markdown chars except in code block
         if self.literal_block['in'] == False:
             text = text.replace("$", "\$")
-
+        #Inline Math
         if self.math['in']:
-            text = '$ {} $'.format(text.strip())
+            text = self.syntax.visit_math(text.strip())
+        #Math Blocks
         elif self.math_block['in'] and self.math_block['math_block_label']:
-            text = "$$\n{0}{1}$${2}".format(
-                        text.strip(), self.math_block['math_block_label'], self.sep_paragraph
-                    )
+            text = self.syntax.visit_math_block(text.strip(), self.math_block['math_block_label'])
             self.math_block['math_block_label'] = None
         elif self.math_block['in']:
-            text = "$$\n{0}\n$${1}".format(text.strip(), self.sep_paragraph)
+            text = self.syntax.visit_math_block(text.strip())
 
-        if self.List:
-            ## when the text is inside the list handle it with lists object   
-            self.List.add_item(text)
-        elif self.literal_block['in']:
+        #Append Text to Cell (Should this be moved to depart_Text?)
+        if self.math_block['in']:
             self.cell.append(text)
+            self.add_newparagraph()
+        elif self.List:
+            self.List.add_item(text)
         elif self.Table:
             self.Table.add_item(text)
+        elif self.literal_block['in']:
+            self.cell.append(text)
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
-                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
+                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are prepended (TODO: should this be in MarkdownSyntax)
             else:
                 self.cell.append(text)
-        elif self.caption and self.toctree:
+        elif self.caption and self.toctree:         #TODO: Check this condition
             self.cell.append("# {}".format(text))
         else:
             self.cell.append(text)
@@ -643,20 +658,19 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             title = node.astext()
         self.visit_first_title = False
         if self.topic:
-            ### this prevents from making it a subsection from section
-            self.cell.append("{} ".format("#" * (self.section_level + 1)))
+            # this prevents from making it a subsection from section
+            self.cell.append(self.syntax.visit_title(self.section_level + 1))
+            self.add_space()
         elif self.Table:
             self.Table.add_title(node)
-            # self.cell.append(
-            #     "### {}\n".format(node.astext()))
         else:
-            ### this makes all the sections go up one level to transform subsections to sections
-            self.cell.append(
-                    "{} ".format("#" * self.section_level))
+            # this makes all the sections go up one level to transform subsections to sections
+            self.cell.append(self.syntax.visit_title(self.section_level))
+            self.add_space()
 
     def depart_title(self, node):
         if not self.Table:
-            self.cell.append(self.sep_paragraph)
+            self.add_newparagraph()
 
     def visit_topic(self, node):
         self.topic = True
@@ -665,6 +679,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.topic = False
 
     #References(Start)
+
+    #TODO: Revisit References to Simplify using Sphinx Internals
+    #TODO: add too MarkdownSyntax()
 
     def visit_reference(self, node):
         self.in_reference = dict()
@@ -761,6 +778,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     # Nodes (Exercise)
+    #TODO: Are these needed (as they are written over by directive in __init__.py?)
 
     def visit_exercise_node(self, node):
         pass
@@ -790,22 +808,25 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     #Utilities(Jupyter)
 
-    def new_cell(self, cell_type=None):
+    def new_cell(self, cell_type="markdown"):
         self.cell = []
         self.cell_type = cell_type
 
     def cell_to_notebook(self):
-        ## default cell type when no cell type is specified
+        if len(self.cell) == 0:
+            return
+        # Default Cell type if not specified
         if not self.cell_type:
             self.cell_type = "markdown"
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
 
-    @property
-    def add_newline(self):
-        self.cell.append("\n")
+    def add_space(self, n=1):
+        self.cell.append(" " * n)
 
-    @property
+    def add_newline(self, n=1):
+        self.cell.append("\n" * n)
+
     def add_newparagraph(self):
         self.cell.append("\n\n")
 
