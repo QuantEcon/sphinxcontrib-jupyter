@@ -25,8 +25,6 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         """
         A sparse translator for extracting code-blocks from RST documents 
         and generating a Jupyter Notebook
-
-        #TODO: Deprecate once JupyterCodeTranslator is finished.
         """
         super().__init__(document, builder)  #add document, builder, config and settings to object
         #-Jupyter Settings-#
@@ -42,16 +40,18 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         pass
 
     def visit_literal_block(self, node):
-        "Parse Literal Blocks (Code Blocks)"
+        """
+        Parse Literal Blocks (Code Blocks)
+        """
         self.in_literal_block = True
         self.cell_type = "code"
+        #-Determine Language of Code Block-#
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
         else:
             self.cell_type = "markdown"   
         if self.nodelang == 'default':
-            self.nodelang = self.language   #use notebook language
-        #Check node language is the same as notebook language
+            self.nodelang = self.language   #use notebook programming language
         if self.nodelang != self.language:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
