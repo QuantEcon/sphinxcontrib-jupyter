@@ -225,7 +225,7 @@ class TableBuilder:
         self.table = []
         self.current_line = 0
         self.lines = []
-        self.line_pending = ""
+        self.row = ""
         self.column_widths = []
         if 'align' in node:
             self.align = node['align']
@@ -233,8 +233,16 @@ class TableBuilder:
     def __repr__(self):
         return self.to_markdown()
 
-    def add_row(self, row):
-        pass
+    def start_row(self):
+        self.row = "|"
+
+    def add_item(self, text):
+        self.row += text + "|"
+
+    def end_row(self):
+        self.row += "\n"
+        self.lines.append(self.row)
+        self.row = ""
 
     def add_title(self, node):
         self.lines.append("### {}\n".format(node.astext()))
@@ -242,23 +250,12 @@ class TableBuilder:
     def add_column_width(self, colwidth):
         self.column_widths.append(colwidth)
 
-    def add_line_pending(self, type, text=None):
-        if type == "start":
-            self.line_pending = "|"
-        elif type == "append":
-            self.line_pending += "|"
-        elif type == "finish":
-            self.line_pending += "\n"
-            self.lines.append(self.line_pending)
-        elif type == "add_text":
-            self.line_pending += text
-
-    def generate_alignment_line(self, line_length, alignment):     #TODO: migrate to Table Builder
+    def generate_alignment_line(self, line_length, alignment):
         left = ":" if alignment != "right" else "-"
         right = ":" if alignment != "left" else "-"
         return left + "-" * (line_length - 2) + right
 
-    def add_header(self, header_line):
+    def add_header_line(self, header_line):
         for col_width in self.column_widths:
             header_line += self.generate_alignment_line(
                 col_width, self.align)

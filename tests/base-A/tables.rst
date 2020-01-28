@@ -32,6 +32,17 @@ False  True   False
 True   True   True
 =====  =====  =======
 
+Math Tables
+-----------
+
+=============  ============================================  ===========
+Treat          Random Math                                   Description
+=============  ============================================  ===========
+Albatross      :math:`n_0(s_0, b_0)`                         On a stick!
+Crunchy Frog   :math:`\beta \sum_{s=1}^S \Pi(s | s_0) x(s)`  On a stick!
+Gannet Ripple  :math:`s \in [1,\ldots, S]`                   On a stick!
+=============  ============================================  ===========
+
 Directive Table Types
 ---------------------
 

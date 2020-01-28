@@ -447,7 +447,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         formatted_text = "$ {} $".format(math_text)
 
         if self.table_builder_obj:
-            self.table_builder_obj.add_line_pending('add_text',formatted_text)
+            self.table_builder_obj.add_item(formatted_text)
         else:
             self.cell.append(formatted_text)
 
@@ -535,38 +535,18 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         pass
 
     def depart_entry(self, node):
-        self.table_builder_obj.add_line_pending("append")
-        #self.table_builder['line_pending'] += "|"
+        pass
     
     def visit_row(self, node):
-        self.table_builder_obj.add_line_pending("start")
-        #self.table_builder['line_pending'] = "|"
+        self.table_builder_obj.start_row()
 
     def depart_row(self, node):
-        self.table_builder_obj.add_line_pending("finish")
-        # finished_line = self.table_builder['line_pending'] + "\n"
-        # self.table_builder['lines'].append(finished_line)
+        self.table_builder_obj.end_row()
 
     def visit_table(self, node):
-        # self.table_builder = dict()
-        # self.table_builder['column_widths'] = []
-        # self.table_builder['lines'] = []
-        # self.table_builder['line_pending'] = ""
-
-        # if 'align' in node:
-        #     self.table_builder['align'] = node['align']
-        # else:
-        #     self.table_builder['align'] = "center"
-
-        ## New Code
         self.table_builder_obj = TableBuilder(node)
 
     def depart_table(self, node):
-        # self.table_builder['table_lines'] = "".join(self.table_builder['lines'])
-        # self.cell.append(self.table_builder['table_lines'])
-        # self.table_builder = None
-
-        ## New Code
         markdown = self.table_builder_obj.to_markdown()
         self.cell.append(markdown)
         self.table_builder_obj = None
@@ -576,18 +556,10 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def visit_thead(self, node):
         """ Table Header """
         pass
-        #self.table_builder['current_line'] = 0
 
     def depart_thead(self, node):
         """ create the header line which contains the alignment for each column """
-        self.table_builder_obj.add_header("|")
-        # header_line = "|"
-        # for col_width in self.table_builder['column_widths']:
-        #     header_line += self.generate_alignment_line(
-        #         col_width, self.table_builder['align'])
-        #     header_line += "|"
-
-        # self.table_builder['lines'].append(header_line + "\n")
+        self.table_builder_obj.add_header_line("|")
 
     def visit_tgroup(self, node):
         pass
@@ -647,7 +619,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         elif self.literal_block['in']:
             self.cell.append(text)
         elif self.table_builder_obj:
-            self.table_builder_obj.add_line_pending('add_text',text)
+            self.table_builder_obj.add_item(text)
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are indented
