@@ -523,6 +523,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_raw(self, node):
         pass
+    
+    def depart_raw(self, node):
+        self.add_newparagraph()
 
     def visit_rubric(self, node):
         self.rubric = True
