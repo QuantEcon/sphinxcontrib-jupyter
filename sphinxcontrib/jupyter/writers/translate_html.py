@@ -35,12 +35,9 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
     def visit_image(self, node):
         """
-        Notes
-        -----
-        1. Should this use .has_attrs()?
-        2. the scale, height and width properties are not combined in this
-        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
-
+        Image Directive
+        Include Images as HTML including attributes that  
+        are available from the directive
         """
         uri = node.attributes["uri"]
         self.images.append(uri)

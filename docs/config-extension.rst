@@ -3,11 +3,26 @@
 Extension Configuration and Options
 ===================================
 
-The options are split into the different parts of the compilation pipeline 
-that are available in this extension:
+.. note::
+
+    The extension has recently been re-written to include separate translators
+    for notebooks that have different end purposes. There is now IPYNB, HTML, 
+    and PDF translators which allows the number of configuration options to be
+    substantially reduced.
+
+    Execution is now also handled by a specialised execution builder with results
+    shared across IPYNB, HTML and PDF translators.
+
+Options are available for each builder and translator:
 
 .. toctree::
    :maxdepth: 1
+
+   config-general
+   config-ipynb-translator
+   config-html-translator 
+   config-pdf-translator
+   config-execution
 
    config-extension-notebooks
    config-extension-execution

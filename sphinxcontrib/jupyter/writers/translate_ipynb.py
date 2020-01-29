@@ -263,12 +263,14 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_image(self, node):
         """
-        .. notes::
+        Image Directive
 
+        Notes
+        -----
             1. Should this use .has_attrs()?
             2. the scale, height and width properties are not combined in this
             implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
-
+            3. HTML images are available in HTMLTranslator (TODO: Should this be an available option here?)
         """
         uri = node.attributes["uri"]
         self.images.append(uri)
