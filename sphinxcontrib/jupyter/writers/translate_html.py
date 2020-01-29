@@ -33,40 +33,11 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
     #-Nodes-#
 
-    def visit_attribution(self, node):
-        super().visit_attribution(node)
-
-    def visit_block_quote(self, node):
-        super().visit_block_quote(node)
-
-    def visit_citation(self, node):
-        super().visit_citation(node)
-
-    def depart_citation(self, node):
-        self.citation = False
-
-    def visit_definition(self, node):
-        self.cell.append(self.syntax.visit_definition())
-        self.add_newline()
-
-    def depart_definition(self, node):
-        self.cell.append(self.syntax.depart_definition())
-        self.add_newline()
-
-    def visit_definition_list(self, node):
-        super().visit_definition_list(node)
-
-    def depart_definition_list(self, node):
-        super().depart_definition_list(node)
-
     def visit_image(self, node):
         """
-        Notes
-        -----
-        1. Should this use .has_attrs()?
-        2. the scale, height and width properties are not combined in this
-        implementation as is done in http://docutils.sourceforge.net/docs/ref/rst/directives.html#image
-
+        Image Directive
+        Include Images as HTML including attributes that  
+        are available from the directive
         """
         uri = node.attributes["uri"]
         self.images.append(uri)
@@ -87,18 +58,6 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         if self.citation['in']:
             self.cell.append(self.syntax.visit_label())
-
-    def depart_label(self, node):
-        super().depart_label(node)
-
-    def visit_literal(self, node):
-        super().visit_literal(node)
-
-    def depart_literal(self, node):
-        super().depart_literal(node)
-
-    def visit_note(self, node):
-        super().visit_note(node)
 
     #References(Start)
 
