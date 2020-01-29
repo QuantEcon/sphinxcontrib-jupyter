@@ -438,4 +438,3 @@ class ExecuteNotebookWriter():
 
                     error_output_file.write(line)
 
-

@@ -7,10 +7,16 @@ SHELL := bash
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
+#JupyterCodeTranslator (Code Only)
+SOURCECODE     = code/
+BUILDCODE      = code/_build
 #BASE
 SOURCEDIR     = base/
 BUILDDIR      = base/_build
 BUILDCOVERAGE = base/_build_coverage
+#BASEA
+SOURCEDIRA     = base-A/
+BUILDDIRA      = base-A/_build
 #PDF
 SOURCEPDF = pdf/
 BUILDPDF = pdf/_build/
@@ -24,7 +30,7 @@ CORES 		  = 4
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile pdf rst-test
+.PHONY: help Makefile pdf rst-test code
 
 test: clean clean-pdf jupyter pdf
 	python check_diffs.py
@@ -58,6 +64,12 @@ clean-website:
 clean-pdf:
 	rm -rf $(BUILDPDF)
 
+clean-jupyter:
+	rm -rf $(BUILDDIR)
+
+clean-jupyterA:
+	rm -rf $(BUILDDIRA)
+
 #### TODO - Add these back in once test cases are setup ####
 # coverage:
 # ifneq (,$(filter $(parallel),true True))
@@ -73,9 +85,17 @@ clean-pdf:
 # 	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_coverage_dir=$(BUILDCOVERAGE)
 # endif
 
-
 pdf:
 	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEPDF)" "$(BUILDPDF)" $(SPHINXOPTS) $(O) -D jupyter_number_workers=$(CORES)
+
+code:
+	@$(SPHINXBUILD) -M jupytercode "$(SOURCECODE)" "$(BUILDCODE)" $(SPHINXOPTS) $(O)
+
+jupyterbase:
+	@$(SPHINXBUILD) -M jupyterbase "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+jupyterbaseA:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIRA)" "$(BUILDDIRA)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

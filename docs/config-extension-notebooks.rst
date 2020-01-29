@@ -7,7 +7,7 @@ Constructing Jupyter Notebooks
     :depth: 1
     :local:
 
-jupyter_conversion_mode
+jupyter_conversion_mode (DEPRECATE)
 -----------------------  
 
 Specifies which writer to use when constructing notebooks. 
@@ -40,7 +40,7 @@ Specify path to `_static` folder.
     jupyter_static_file_path = ["source/_static"]
 
 
-jupyter_header_block
+jupyter_header_block  (DEPRECATE)
 ---------------------
 
 Add a header block to every generated notebook by specifying an RST file
@@ -51,7 +51,7 @@ Add a header block to every generated notebook by specifying an RST file
 
     jupyter_header_block = ["source/welcome.rst"]
 
-jupyter_default_lang
+jupyter_default_lang (NR)
 --------------------
 
 Specify default language for collection of RST files
@@ -62,23 +62,10 @@ Specify default language for collection of RST files
 
     jupyter_default_lang = "python3"
 
-jupyter_lang_synonyms
----------------------
 
-Specify any language synonyms.
 
-This will be used when parsing code blocks. For example, python and ipython 
-have slightly different highlighting directives but contain code that can both be executed on
-the same kernel
-
-``conf.py`` usage:
-
-.. code-block:: python
-
-    jupyter_lang_synonyms = ["pycon", "ipython"]
-
-jupyter_kernels
----------------
+jupyter_kernels (NR)
+--------------------
 
 Specify kernel information for the jupyter notebook metadata. 
 
@@ -193,23 +180,7 @@ for `code-blocks`.
 
     jupyter_ignore_skip_test = True
 
-jupyter_allow_html_only
------------------------
 
-Enable this option to allow ``.. only:: html`` pass through to the notebooks. 
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Values
-   * - False (**default**)
-   * - True
-
-``conf.py`` usage:
-
-.. code-block:: python
-
-    jupyter_allow_html_only = True
 
 jupyter_target_html
 -------------------
@@ -260,20 +231,3 @@ Force the inclusion of images as native markdown
     jupyter_images_markdown = True
 
 
-jupyter_dependencies
---------------------
-
-Specify file or directory level dependencies
-
-``conf.py`` usage:
-
-.. code-block:: python
-
-    jupyter_dependencies = {
-        <dir> : ['file1', 'file2'],
-        {<dir>}/<file.rst> : ['file1']
-    }
-
-this allows you to specify a companion data file for 
-a given ``RST`` document and it will get copied through sphinx
-to the ``_build`` folder.

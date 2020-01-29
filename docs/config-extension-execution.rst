@@ -3,7 +3,7 @@
 Executing Notebooks
 ===================
 
-jupyter_execute_nb
+jupyter_execute_nb  (DEPRECATED)
 ------------------
 
 Enables the execution of generated notebooks
@@ -19,7 +19,7 @@ Enables the execution of generated notebooks
 
     deprecate this option in favour of jupyter_execute_notebooks
 
-jupyter_execute_notebooks
+jupyter_execute_notebooks (DEPRECATED)
 -------------------------
 
 Enables the execution of generated notebooks
@@ -37,7 +37,7 @@ Enables the execution of generated notebooks
 
     jupyter_execute_notebooks = True
 
-jupyter_dependency_lists
+jupyter_dependency_lists (MIGRATED -> jupyter_notebook_dependencies)
 ------------------------
 
 Dependency of notebooks on other notebooks for execution can also 
@@ -55,7 +55,7 @@ The key/value pairs will contain the names of the notebook files.
    }
 
 
-jupyter_dependencies
+jupyter_dependencies (MIGRATED > jupyter_file_dependencies)
 --------------------
 
 Specify support (dependencies) for notebook collection at the `file` or 
@@ -75,34 +75,5 @@ the `directory` level.
     to specify a support file at the root level of the source directory
     the key should be `""`
 
-jupyter_number_workers
-----------------------
 
-Specify the number cores to use with dask
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Values
-   * - Integer (**default** = 1)
-
-``conf.py`` usage:
-
-    jupyter_number_workers = 4
-
-
-jupyter_threads_per_worker
---------------------------
-
-Specify the number of threads per worker for dask
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Values
-   * - Integer (**default** = 1)
-
-``conf.py`` usage:
-
-    jupyter_threads_per_worker = 1
 
