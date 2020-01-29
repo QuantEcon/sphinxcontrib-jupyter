@@ -321,7 +321,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
                 id_text += "{} ".format(id_)
             else:
                 id_text = id_text[:-1]
-            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext()))
+            self.cell.append("<a id='{}'></a>\n**[{}]** ".format(id_text, node.astext())) #TODO: can this be harmonized with HTML
             raise nodes.SkipNode
 
         if self.citation['in']:
@@ -462,7 +462,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             # the flag is raised, the function can be exited.
             return                                              #TODO: raise nodes.SkipNode?
 
-        formatted_text = "$ {} $".format(math_text)
+        formatted_text = self.syntax.visit_math(math_text)
+
         if self.Table:
             self.Table.add_item(formatted_text)
         else:
@@ -632,14 +633,15 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         elif self.math_block['in']:
             text = self.syntax.visit_math_block(text.strip())
 
-        #Append Text to Cell (Should this be moved to depart_Text?)
-        if self.math_block['in']:
-            self.cell.append(text)
-            self.add_newparagraph()
-        elif self.List:
+        #List and Table objects should be updated first. 
+        #TODO: Append Text to Cell (Should this be moved to depart_Text?)
+        if self.List:
             self.List.add_item(text)
         elif self.Table:
             self.Table.add_item(text)
+        elif self.math_block['in']:
+            self.cell.append(text)
+            self.add_newparagraph()
         elif self.literal_block['in']:
             self.cell.append(text)
         elif self.block_quote['in'] or self.note:
@@ -668,7 +670,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         elif self.Table:
             self.Table.add_title(node)
         else:
-            # this makes all the sections go up one level to transform subsections to sections
             self.cell.append(self.syntax.visit_title(self.section_level))
             self.add_space()
 
@@ -766,7 +767,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.footnote_reference['in'] = True
         refid = node.attributes['refid']
         ids = node.astext()
-        self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(ids, refid)
+        self.footnote_reference['link'] = "<sup>[{}](#{})</sup>".format(ids, refid) #TODO: can this be harmonized with HTML
         self.cell.append(self.footnote_reference['link'])
         raise nodes.SkipNode
 
