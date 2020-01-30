@@ -20,7 +20,7 @@ class JupyterCodeBuilder(Builder):
     """
     Builds Code Builder
     """
-    name="codetree"
+    name="execute"
     format = "json"
     out_suffix = ".codetree"
     allow_parallel = True
@@ -74,8 +74,7 @@ class JupyterCodeBuilder(Builder):
 
     def prepare_writing(self, docnames):
         ## instantiates the writer class with code only config value
-        code_only = True
-        self.writer = self._writer_class(self, code_only)
+        self.writer = self._writer_class(self)
 
     def write_doc(self, docname, doctree):
         doctree = doctree.deepcopy()

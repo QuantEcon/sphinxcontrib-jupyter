@@ -1,7 +1,7 @@
 """
 Translators for working with Code Blocks
 """
-
+from docutils import nodes
 from docutils.nodes import SparseNodeVisitor
 from sphinx.util.docutils import SphinxTranslator
 from sphinx.util import logging
@@ -19,7 +19,10 @@ class SphinxSparseTranslator(SparseNodeVisitor):
 
 class JupyterCodeBlockTranslator(SphinxSparseTranslator):
     
-    in_literal_block = False
+    #Configuration (Literal Block)
+    literal_block = dict()
+    literal_block['in'] = False
+    literal_block['no-execute'] = False
 
     def __init__(self, document, builder):
         """
@@ -28,8 +31,8 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         """
         super().__init__(document, builder)  #add document, builder, config and settings to object
         #-Jupyter Settings-#
-        self.language = builder.config["jupyter_language"]
-        self.jupyter_lang_synonyms = builder.config["jupyter_language_synonyms"]
+        self.language = self.config["jupyter_language"]   #self.language = self.config['highlight_language'] (https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-highlight_language)
+        self.language_synonyms = self.config['jupyter_language_synonyms']
 
     def visit_document(self, node):
         self.output = JupyterNotebook(language=self.language)
@@ -43,8 +46,10 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         """
         Parse Literal Blocks (Code Blocks)
         """
-        self.in_literal_block = True
-        self.cell_type = "code"
+        #Start new cell and add add current cell to notebook
+        self.literal_block['in'] = True
+        self.new_cell(cell_type = "code")
+
         #-Determine Language of Code Block-#
         if "language" in node.attributes:
             self.nodelang = node.attributes["language"].strip()
@@ -52,23 +57,28 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
             self.cell_type = "markdown"   
         if self.nodelang == 'default':
             self.nodelang = self.language   #use notebook programming language
-        if self.nodelang != self.language:
+
+        #Check for no-execute status
+        if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
+            self.literal_block['no-execute'] = True
+        else:
+            self.literal_block['no-execute'] = False
+
+        ## Check node language is the same as notebook language else make it markdown
+        if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             logger.warning("Found a code-block with different programming \
                 language to the notebook language. Adding as markdown"
             )
-            self.cell.append("``` {}".format(self.nodelang))
-            self.cell_type = "markdown"
-
+            raise nodes.SkipNode
+            
     def depart_literal_block(self, node):
-        if self.nodelang != self.language:
-            self.cell.append("```")
         source = "".join(self.cell)
         self.output.add_cell(source, self.cell_type)
         self.new_cell()
-        self.in_literal_block = False
+        self.literal_block['in'] = False
 
     def visit_Text(self, node):
-        if self.in_literal_block:
+        if self.literal_block['in']:
             text = node.astext()
             self.cell.append(text)
 
@@ -77,7 +87,7 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
 
     #Utilities
 
-    def new_cell(self):
+    def new_cell(self, cell_type="markdown"):
         self.cell = []
-        self.cell_type = None
+        self.cell_type = cell_type
 

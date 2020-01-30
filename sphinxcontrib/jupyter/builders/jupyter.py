@@ -10,10 +10,9 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from ..writers.make_site import MakeSiteWriter
-from ..writers.convert import convertToHtmlWriter
+from ..writers.convert import ConvertToHTMLWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
-import pdb
 import time
 import json
 from hashlib import md5
@@ -41,7 +40,7 @@ class JupyterBuilder(Builder):
 
     def init(self):
         ### initializing required classes
-        self.executedir = self.confdir + '/_build/codetree'
+        self.executedir = self.confdir + '/_build/execute'
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:

@@ -221,3 +221,55 @@ jupyter_language_synonyms = ["ipython", "python", "pycon", "ipython3"]
 
 exercise_include_exercises = True
 exercise_inline_exercises = True
+
+# Location of template folder for coverage reports
+jupyter_template_coverage_file_path = False
+
+# generate html from IPYNB files
+jupyter_generate_html = False
+
+# html template specific to your website needs
+jupyter_html_template = ""
+
+# latex template specific to your website needs
+jupyter_latex_template = ""
+
+#make website
+jupyter_make_site = False
+
+#force markdown image inclusion
+jupyter_images_markdown = True
+
+#This is set true by default to pass html to the notebooks
+jupyter_allow_html_only=True
+
+## Theme specific variables
+jupyter_theme_path = 'theme'
+jupyter_template_path = 'theme/templates'
+
+### pdf options
+jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"
+
+jupyter_bib_file = "_static/quant-econ"
+
+jupyter_pdf_author = "Thomas J. Sargent and John Stachurski"
+
+# Exclude Document Patterns for PDF Construction
+jupyter_pdf_excludepatterns = ["404", "index", "references"]
+
+# Set urlpath for html links in documents
+jupyter_pdf_urlpath = "https://lectures.quantecon.org/py/"
+
+# make book
+jupyter_pdf_book = False
+
+# book title
+jupyter_pdf_book_title = "Quantitative Economics with Python"
+
+# pdf book name
+jupyter_pdf_book_name = "quantitative_economics_with_python"
+
+# pdf toc file
+jupyter_pdf_book_index = "index_toc"
+
+jupyter_execute_allow_errors = True

@@ -145,7 +145,7 @@ class ExecuteNotebookWriter():
         #Parse Executed notebook to remove hide-output blocks
         for cell in executed_nb['cells']:
             if cell['cell_type'] == "code":
-                if cell['metadata']['hide-output']:
+                if 'hide-output' in cell['metadata']:
                     cell['outputs'] = []
             # #Write Executed Notebook as File
             # with open(executed_notebook_path, "wt", encoding="UTF-8") as f:

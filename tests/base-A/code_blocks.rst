@@ -67,7 +67,7 @@ Support for Python doctest code blocks::
     >>> 1+1
     2
     >>> for x in range(3):
-    ...      print x
+    ...      print(x)
     ...
     0
     1

@@ -31,7 +31,7 @@ class JupyterPdfBuilder(Builder):
 
     _writer_class = JupyterWriter
     def init(self):
-        self.executedir = self.confdir + '/_build/codetree'
+        self.executedir = self.confdir + '/_build/execute'
         self.texdir = self.outdir + "/latex"
         self.texbookdir = self.outdir + "/texbook"
         self.pdfdir = self.outdir + "/pdf"

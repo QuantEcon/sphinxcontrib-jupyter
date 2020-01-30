@@ -10,7 +10,7 @@ from sphinx.util.console import bold, darkgreen, brown
 from sphinx.util.fileutil import copy_asset
 from ..writers.execute_nb import ExecuteNotebookWriter
 from ..writers.make_site import MakeSiteWriter
-from ..writers.convert import convertToHtmlWriter
+from ..writers.convert import ConvertToHTMLWriter
 from dask.distributed import Client, progress
 from sphinx.util import logging
 from docutils import nodes
@@ -35,10 +35,10 @@ class JupyterHtmlBuilder(Builder):
     _writer_class = JupyterWriter
     def init(self):
         ### initializing required classes
-        self.executedir = self.confdir + '/_build/codetree'
+        self.executedir = self.confdir + '/_build/execute'
         self.downloadsdir = self.outdir + "/_downloads"
         self.downloadsExecutedir = self.downloadsdir + "/executed"
-        self._convert_class = convertToHtmlWriter(self)
+        self._convert_class = ConvertToHTMLWriter(self)
         self._make_site_class = MakeSiteWriter(self)
 
     def get_target_uri(self, docname: str, typ: str = None):

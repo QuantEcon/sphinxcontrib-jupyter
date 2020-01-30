@@ -37,27 +37,29 @@ def combine_executed_files(executedir, nb, docname):
                 execution_count += 1
                 cellcopy = normalize_cell(cell.copy())
                 hashcode = create_hashcode(cellcopy)
-                output = json_obj[hashcode]['outputs']
-                cell['execution_count'] = execution_count
-                cell['outputs'] = munchify(output)
-                if cell['metadata']['hide-output']:
-                    cell['outputs'] = []
+                if hashcode in json_obj:
+                    output = json_obj[hashcode]['outputs']
+                    cell['execution_count'] = execution_count
+                    cell['outputs'] = munchify(output)
+                    if 'hide-output' in cell['metadata']:
+                        cell['outputs'] = []
 
     return nb
 
 def check_codetree_validity(builder, nb, docname):
     ### function to check codetree validity
     if os.path.exists(builder.executedir):
-        codetreeFile = builder.executedir + "/" + docname + builder.out_suffix
+        codetreeFile = builder.executedir + "/" + docname + ".codetree"
         if os.path.exists(codetreeFile):
             with open(codetreeFile, "r", encoding="UTF-8") as f:
                 json_obj = json.load(f)
 
             for cell in nb.cells:
-                cell = normalize_cell(cell)
-                cell = create_hash(cell)
-                if cell.metadata.hashcode not in json_obj.keys():
-                    return True
+                if cell['cell_type'] == "code":
+                    cell = normalize_cell(cell)
+                    cell = create_hash(cell)
+                    if cell.metadata.hashcode not in json_obj.keys():
+                        return True
         else:
             return True
     else:

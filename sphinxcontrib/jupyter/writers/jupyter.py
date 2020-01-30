@@ -9,7 +9,6 @@ class JupyterWriter(Writer):
     
     builder_translator = {
         #Code Translators
-        'jupytercode' : JupyterCodeBlockTranslator,
         "execute" : JupyterCodeBlockTranslator,
         #RST + Code Translators
         'jupyter' : JupyterIPYNBTranslator,
