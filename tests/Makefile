@@ -15,9 +15,6 @@ SOURCEDIR     = base/
 BUILDDIR      = base/_build
 BUILDCOVERAGE = base/_build_coverage
 BUILDWEBSITE  = base/_build_website
-#BASEA
-SOURCEDIRA     = base-A/
-BUILDDIRA      = base-A/_build
 #PDF
 SOURCEPDF = pdf/
 BUILDPDF = pdf/_build/
@@ -71,9 +68,6 @@ clean-pdf:
 clean-jupyter:
 	rm -rf $(BUILDDIR)
 
-clean-jupyterA:
-	rm -rf $(BUILDDIRA)
-
 #### TODO - Add these back in once test cases are setup ####
 coverage:
 ifneq (,$(filter $(parallel),true True))
@@ -111,9 +105,6 @@ code:
 
 jupyterbase:
 	@$(SPHINXBUILD) -M jupyterbase "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-jupyterbaseA:
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIRA)" "$(BUILDDIRA)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
