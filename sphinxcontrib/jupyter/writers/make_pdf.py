@@ -103,7 +103,6 @@ class MakePDFWriter():
                 subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
 
             ### check if subdirectory
-            print(filename, "filename")
             subdirectory, filename = get_subdirectory_and_filename(filename)
 
             ### set working directory for xelatex processing

@@ -30,7 +30,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
         self.book_index_previous_links = []
         self.cell_trimmed = []
         self.book_index = self.config["jupyter_pdf_book_index"]
-        self.urlpath = "http://test.com" #use builder.urlpath instead
+        self.urlpath = builder.urlpath
         self.syntax = PDFSyntax()
 
 
@@ -54,7 +54,10 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
 
     def visit_bullet_list(self, node):
         #TODO: implement depth to skip and other pdf related things
-        super().visit_bullet_list(node)
+        if self.in_book_index:
+            pass
+        else:    
+            super().visit_bullet_list(node)
 
     # math
 
@@ -131,11 +134,12 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
             return
 
         self.in_reference = dict()
-
-        if self.List:
+        if self.List and not self.in_book_index:
             marker = self.List.get_marker()
             self.List.add_item("[")
         else:
+            if self.in_book_index and self.List:
+                self.List = None
             text = self.syntax.visit_reference(node)
             if text:
                 self.cell.append(text)

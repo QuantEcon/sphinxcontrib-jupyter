@@ -56,9 +56,9 @@ def check_codetree_validity(builder, nb, docname):
 
             for cell in nb.cells:
                 if cell['cell_type'] == "code":
-                    cell = normalize_cell(cell)
-                    cell = create_hash(cell)
-                    if cell.metadata.hashcode not in json_obj.keys():
+                    cellcopy = normalize_cell(cell.copy())
+                    cellcopy = create_hash(cellcopy)
+                    if cellcopy.metadata.hashcode not in json_obj.keys():
                         return True
         else:
             return True

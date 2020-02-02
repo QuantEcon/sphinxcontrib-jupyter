@@ -76,6 +76,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     Table = None
     #Configuration (Titles)
     visit_first_title = True
+    title = ""
     #Configuration (Toctree)
     toctree = False
     #Configuration (Topic)
@@ -91,6 +92,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     slide = "slide"           #TODO: move to JupyterSlideTranslator
 
     cached_state = dict()   #A dictionary to cache states to support nested blocks
+    URI_SPACE_REPLACE_FROM = re.compile(r"\s")
+    URI_SPACE_REPLACE_TO = "-"
 
     def __init__(self, document, builder):
         """
@@ -125,6 +128,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.new_cell()
 
     def depart_document(self, node):
+        self.output.add_metadata_notebook({"filename": self.source_file_name.split("/")[-1], "title": self.title})
         self.cell_to_notebook()
         #TODO: Should this be in the `builder` (otherwise helper function should be used)
         if len(self.files) > 0:
@@ -279,6 +283,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_image(self, node):
         pass
 
+    def visit_index(self, node):
+        pass
+
+    def depart_index(self, node):
+        pass
+
     def visit_inline(self, node):
         pass
 
@@ -334,6 +344,18 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.cell.append(self.syntax.depart_label())
             self.add_space()
 
+    def visit_line(self, node):
+        pass
+
+    def depart_line(self, node):
+        pass
+
+    def visit_line_block(self, node):
+        pass
+
+    def depart_line_block(self, node):
+        pass
+
     #List(Start)
 
     def visit_bullet_list(self, node):
@@ -365,7 +387,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.List = None
 
     def visit_list_item(self, node):
-        self.List.set_marker(node)
+        if self.List:
+            self.List.set_marker(node)
 
     def depart_list_item(self, node):
         pass
@@ -663,7 +686,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def visit_title(self, node):
         if self.visit_first_title:
-            title = node.astext()
+            self.title = node.astext()
         self.visit_first_title = False
         if self.topic:
             # this prevents from making it a subsection from section
@@ -696,22 +719,20 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.List:
             marker = self.List.get_marker()
             self.List.add_item("[")
+            self.reference_text_start = len(self.cell)
         else:
             self.cell.append("[")
             self.reference_text_start = len(self.cell)
 
     def depart_reference(self, node):
         subdirectory = False
+        formatted_text = ""
 
         if self.topic:
             # Jupyter Notebook uses the target text as its id
-            uri_text = "".join(
-                self.cell[self.reference_text_start:]).strip()
-            uri_text = re.sub(
-                self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
-            self.in_reference['uri_text'] = uri_text
-            formatted_text = "](#{})".format(self.reference['uri_text'])
-            self.cell.append(formatted_text)
+            uri_text = node.astext().replace(" ","-")
+            formatted_text = "](#{})".format(uri_text)
+            #self.cell.append(formatted_text)
         else:
             # if refuri exists, then it includes id reference
             if "refuri" in node.attributes:
@@ -740,12 +761,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            if self.List:
-                marker = self.List.get_marker()
-                text = "]({})".format(refuri)
-                self.List.add_item(text)
-            else:
-                self.cell.append("]({})".format(refuri))
+            formatted_text = "]({})".format(refuri)
+        if self.List:
+            marker = self.List.get_marker()
+            self.List.add_item(formatted_text)
+        else:
+            self.cell.append(formatted_text)
 
         if self.toctree:
             self.cell.append("\n")
