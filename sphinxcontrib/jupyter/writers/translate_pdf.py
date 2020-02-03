@@ -31,6 +31,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
         self.cell_trimmed = []
         self.book_index = self.config["jupyter_pdf_book_index"]
         self.urlpath = builder.urlpath
+        self.skip_topic_list_content = True
         self.syntax = PDFSyntax()
 
 
@@ -66,7 +67,6 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                 markdown = self.List.to_markdown()
             self.cell.append(markdown)
             self.List = None
-
 
     # math
 
@@ -146,11 +146,16 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
         if self.in_book_index and node.attributes['refuri'] == 'zreferences':
             return
 
+        if self.topic and self.skip_topic_list_content:
+            self.skip_topic_list_content = False
+            self.List.decrement_level()
+            raise nodes.SkipNode
+
         self.in_reference = dict()
-        
+
         if self.List:
             marker = self.List.get_marker()
-            if not self.in_book_index:
+            if not self.in_book_index and not self.topic:
                 self.List.add_item("[")
         else:
             self.cell.append("[")
@@ -165,8 +170,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
 
         if self.topic:
             # Jupyter Notebook uses the target text as its id
-            uri_text = node.astext().replace(" ","-")
-            uri_text = uri_text.lower()
+            uri_text = node.astext().replace(" ","-").lower()
             SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
                             r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–", r"`"]
             for CHAR in SPECIALCHARS:
@@ -174,7 +178,6 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                 uri_text = uri_text.replace("--","-")
                 uri_text = uri_text.replace(".-",".")
             formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
-            formatted_text = "](#{})".format(uri_text)
         else:
             # if refuri exists, then it includes id reference
             if "refuri" in node.attributes:
