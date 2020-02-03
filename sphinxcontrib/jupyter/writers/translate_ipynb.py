@@ -762,14 +762,16 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
             formatted_text = "]({})".format(refuri)
+
+        if self.toctree:
+            formatted_text += "\n"
+
+        ## if there is a list add to it, else add it to the cell directly
         if self.List:
             marker = self.List.get_marker()
             self.List.add_item(formatted_text)
         else:
             self.cell.append(formatted_text)
-
-        if self.toctree:
-            self.cell.append("\n")
 
     def visit_title_reference(self, node):
         pass

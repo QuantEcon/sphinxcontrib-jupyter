@@ -67,29 +67,45 @@ class List:
                 self.items.append(last_item)
         self.items.append(itemtuple)
 
+    def build_syntax(self, item):
+        indent = self.indentation * item[2]
+        marker = item[0]
+        if isinstance(item[0], int):
+            marker = str(item[0]) + "."
+
+        content = ""
+        for children in item[3]:
+            if isinstance(children, str) or isinstance(children, int):
+                content +=  children
+            else:
+                content +=  children.astext()
+        return indent, marker, content
+
     def to_markdown(self):
         """
         converts the list items to markdown
         """
         markdown = []
         for item in self.items:
-            indent = self.indentation * item[2]
-            marker = item[0]
-            if isinstance(item[0], int):
-                marker = str(item[0]) + "."
-
-            content = ""
-            for children in item[3]:
-                if isinstance(children, str) or isinstance(children, int):
-                    content +=  children
-                else:
-                    content +=  children.astext()
+            indent, marker, content = self.build_syntax(item)
             markdown.append("{}{} {}".format(indent, marker, content))
         
         ## need a new line at the end
         markdown.append("\n")
         return "\n".join(markdown)
 
+    def to_latex(self):
+        """
+        converts the list items to a latex string 
+        """
+        latex = []
+        for item in self.items:
+            indent, marker, content = self.build_syntax(item)
+            latex.append("{}".format(content))
+
+        latex.append("\n")
+        return "\n".join(latex)
+        
     def increment_level(self):
         self.level += 1
 

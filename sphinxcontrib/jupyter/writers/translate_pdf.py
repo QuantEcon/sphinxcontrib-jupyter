@@ -53,11 +53,20 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
     # List items
 
     def visit_bullet_list(self, node):
-        #TODO: implement depth to skip and other pdf related things
-        if self.in_book_index:
-            pass
-        else:    
-            super().visit_bullet_list(node)
+        #TODO: implement depth to skip and other pdf related things    
+        super().visit_bullet_list(node)
+
+    def depart_bullet_list(self, node):
+        if self.List is not None:
+            self.List.decrement_level()
+        if self.List and self.List.level == 0:
+            if self.in_book_index:
+                markdown = self.List.to_latex()
+            else:
+                markdown = self.List.to_markdown()
+            self.cell.append(markdown)
+            self.List = None
+
 
     # math
 
@@ -80,6 +89,10 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
 
     def visit_Text(self, node):
         text = node.astext()
+
+        ## removing references from index file book
+        if self.in_book_index:
+            return
 
         #Escape Special markdown chars except in code block
         if self.literal_block['in'] == False:
@@ -134,19 +147,17 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
             return
 
         self.in_reference = dict()
-        if self.List and not self.in_book_index:
+        
+        if self.List:
             marker = self.List.get_marker()
-            self.List.add_item("[")
+            if not self.in_book_index:
+                self.List.add_item("[")
         else:
-            if self.in_book_index and self.List:
-                self.List = None
-            text = self.syntax.visit_reference(node)
-            if text:
-                self.cell.append(text)
-            self.reference_text_start = len(self.cell)
+            self.cell.append("[")
 
     def depart_reference(self, node):
         subdirectory = False
+        formatted_text = ""
 
         ## removing zreferences from the index file
         if self.in_book_index and node.attributes['refuri'] == 'zreferences':
@@ -154,10 +165,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
 
         if self.topic:
             # Jupyter Notebook uses the target text as its id
-            uri_text = "".join(
-                self.cell[self.reference_text_start:]).strip()
-            uri_text = re.sub(
-                self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
+            uri_text = node.astext().replace(" ","-")
             uri_text = uri_text.lower()
             SPECIALCHARS = [r"!", r"@", r"#", r"$", r"%", r"^", r"&", r"*", r"(", r")", r"[", r"]", r"{", 
                             r"}", r"|", r":", r";", r",", r"?", r"'", r"’", r"–", r"`"]
@@ -166,9 +174,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                 uri_text = uri_text.replace("--","-")
                 uri_text = uri_text.replace(".-",".")
             formatted_text = " \\ref{" + uri_text + "}" #Use Ref and Plain Text titles
-            self.in_reference['uri_text'] = uri_text
-            formatted_text = "](#{})".format(self.reference['uri_text'])
-            self.cell.append(formatted_text)
+            formatted_text = "](#{})".format(uri_text)
         else:
             # if refuri exists, then it includes id reference
             if "refuri" in node.attributes:
@@ -183,7 +189,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                             self.cell.pop()
                         refuri = "reference-\\cite{" + label
                         self.add_bib_to_latex(self.output, True)
-                    else:
+                    elif 'references' not in refuri:
                         if len(self.source_file_name.split('/')) >= 2 and self.source_file_name.split('/')[-2] and 'rst' not in self.source_file_name.split('/')[-2]:
                             subdirectory = self.source_file_name.split('/')[-2]
                         if subdirectory: refuri = subdirectory + "/" + refuri
@@ -193,9 +199,11 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                         else:
                             refuri = refuri + ".html"
                         if self.urlpath:
-                            self.cell.append("]({})".format(self.urlpath + refuri))
+                            formatted_text = "]({})".format(self.urlpath + refuri)
                         else:
-                            self.cell.append("]({})".format(refuri))
+                            formatted_text = "]({})".format(refuri)
+                    else:
+                        refuri = self.add_extension_to_inline_link(refuri, self.default_ext)
             else:
                 # in-page link
                 if "refid" in node:
@@ -214,62 +222,43 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
 
             #TODO: review if both %28 replacements necessary in this function?
             #      Propose delete above in-link refuri
-            if self.List:
-                marker = self.List.get_marker()
-                text = "]({})".format(refuri)
-                self.List.add_item(text)
-            else:
-                #TODO: show these checks while pushing to list as well?
-                if 'reference-' in refuri:
-                    self.cell.append(refuri.replace("reference-","") + "}")
-                elif "refuri" in node.attributes and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
-                    ##### Below code, constructs an index file for the book
-                    if self.in_book_index:
-                        if self.cell_trimmed != [] and (all(x in self.cell for x in self.cell_trimmed)): 
-                            ### when the list is not empty and when the list contains chapters or heading from the topic already
-                            self.cell_trimmed = self.cell[len(self.book_index_previous_links) + 2:] ### +2 to preserve '/n's
-                            if '- ' in self.cell[len(self.book_index_previous_links) + 1:]:
-                                text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(), node["refuri"] + ".tex")
-                            else:
-                                text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
-                            self.cell = self.cell[:len(self.cell) - len(self.cell_trimmed)]
-                            self.cell.append(text)
-                            self.cell_trimmed = []
-                            self.cell_trimmed.append(text)
-                        else:
-                            ### when the list is empty the first entry is the topic
-                            text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
-                            self.cell = []
-                            self.cell.append(text)
-                            self.cell_trimmed = copy.deepcopy(self.cell)
-                        self.book_index_previous_links = copy.deepcopy(self.cell)
-
-                        ## check to remove any '- ' left behind during the above operation
-                        if "- " in self.cell:
-                            self.cell.remove("- ")
-
-                elif "refuri" in node.attributes and "http" in node["refuri"]:
-                    ### handling extrernal links
-                    self.cell.append("]({})".format(refuri))
-                    #label = self.cell.pop()
-                    # if "\href{" == label:  #no label just a url
-                    #     self.cell.append(label + "{" + refuri + "}")
-                    # else:
-                    #     self.cell.append(refuri + "}" + "{" + label + "}")
-                elif self.inpage_reference:
-                    labeltext = self.cell.pop()
-                    # Check for Equations as they do not need labetext
-                    if 'equation-' in refuri:
-                        self.cell.append(refuri + "}")
+            #TODO: show these checks while pushing to list as well?
+            if 'reference-' in refuri:
+                formatted_text = refuri.replace("reference-","") + "}"
+            elif "refuri" in node.attributes and "internal" in node.attributes and node.attributes["internal"] == True and "references" not in node["refuri"]:
+                ##### Below code, constructs an index file for the book
+                if self.in_book_index:
+                    if self.List.level > 1:
+                        # if it is not the top level, then probably it is a chapter
+                        formatted_text = "\\chapter{{{}}}\\input{{{}}}".format(node.astext(), node["refuri"] + ".tex")
                     else:
-                        self.cell.append(refuri + "}{" + labeltext + "}")
+                        formatted_text = "\\cleardoublepage\\part{{{}}}".format(node.astext())
+
+            elif "refuri" in node.attributes and "http" in node["refuri"]:
+                ### handling extrernal links
+                formatted_text = "]({})".format(refuri)
+            elif self.inpage_reference:
+                labeltext = self.cell.pop()
+                # Check for Equations as they do not need labetext
+                if 'equation-' in refuri:
+                    formatted_text = refuri + "}"
+                else:
+                    formatted_text = refuri + "}{" + labeltext + "}"
+
                 # if self.in_toctree:
                 #     #TODO: this will become an internal link when making a single unified latex file
                 #     formatted_text = " \\ref{" + refuri + "}"
                 #     self.cell.append(formatted_text)
 
         if self.toctree:
-            self.cell.append("\n")
+            formatted_text += "\n"
+
+        ## if there is a list add to it, else add it to the cell directly        
+        if self.List:
+            marker = self.List.get_marker()
+            self.List.add_item(formatted_text)
+        else:
+            self.cell.append(formatted_text)
 
     #References(End)
 
@@ -314,6 +303,13 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                 return
             self.add_newparagraph()
 
+    @classmethod
+    def add_bib_to_latex(self, nb, boolean):
+        ## add bib include value to the latex metadata object
+        latex_metadata = nb.get_metadata('latex_metadata', {})
+
+        latex_metadata['bib_include'] = boolean
+        nb.add_metadata_notebook(latex_metadata)
 
 
 

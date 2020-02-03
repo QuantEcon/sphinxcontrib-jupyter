@@ -60,10 +60,12 @@ clean-coverage:
 	rm -rf $(BUILDCOVERAGE)
 
 clean-website:
-	rm -rf $(BUILDWEBSITE)
+	rm -rf $(BUILDDIR)/jupyterhtml
+	rm -rf $(BUILDDIR)/jupyter_html
+
 
 clean-pdf:
-	rm -rf $(BUILDPDF)
+	rm -rf $(BUILDDIR)/jupyterpdf
 
 clean-jupyter:
 	rm -rf $(BUILDDIR)

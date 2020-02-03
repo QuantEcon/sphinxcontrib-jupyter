@@ -131,6 +131,11 @@ class JupyterNotebook:
         """ Attach Metadata to a notebook """
         for k,v in metadata.items():
             self.nb.metadata[k] = v
+    
+    def get_metadata(self, key, default_value={}):
+        if not key in self.nb.metadata:
+            self.nb.metadata[key] = default_value
+        return self.nb.metadata[key]
 
 
 
