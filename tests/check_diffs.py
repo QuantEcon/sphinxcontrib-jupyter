@@ -22,7 +22,7 @@ if sys.version_info.major == 2:
 
 SPHINX_VERSION = sphinx.version_info
 CONFIGSETS = {
-    'code'  : "jupyter",
+    'execute'  : "jupyter",
     'base'  : "jupyter", 
     'pdf'   : "jupyterpdf",
     'no_inline_exercises' : "jupyter",
@@ -87,6 +87,8 @@ def check_set(PATH, BUILDER):
 
 #-Main-#
 for configset in CONFIGSETS:
+    if len(sys.argv) > 1:
+        configset = sys.argv[1]   #Specify a configuration set
     print("Testing Configuration Set: {}".format(configset))
     builder = CONFIGSETS[configset]
     failed = check_set(configset, builder)

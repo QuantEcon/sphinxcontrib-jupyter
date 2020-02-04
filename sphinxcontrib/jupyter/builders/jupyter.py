@@ -22,11 +22,9 @@ from sphinx.cmd.build import build_main
 import os
 
 class JupyterBuilder(Builder):
-    """
-    Builds Jupyter Notebook
-    """
+
     name = "jupyter"
-    format = "ipynb"
+    docformat = "ipynb"
     out_suffix = ".ipynb"
     allow_parallel = True
 
@@ -39,7 +37,9 @@ class JupyterBuilder(Builder):
     logger = logging.getLogger(__name__)
 
     def init(self):
-        ### initializing required classes
+        """
+        A Sphinx Builder for Jupyter Notebooks
+        """
         self.executedir = self.confdir + '/_build/execute'
 
     def get_outdated_docs(self):
@@ -65,8 +65,7 @@ class JupyterBuilder(Builder):
 
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
-
-        ## copies the dependencies to the notebook folder
+        # Copies the dependencies to the notebook folder
         copy_dependencies(self)
             
     def write_doc(self, docname, doctree):
@@ -74,25 +73,17 @@ class JupyterBuilder(Builder):
         # replace tuples in attribute values with lists
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
-
         self.writer.write(doctree, destination)
-
-        # get a NotebookNode object from a string
+        # Get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
-
-
-        ### combine the executed code with output of this builder
+        # Combine the executed code with output of this builder
         update = check_codetree_validity(self, nb, docname)
-
         if update:
             run_build('execute')
-
-
         nb = combine_executed_files(self.executedir, nb, docname)
-
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)
         ensuredir(os.path.dirname(outfilename))
-
+        #Write Document
         try:
             with open(outfilename, "wt", encoding="UTF-8") as f:
                 nbformat.write(nb, f)
@@ -106,7 +97,6 @@ class JupyterBuilder(Builder):
         if (self.config["jupyter_execute_notebooks"]):
             self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
             ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
-
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:

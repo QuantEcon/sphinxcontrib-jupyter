@@ -47,21 +47,41 @@ the same kernel
 
     jupyter_lang_synonyms = ["pycon", "ipython"]
 
+jupyter_execute_notebooks
+-------------------------
 
-jupyter_dependencies
---------------------
+Enables the execution of generated notebooks by calling the
+`execute` builder
 
-Specify file or directory level dependencies
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
 
 ``conf.py`` usage:
 
 .. code-block:: python
 
-    jupyter_dependencies = {
-        <dir> : ['file1', 'file2'],
-        {<dir>}/<file.rst> : ['file1']
-    }
+    jupyter_execute_notebooks = True
 
-this allows you to specify a companion data file for 
-a given ``RST`` document and it will get copied through sphinx
-to the ``_build`` folder.
+.. note::
+
+    `jupyter_dependencies <config_execution>`__ can be specified to support notebook
+    execution. 
+
+jupyter_static_file_path
+-------------------------
+
+Specify path to `_static` folder.
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_static_file_path = ["source/_static"]
+
+.. todo::
+
+    Is this required?

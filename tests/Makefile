@@ -7,15 +7,16 @@ SHELL := bash
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
-#JupyterCodeTranslator (Code Only)
-SOURCECODE     = code/
-BUILDCODE      = code/_build
-#BASE
+#JupyterCodeBlockTranslator
+SOURCEEXECUTE     = execute/
+BUILDEXECUTE      = execute/_build
+#BASE JupyterIPYNBTranlsator
 SOURCEDIR     = base/
 BUILDDIR      = base/_build
-BUILDCOVERAGE = base/_build_coverage
-BUILDWEBSITE  = base/_build_website
-#PDF
+#PDF JupyterHTMLTranslator
+SOURCEHTML = html/
+BUILDHTML = html/_build/
+#PDF JupyterPDFTranslator
 SOURCEPDF = pdf/
 BUILDPDF = pdf/_build/
 #no_inline_exercises
@@ -30,83 +31,34 @@ help:
 
 .PHONY: help Makefile pdf rst-test code
 
-test: clean clean-pdf jupyter pdf
-	python check_diffs.py
+test: test-base test-execute test-no-inline
 
-no-inline:
+test-base: clean jupyter
+	python check_diffs.py base
+
+test-execute: clean-execute build-execute
+	python check_diffs.py execute
+
+test-no-inline: clean-no-inline no-inline
+	python check_diffs.py no_inline_exercises
+
+build-execute:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEEXECUTE)" "$(BUILDEXECUTE)" $(SPHINXOPTS) $(O)
+
+build-no-inline:
 	@$(SPHINXBUILD) -M jupyter "$(SOURCENOEX)" "$(BUILDNOEX)" $(SPHINXOPTS) $(O)
+
+clean-execute:
+	rm -rf $(BUILDEXECUTE)
 
 clean-no-inline:
 	rm -rf $(BUILDNOEX)
 
-no-inline-test: clean-no-inline no-inline
-	python check_diffs.py
-
-preview:
-ifneq (,$(filter $(parallel),website Website))
-	cd _build/jupyter_html/ && python -m http.server
-else
-ifdef lecture
-	cd _build/jupyter/ && jupyter notebook $(basename $(lecture)).ipynb
-else
-	cd _build/jupyter/ && jupyter notebook
-endif
-endif
-
-clean-execute:
-	rm -rf $(BUILDDIR)/execute
-
-clean-coverage:
-	rm -rf $(BUILDCOVERAGE)
-
-clean-website:
-	rm -rf $(BUILDDIR)/jupyterhtml
-	rm -rf $(BUILDDIR)/jupyter_html
-
+clean-html:
+	rm -rf $(BUILDHTML)
 
 clean-pdf:
-	rm -rf $(BUILDDIR)/jupyterpdf
-
-clean-jupyter:
-	rm -rf $(BUILDDIR)
-
-#### TODO - Add these back in once test cases are setup ####
-coverage:
-ifneq (,$(filter $(parallel),true True))
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0 -D jupyter_number_workers=$(CORES)
-else
-	@$(SPHINXBUILD) -M jupyter "$(SOURCEDIR)" "$(BUILDCOVERAGE)" $(SPHINXOPTS) $(O) -D jupyter_make_coverage=1 -D jupyter_execute_notebooks=1 -D jupyter_ignore_skip_test=0
-endif
-
-website:
-ifneq ($(strip $(parallel)),)
-	@$(SPHINXBUILD) -M jupyterhtml "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_target_html=1 -D jupyter_download_nb_image_urlpath="https://s3-ap-southeast-2.amazonaws.com/python.quantecon.org/_static/" -D jupyter_images_markdown=0 -D jupyter_html_template="python-html.tpl" -D jupyter_download_nb_urlpath="https://python.quantecon.org/" -D jupyter_coverage_dir=$(BUILDCOVERAGE) -D jupyter_number_workers=$(parallel)
-
-else
-	@$(SPHINXBUILD) -M jupyterhtml "$(SOURCEDIR)" "$(BUILDWEBSITE)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_make_site=1 -D jupyter_generate_html=1 -D jupyter_download_nb=1 -D jupyter_execute_notebooks=1 -D jupyter_target_html=1 -D jupyter_download_nb_image_urlpath="https://s3-ap-southeast-2.amazonaws.com/python.quantecon.org/_static/" -D jupyter_images_markdown=0 -D jupyter_html_template="python-html.tpl" -D jupyter_download_nb_urlpath="https://python.quantecon.org/" -D jupyter_coverage_dir=$(BUILDCOVERAGE)
-endif
-
-pdf:
-ifneq ($(strip $(parallel)),)
-	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_latex_template="latex.tpl" -D jupyter_latex_template_book="latex_book.tpl" -D jupyter_images_markdown=1 -D jupyter_execute_notebooks=1 -D jupyter_target_pdf=1 -D jupyter_number_workers=$(parallel)
-
-else
-	@$(SPHINXBUILD) -M jupyterpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_latex_template="latex.tpl" -D jupyter_latex_template_book="latex_book.tpl" -D jupyter_images_markdown=1 -D jupyter_execute_notebooks=1 -D jupyter_target_pdf=1
-endif
-
-execute:
-ifneq ($(strip $(parallel)),)
-	@@$(SPHINXBUILD) -M execute "$(SOURCEDIR)" "$(BUILDDIR)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_template_coverage_file_path="error_report_template.html" -D jupyter_number_workers=$(parallel)
-
-else
-	@$(SPHINXBUILD) -M execute "$(SOURCEDIR)" "$(BUILDDIR)" $(FILES) $(SPHINXOPTS) $(O) -D jupyter_template_coverage_file_path="error_report_template.html"
-endif
-
-code:
-	@$(SPHINXBUILD) -M jupytercode "$(SOURCECODE)" "$(BUILDCODE)" $(SPHINXOPTS) $(O)
-
-jupyterbase:
-	@$(SPHINXBUILD) -M jupyterbase "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	rm -rf $(BUILDPDF)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

@@ -22,18 +22,19 @@ from hashlib import md5
 
 logger = logging.getLogger(__name__)
 
-class JupyterHtmlBuilder(Builder):
-    """
-    Builds html notebooks
-    """
+class JupyterHTMLBuilder(Builder):
+
     name="jupyterhtml"
-    format = "ipynb"
+    docformat = "ipynb"
     out_suffix = ".ipynb"
 
     allow_parallel = True
     _writer_class = JupyterWriter
+
     def init(self):
-        ### initializing required classes
+        """
+        Builds IPYNB(HTML) notebooks and constructs web sites
+        """
         self.executedir = self.confdir + '/_build/execute'
         self.downloadsdir = self.outdir + "/_downloads"
         self.downloadsExecutedir = self.downloadsdir + "/executed"
@@ -57,19 +58,17 @@ class JupyterHtmlBuilder(Builder):
         # replace tuples in attribute values with lists
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
-        
-        ### processing for downloaded notebooks
+    
+        # Download Notebooks
         if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
             nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname, True)
             nb = self.add_download_metadata(nb) ## add metadata for the downloaded notebooks
-
         self.save_notebook(outfilename, nb)
 
-        ### processing for html notebooks
+        # Notebooks for producing HTML
         nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname)
         #self.save_notebook(outfilename, nb)
-
-        ### converting to HTML
+        # Convert IPYNB to HTML
         language_info = nb.metadata.kernelspec.language
         self._convert_class.convert(nb, docname, language_info, nb['metadata']['path'])
 
@@ -82,11 +81,10 @@ class JupyterHtmlBuilder(Builder):
             ref_urlpath = self.config["jupyter_download_nb_urlpath"]
             jupyter_download_nb_image_urlpath = self.config["jupyter_download_nb_image_urlpath"]
             outdir = self.downloadsdir
-
         self.writer._set_ref_urlpath(ref_urlpath)
         self.writer._set_jupyter_download_nb_image_urlpath(jupyter_download_nb_image_urlpath)
         
-        ## combine the executed code with output of this builder
+        # Combine the executed code with output of this builder
         self.writer.write(doctree, destination)
 
         nb = nbformat.reads(self.writer.output, as_version=4)
@@ -101,7 +99,7 @@ class JupyterHtmlBuilder(Builder):
 
         ## adding the site metadata here
         nb = self.add_site_metadata(nb, docname)
-        
+
         nb = combine_executed_files(self.executedir, nb, docname)
 
         outfilename = os.path.join(outdir, os_path(docname) + self.out_suffix)
@@ -118,10 +116,8 @@ class JupyterHtmlBuilder(Builder):
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def copy_static_files(self):
-        # copy all static files
         logger.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
-
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -135,6 +131,9 @@ class JupyterHtmlBuilder(Builder):
         logger.info("done")
 
     def add_site_metadata(self, nb, docname):
+        """
+        Site metadata is used when converting IPYNB to HTML (nbconvert)
+        """
         subdirectory, filename = get_subdirectory_and_filename(docname)
         nb['metadata']['path'] = subdirectory
         nb['metadata']['filename'] = filename
@@ -148,6 +147,6 @@ class JupyterHtmlBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-
+        #Construct complete website
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
