@@ -390,20 +390,23 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         if self.List:
             self.List.set_marker(node)
 
-    def depart_list_item(self, node):
-        pass
-
     #List(End)
 
     def visit_literal(self, node):
         if self.download_reference['in']:
             return            #TODO: can we just raise Skipnode?
-        self.cell.append(self.syntax.visit_literal())
+        if self.List:
+            self.List.add_item(self.syntax.visit_literal())
+        else:
+            self.cell.append(self.syntax.visit_literal())
 
     def depart_literal(self, node):
         if self.download_reference['in']:
             return
-        self.cell.append(self.syntax.depart_literal())
+        if self.List:
+            self.List.add_item(self.syntax.depart_literal())
+        else:
+            self.cell.append(self.syntax.depart_literal())
 
     def visit_literal_block(self, node):
         "Parse Literal Blocks (Code Blocks)"
@@ -717,7 +720,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.in_reference = dict()
 
         if self.List:
-            marker = self.List.get_marker()
             self.List.add_item("[")
             self.reference_text_start = len(self.cell)
         else:
@@ -768,7 +770,6 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
         ## if there is a list add to it, else add it to the cell directly
         if self.List:
-            marker = self.List.get_marker()
             self.List.add_item(formatted_text)
         else:
             self.cell.append(formatted_text)

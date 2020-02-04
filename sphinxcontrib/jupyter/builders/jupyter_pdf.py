@@ -11,7 +11,6 @@ from sphinx.util.console import bold
 from sphinx.util.fileutil import copy_asset
 from ..writers.make_pdf import MakePDFWriter
 from sphinx.util import logging
-import pdb
 import shutil
 from distutils.spawn import find_executable
 import time
