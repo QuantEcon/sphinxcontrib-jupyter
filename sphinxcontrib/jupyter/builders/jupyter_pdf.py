@@ -20,17 +20,18 @@ from ..writers.utils import get_subdirectory_and_filename
 
 logger = logging.getLogger(__name__)
 
-class JupyterPdfBuilder(Builder):
-    """
-    Builds pdf notebooks
-    """
+class JupyterPDFBuilder(Builder):
+
     name="jupyterpdf"
-    format = "ipynb"
+    docformat = "ipynb"
     out_suffix = ".ipynb"
     allow_parallel = True
-
     _writer_class = JupyterWriter
+
     def init(self):
+        """
+        Builds IPYNB(PDF) notebooks
+        """
         self.executedir = self.confdir + '/_build/execute'
         self.texdir = self.outdir + "/latex"
         self.texbookdir = self.outdir + "/texbook"
@@ -45,14 +46,15 @@ class JupyterPdfBuilder(Builder):
             )
             exit(1)
 
-        ### we should write a separate function/class to check configs
+        # TODO: We should write a separate function/class to check configs
         if  self.config["jupyter_pdf_book"] and ("jupyter_pdf_book_index" not in self.config or not self.config["jupyter_pdf_book_index"]):
             logger.warning(
                 "You have switched on the book conversion option but not specified an index/contents file for book pdf"
             )
             exit(1)
-        ### initializing required classes
-        self._pdf_class = MakePDFWriter(self)
+        
+        #PDF Writer Object
+        self.pdf = MakePDFWriter(self)
 
         if ("jupyter_target_pdf" in self.config and self.config['jupyter_target_pdf'] is False) or "jupyter_target_pdf" not in self.config:
             self.config['jupyter_target_pdf'] = True
@@ -123,9 +125,8 @@ class JupyterPdfBuilder(Builder):
         except (IOError, OSError) as err:
             logger.warning("error writing file %s: %s" % (outfilename, err))
 
-
-        self._pdf_class.convert_to_latex(self, docname, nb['metadata']['latex_metadata'])
-        self._pdf_class.move_pdf(self)
+        self.pdf.convert_to_latex(self, docname, nb['metadata']['latex_metadata'])
+        self.pdf.move_pdf(self)
 
     def copy_static_files(self):
         # copy all static files
@@ -145,7 +146,7 @@ class JupyterPdfBuilder(Builder):
         logger.info("done")
         self.copy_static_folder_to_subfolders(self.texdir, True)
 
-    ## copying static folder to subfolders - will remove this later
+    # Copying static folder to subfolders - TODO: will remove this later
     def copy_static_folder_to_subfolders(self, sourcedir, skiptopdir):
         dirs = os.listdir(sourcedir)
         sourcefolder = sourcedir + "/_static"
@@ -162,7 +163,7 @@ class JupyterPdfBuilder(Builder):
 
         ### making book pdf
         if self.config["jupyter_pdf_book"]:
-            self._pdf_class.process_tex_for_book(self)
+            self.pdf.process_tex_for_book(self)
 
     def add_latex_metadata(self, nb, docname=""):
         ## initialize latex metadata
