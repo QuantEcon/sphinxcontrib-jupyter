@@ -579,6 +579,9 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.rubric = False
 
     def visit_section(self, node):
+        if self.config["jupyter_section_blocks"] and self.section_level > 0:
+            self.cell_to_notebook()
+            self.new_cell()
         self.section_level += 1
 
     def depart_section(self, node):

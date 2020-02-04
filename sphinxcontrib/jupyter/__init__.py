@@ -39,6 +39,7 @@ def setup(app):
     app.add_config_value("jupyter_language_synonyms", [], "jupyter")
     #-IPYNB-#
     app.add_config_value("jupyter_images_html", True, "jupyter")
+    app.add_config_value("jupyter_section_blocks", True, "jupyter")
 
 
     app.add_config_value("jupyter_kernels", None, "jupyter")
