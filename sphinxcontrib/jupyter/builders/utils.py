@@ -1,5 +1,5 @@
 """
-    Utility functions needed primarily in builders
+Utility Functions to support Builders
 """
 import os
 import json
@@ -15,30 +15,27 @@ def normalize_cell(cell):
     cell.source = cell.source.strip().replace('\n','')
     return cell
 
-def create_hashcode(cell):
-    hashcode = md5(cell.source.encode()).hexdigest()
-    return hashcode
-
 def create_hash(cell):
-    hashcode = create_hashcode(cell)
+    hashcode = md5(cell.source.encode()).hexdigest()
     cell.metadata.hashcode = hashcode
     return cell
 
+#TODO: @aakash Does this need logger messages for failure cases?
 def combine_executed_files(executedir, nb, docname):
     codetreeFile = executedir + "/" + docname + ".codetree"
     execution_count = 0
     count = 0
     if os.path.exists(codetreeFile):
         with open(codetreeFile, "r", encoding="UTF-8") as f:
-            json_obj = json.load(f)
+            codetree = json.load(f)
 
         for cell in nb.cells:
             if cell['cell_type'] == "code":
                 execution_count += 1
                 cellcopy = normalize_cell(cell.copy())
                 hashcode = create_hashcode(cellcopy)
-                if hashcode in json_obj:
-                    output = json_obj[hashcode]['outputs']
+                if hashcode in codetree:
+                    output = codetree[hashcode]['outputs']
                     cell['execution_count'] = execution_count
                     cell['outputs'] = munchify(output)
                     if 'hide-output' in cell['metadata']:
@@ -47,18 +44,21 @@ def combine_executed_files(executedir, nb, docname):
     return nb
 
 def check_codetree_validity(builder, nb, docname):
-    ### function to check codetree validity
+    """
+    Check the validity of a codetree for each code block
+    This checks the md5 hash to see if the codetree data needs to be 
+    updated
+    """
     if os.path.exists(builder.executedir):
         codetreeFile = builder.executedir + "/" + docname + ".codetree"
         if os.path.exists(codetreeFile):
             with open(codetreeFile, "r", encoding="UTF-8") as f:
-                json_obj = json.load(f)
-
+                codetree = json.load(f)
             for cell in nb.cells:
                 if cell['cell_type'] == "code":
                     cellcopy = normalize_cell(cell.copy())
                     cellcopy = create_hash(cellcopy)
-                    if cellcopy.metadata.hashcode not in json_obj.keys():
+                    if cellcopy.metadata.hashcode not in codetree.keys():
                         return True
         else:
             return True
