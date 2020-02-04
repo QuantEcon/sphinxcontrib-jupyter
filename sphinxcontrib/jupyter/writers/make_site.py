@@ -55,20 +55,16 @@ class MakeSiteWriter():
         ## copies the helper html files 
         if os.path.exists(htmlFolder):
             copy_tree(htmlFolder, self.websitedir, preserve_symlinks=1)
-        else:
-            self.logger.warning("html folder not present in the themes directory")
 
-
-        if "jupyter_coverage_dir" in builder.config and builder.config["jupyter_coverage_dir"]:
-            if os.path.exists(builder.config['jupyter_coverage_dir']):
-                self.coveragedir = builder.config['jupyter_coverage_dir']
-                ## copies the report of execution results
-                if os.path.exists(self.coveragedir + "/jupyter/reports/code-execution-results.json"):
-                    shutil.copy2(self.coveragedir + "/jupyter/reports/code-execution-results.json", self.websitedir + "_static/")
+        if os.path.exists(builder.executedir):
+            self.coveragereport = builder.executedir + "/reports/code-execution-results.json"
+            ## copies the report of execution results
+            if os.path.exists(self.coveragereport):
+                    shutil.copy2(self.coveragereport, self.websitedir + "_static/")
             else:
-                self.logger.error("coverage directory not found. Please ensure to run coverage build before running website build")
+                self.logger.error("coverage report not found. Please ensure to run make execute for creating website reports")
         else:
-            self.logger.error(" coverage directory nbot specified. Please specify coverage directory for creating website reports ")
+            self.logger.error("Notebooks are not executed. Please run make execute for creating website reports")
 
         
         ## copies the downloads folder
