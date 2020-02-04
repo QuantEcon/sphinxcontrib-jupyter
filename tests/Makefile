@@ -8,8 +8,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
 #JupyterCodeBlockTranslator
-SOURCECODE     = code/
-BUILDCODE      = code/_build
+SOURCECODE     = execute/
+BUILDCODE      = execute/_build
 #BASE JupyterIPYNBTranlsator
 SOURCEDIR     = base/
 BUILDDIR      = base/_build
