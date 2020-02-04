@@ -15,7 +15,6 @@ from dask.distributed import Client, progress
 from sphinx.util import logging
 from docutils import nodes
 from docutils.nodes import Node
-import pdb
 import time
 from .utils import copy_dependencies, combine_executed_files, check_codetree_validity, run_build
 from ..writers.utils import get_subdirectory_and_filename
@@ -79,12 +78,6 @@ class JupyterHtmlBuilder(Builder):
         jupyter_download_nb_image_urlpath = None
         outdir = self.outdir
 
-        ### check for codetree else, create it
-        update = check_codetree_validity(self, nb, docname)
-
-        if update:
-            run_build('execute')
-
         if download_nb:
             ref_urlpath = self.config["jupyter_download_nb_urlpath"]
             jupyter_download_nb_image_urlpath = self.config["jupyter_download_nb_image_urlpath"]
@@ -97,6 +90,14 @@ class JupyterHtmlBuilder(Builder):
         self.writer.write(doctree, destination)
 
         nb = nbformat.reads(self.writer.output, as_version=4)
+
+        ### check for codetree else, create it
+        update = check_codetree_validity(self, nb, docname)
+
+        os.chdir(self.confdir)
+        
+        if update:
+            run_build('execute')
 
         ## adding the site metadata here
         nb = self.add_site_metadata(nb, docname)

@@ -66,14 +66,9 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
 
         if self.topic:
             # Jupyter Notebook uses the target text as its id
-            uri_text = "".join(
-                self.cell[self.reference_text_start:]).strip()
-            uri_text = re.sub(
-                self.URI_SPACE_REPLACE_FROM, self.URI_SPACE_REPLACE_TO, uri_text)
+            uri_text = node.astext().replace(" ","-")
             uri_text = uri_text.replace("(", "%28").replace(")", "%29")
-            self.in_reference['uri_text'] = uri_text
-            formatted_text = "](#{})".format(self.reference['uri_text'])
-            self.cell.append(formatted_text)
+            formatted_text = "](#{})".format(uri_text)
         else:
             # if refuri exists, then it includes id reference
             if "refuri" in node.attributes:
@@ -102,15 +97,18 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            if self.List:
-                marker = self.List.get_marker()
-                text = "]({})".format(refuri)
-                self.List.add_item(text)
-            else:
-                self.cell.append("]({})".format(refuri))
+            formatted_text = "]({})".format(refuri)
 
         if self.toctree:
-            self.cell.append("\n")
+            formatted_text += "\n"
+
+        ## if there is a list add to it, else add it to the cell directl
+        if self.List:
+            self.List.add_item(formatted_text)    
+        else:
+            self.cell.append(formatted_text)
+
+        
 
     def visit_footnote_reference(self, node):
         self.footnote_reference['in'] = True
