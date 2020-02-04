@@ -37,6 +37,10 @@ def setup(app):
     app.add_builder(JupyterPDFBuilder)
     app.add_config_value("jupyter_language", "python3", "jupyter")
     app.add_config_value("jupyter_language_synonyms", [], "jupyter")
+    #-IPYNB-#
+    app.add_config_value("jupyter_images_html", True, "jupyter")
+
+
     app.add_config_value("jupyter_kernels", None, "jupyter")
     app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
     app.add_config_value("jupyter_write_metadata", True, "jupyter")

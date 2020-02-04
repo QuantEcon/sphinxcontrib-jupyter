@@ -17,6 +17,7 @@ from .translate_code import JupyterCodeBlockTranslator
 from .utils import JupyterOutputCellGenerators, get_source_file_name
 from .notebook import JupyterNotebook
 from .markdown import MarkdownSyntax
+from .html import HTMLSyntax
 from .accumulators import List, TableBuilder
 
 logger = logging.getLogger(__name__)
@@ -120,6 +121,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.source_file_name = self.settings._source.replace(src_dir+"/", "")
         #-Syntax-#
         self.syntax = MarkdownSyntax()
+        self.html_syntax = HTMLSyntax()   #for HTML enabled options
 
     #-Document-#
 
@@ -278,7 +280,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)
-        self.cell.append(self.syntax.visit_image(uri))
+        if self.config["jupyter_images_html"]:
+            attrs = node.attributes
+            syntax = self.html_syntax.visit_image(uri, attrs)
+        else:
+            syntax = self.syntax.visit_image(uri)
+        self.cell.append(syntax)
     
     def depart_image(self, node):
         pass

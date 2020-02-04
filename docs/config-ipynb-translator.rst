@@ -41,8 +41,8 @@ Force the inclusion of images as html objects in the notebook
    :header-rows: 1
 
    * - Values
-   * - False (**default**)
-   * - True
+   * - False 
+   * - True (**default**)
 
 .. note::
 
