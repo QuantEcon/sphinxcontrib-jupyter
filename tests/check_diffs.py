@@ -22,7 +22,7 @@ if sys.version_info.major == 2:
 
 SPHINX_VERSION = sphinx.version_info
 CONFIGSETS = {
-    'code'  : "jupyter",
+    'execute'  : "jupyter",
     'base'  : "jupyter", 
     'pdf'   : "jupyterpdf",
     'no_inline_exercises' : "jupyter",

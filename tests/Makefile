@@ -8,8 +8,8 @@ SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = sphinxcontrib-jupyter-testcases
 #JupyterCodeBlockTranslator
-SOURCECODE     = execute/
-BUILDCODE      = execute/_build
+SOURCEEXECUTE     = execute/
+BUILDEXECUTE      = execute/_build
 #BASE JupyterIPYNBTranlsator
 SOURCEDIR     = base/
 BUILDDIR      = base/_build
@@ -31,30 +31,34 @@ help:
 
 .PHONY: help Makefile pdf rst-test code
 
-test: clean clean-pdf jupyter
-	python check_diffs.py
+test: test-base test-execute test-no-inline
 
 test-base: clean jupyter
 	python check_diffs.py base
 
-no-inline:
+test-execute: clean-execute build-execute
+	python check_diffs.py execute
+
+test-no-inline: clean-no-inline no-inline
+	python check_diffs.py no_inline_exercises
+
+build-execute:
+	@$(SPHINXBUILD) -M jupyter "$(SOURCEEXECUTE)" "$(BUILDEXECUTE)" $(SPHINXOPTS) $(O)
+
+build-no-inline:
 	@$(SPHINXBUILD) -M jupyter "$(SOURCENOEX)" "$(BUILDNOEX)" $(SPHINXOPTS) $(O)
+
+clean-execute:
+	rm -rf $(BUILDEXECUTE)
 
 clean-no-inline:
 	rm -rf $(BUILDNOEX)
 
-no-inline-test: clean-no-inline no-inline
-	python check_diffs.py
-
-clean-website:
-	rm -rf $(BUILDDIR)/jupyterhtml
-	rm -rf $(BUILDDIR)/jupyter_html
+clean-html:
+	rm -rf $(BUILDHTML)
 
 clean-pdf:
-	rm -rf $(BUILDDIR)/jupyterpdf
-
-clean-jupyter:
-	rm -rf $(BUILDDIR)
+	rm -rf $(BUILDPDF)
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
