@@ -33,7 +33,7 @@ def combine_executed_files(executedir, nb, docname):
             if cell['cell_type'] == "code":
                 execution_count += 1
                 cellcopy = normalize_cell(cell.copy())
-                hashcode = create_hashcode(cellcopy)
+                hashcode = md5(cellcopy.source.encode()).hexdigest()
                 if hashcode in codetree:
                     output = codetree[hashcode]['outputs']
                     cell['execution_count'] = execution_count
