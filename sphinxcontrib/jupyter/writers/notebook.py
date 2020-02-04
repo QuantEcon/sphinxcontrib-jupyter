@@ -36,13 +36,13 @@ class JupyterNotebook:
     def notebook_as_string(self):
         return self.writes()
 
-    def add_cell(self, source, cell_type, **kwargs):
+    def add_cell(self, source, cell_type, metadata=None, **kwargs):
         if cell_type == "markdown":
-            self.add_markdown_cell(source, **kwargs)
+            self.add_markdown_cell(source, metadata, **kwargs)
         elif cell_type == "code":
-            self.add_code_cell(source, **kwargs)
+            self.add_code_cell(source, metadata, **kwargs)
         elif cell_type == "raw":
-            self.add_raw_cell(source, **kwargs)
+            self.add_raw_cell(source, metadata, **kwargs)
         else:
             raise InvalidJupyterCell("{} is not a valid Jupyter Cell type".format(cell_type))
 
@@ -114,12 +114,6 @@ class JupyterNotebook:
         https://nbformat.readthedocs.io/en/latest/api.html#nbformat.writes
         """
         return nbformat.writes(self.nb)
-
-    def read(self, fl):
-        """
-        https://nbformat.readthedocs.io/en/latest/api.html#reading-and-writing
-        """
-        self.nb = nbformat.read(fl)
 
     def add_metadata(self, cell, metadata):
         """ Attach Metadata to a cell """   

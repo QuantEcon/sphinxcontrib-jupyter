@@ -32,7 +32,7 @@ class JupyterCodeBuilder(Builder):
     def init(self):
         ### initializing required classes
         self._execute_notebook_class = ExecuteNotebookWriter(self)
-        self.executedir = self.outdir
+        self.executedir = self.confdir + '/_build/execute'
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
         self.client = None
@@ -101,17 +101,18 @@ class JupyterCodeBuilder(Builder):
         for cell in nb.cells:
             cell = normalize_cell(cell)
             cell = create_hash(cell)
-            codetree_ds = self.create_codetree_ds(codetree_ds, cell)
+            codetree_ds = self.create_codetree_ds(codetree_ds, cell, nb)
 
         filename = self.executedir + "/" + nb.metadata.filename_with_path + self.out_suffix
         with open(filename, "wt", encoding="UTF-8") as json_file:
             json.dump(codetree_ds, json_file)
 
-    def create_codetree_ds(self, codetree_ds, cell):
+    def create_codetree_ds(self, codetree_ds, cell, nb):
         codetree_ds[cell.metadata.hashcode] = dict()
         key = codetree_ds[cell.metadata.hashcode]
         if hasattr(cell, 'source'): key['source']= cell.source
         if hasattr(cell, 'outputs'): key['outputs'] = cell.outputs
+        if hasattr(cell, 'metadata'): key['metadata'] = cell.metadata
         return codetree_ds
 
     def finish(self):

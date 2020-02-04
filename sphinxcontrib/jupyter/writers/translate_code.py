@@ -49,6 +49,7 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
         #Start new cell and add add current cell to notebook
         self.literal_block['in'] = True
         self.new_cell(cell_type = "code")
+        self.cell_metadata = dict()
 
         #-Determine Language of Code Block-#
         if "language" in node.attributes:
@@ -59,10 +60,14 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
             self.nodelang = self.language   #use notebook programming language
 
         #Check for no-execute status
-        if  "classes" in node.attributes and "no-execute" in node.attributes["classes"]:
-            self.literal_block['no-execute'] = True
-        else:
-            self.literal_block['no-execute'] = False
+        if  "classes" in node.attributes:
+            if "no-execute" in node.attributes["classes"]:
+                self.literal_block['no-execute'] = True
+            else:
+                self.literal_block['no-execute'] = False
+            
+            if "hide-output" in node.attributes["classes"]:
+                self.cell_metadata["hide-output"] = True
 
         ## Check node language is the same as notebook language else make it markdown
         if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
@@ -73,7 +78,7 @@ class JupyterCodeBlockTranslator(SphinxSparseTranslator):
             
     def depart_literal_block(self, node):
         source = "".join(self.cell)
-        self.output.add_cell(source, self.cell_type)
+        self.output.add_cell(source, self.cell_type, self.cell_metadata)
         self.new_cell()
         self.literal_block['in'] = False
 
