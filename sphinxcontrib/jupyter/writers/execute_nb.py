@@ -137,7 +137,7 @@ class ExecuteNotebookWriter():
                 if (executed == len(arr)):
                     key_to_delete = nb
                     notebook = params['delayed_notebooks'].get(nb)
-                    builder._execute_notebook_class.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
+                    builder.executenb.execute_notebook(builder, notebook, nb, params, params['delayed_futures'])
             if (key_to_delete):
                 del params['dependency_lists'][str(key_to_delete)]
                 key_to_delete = False
@@ -181,14 +181,14 @@ class ExecuteNotebookWriter():
         update_count_delayed = 1
         for future, nb in as_completed(params['futures'], with_results=True, raise_errors=False):
             count += 1
-            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count, 'futures', params)
+            builder.executenb.check_execution_completion(builder, future, nb, error_results, count, total_count, 'futures', params)
 
         for future, nb in as_completed(params['delayed_futures'], with_results=True, raise_errors=False):
             count += 1
             if update_count_delayed == 1:
                 update_count_delayed = 0
                 total_count += len(params['delayed_futures'])
-            builder._execute_notebook_class.check_execution_completion(builder, future, nb, error_results, count, total_count,  'delayed_futures', params)
+            builder.executenb.check_execution_completion(builder, future, nb, error_results, count, total_count,  'delayed_futures', params)
 
         return error_results
 
