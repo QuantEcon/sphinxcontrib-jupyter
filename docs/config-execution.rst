@@ -7,6 +7,7 @@ Execution Configuration
     :depth: 1
     :local:
 
+Code execution is handled by a specialised `execute` builder.
 
 jupyter_file_dependencies
 --------------------------
@@ -76,18 +77,6 @@ Specify the number of threads per worker for dask
 
     jupyter_threads_per_worker = 1
 
-jupyter_coverage
-----------------
-
-Enable coverage statistics to be computed
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Values
-   * - False (**default**)
-   * - True 
-
 jupyter_coverage_report_template
 -----------------------------------
 
@@ -110,3 +99,84 @@ Provide path to template coverage report file
     badges and a status page needs to be made into an option and 
     specified via the default theme. 
     See `#237 <https://github.com/QuantEcon/sphinxcontrib-jupyter/issues/237>`__
+
+
+jupyter_options
+---------------
+
+An dict-type object that is used by dask to control execution
+
+
+.. TODO:: 
+
+    @aakash is this used?
+
+jupyter_drop_tests
+------------------
+
+**Note:** Future Feature?
+
+Drop ``code-blocks` that include ``:class: test``
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
+
+.. TODO::
+
+    This option should be added to `execute` builder so tests can 
+    be switched on/off for execution testing
+
+jupyter_ignore_no_execute:
+--------------------------
+
+**Note:** Deprecate?
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
+
+When constructing notebooks this option can be enabled to ignore `:class: no-execute`
+for `code-blocks`. This is useful for `html` writer for pages that are meant to fail 
+but shouldn't be included in `coverage` tests. 
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_ignore_no_execute = True
+
+.. todo::
+
+    @aakash this is no longer required as all code-blocks are run correct?
+
+jupyter_ignore_skip_test
+------------------------
+
+**Note:** Deprecate?
+
+When constructing notebooks this option can be enabled to ignore `:class: skip-test`
+for `code-blocks`.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_ignore_skip_test = True
+
+.. todo::
+
+    @aakash is this required?

@@ -23,13 +23,7 @@ Options are available for each builder and translator:
    config-html-translator 
    config-pdf-translator
    config-execution
-
-   config-extension-notebooks
-   config-extension-execution
-   config-extension-html
-   config-extension-coverage
-   config-extension-exercise
-   config-extension-pdf
+   config-directive-exercise
 
 This extension also offers additional directives that can be used while writing your documents
 

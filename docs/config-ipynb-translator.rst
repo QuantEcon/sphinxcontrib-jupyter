@@ -54,3 +54,39 @@ Force the inclusion of images as html objects in the notebook
 .. code-block:: python
 
     jupyter_images_html = True
+
+jupyter_drop_tests
+------------------
+
+Drop ``code-blocks` that include ``:class: test``
+Allows notebooks to be constructed without including tests from the 
+source RST file
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False
+   * - True (**default**)
+
+jupyter_drop_solutions
+----------------------
+
+**Note:** Future Feature
+
+Drop ``code-blocks`` that include ``:class: solution``
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False (**default**)
+   * - True 
+
+.. TODO:: 
+
+    This option needs to be reviewed. A new implementation should be
+    considered where the option builds a set of notebooks with and 
+    without solutions so special configuration isn't required. 
+
+

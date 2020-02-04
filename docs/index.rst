@@ -3,6 +3,7 @@
 
 This sphinx extension can be used to build a collection of
 `Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects.
+It can also be used to manage websites and build pdf files.
 
 .. note:: 
 
