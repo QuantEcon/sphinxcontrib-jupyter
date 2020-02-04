@@ -27,7 +27,6 @@ the task of version control for large projects.
    builders
    examples
    config-example
-   config-project
 
 
 Credits
