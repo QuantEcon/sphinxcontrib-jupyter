@@ -2,9 +2,9 @@ import yaml
 yaml.warnings({'YAMLLoadWarning': False})
 
 from .builders.jupyter import JupyterBuilder
-from .builders.jupyter_pdf import JupyterPdfBuilder
+from .builders.jupyter_pdf import JupyterPDFBuilder
 from .builders.jupyter_code import JupyterCodeBuilder
-from .builders.jupyter_html import JupyterHtmlBuilder
+from .builders.jupyter_html import JupyterHTMLBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -31,10 +31,10 @@ def setup(app):
     app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
-    app.add_builder(JupyterPdfBuilder)
     app.add_builder(JupyterBuilder)
     app.add_builder(JupyterCodeBuilder)
-    app.add_builder(JupyterHtmlBuilder)
+    app.add_builder(JupyterHTMLBuilder)
+    app.add_builder(JupyterPDFBuilder)
     app.add_config_value("jupyter_language", "python3", "jupyter")
     app.add_config_value("jupyter_language_synonyms", [], "jupyter")
     app.add_config_value("jupyter_kernels", None, "jupyter")
