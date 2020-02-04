@@ -24,10 +24,10 @@ the task of version control for large projects.
    installation
    config-sphinx
    config-extension
+   builders
    examples
    config-example
    config-project
-   builders
 
 
 Credits
