@@ -395,6 +395,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def visit_literal(self, node):
         if self.download_reference['in']:
             return            #TODO: can we just raise Skipnode?
+
         if self.List:
             self.List.add_item(self.syntax.visit_literal())
         else:
@@ -634,16 +635,28 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     #Text(Start)
 
     def visit_emphasis(self, node):
-        self.cell.append(self.syntax.visit_italic())
+        if self.List:
+            self.List.add_item(self.syntax.visit_italic())
+        else:
+            self.cell.append(self.syntax.visit_italic())
 
     def depart_emphasis(self, node):
-        self.cell.append(self.syntax.depart_italic())
+        if self.List:
+            self.List.add_item(self.syntax.depart_italic())
+        else:
+            self.cell.append(self.syntax.depart_italic())
 
     def visit_strong(self, node):
-        self.cell.append(self.syntax.visit_bold())
+        if self.List:
+            self.List.add_item(self.syntax.visit_bold())
+        else:
+            self.cell.append(self.syntax.visit_bold())
 
     def depart_strong(self, node):
-        self.cell.append(self.syntax.depart_bold())
+        if self.List:
+            self.List.add_item(self.syntax.depart_bold())
+        else:
+            self.cell.append(self.syntax.depart_bold())
 
     def visit_Text(self, node):
         text = node.astext()
