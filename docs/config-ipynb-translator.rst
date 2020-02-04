@@ -41,8 +41,8 @@ Force the inclusion of images as html objects in the notebook
    :header-rows: 1
 
    * - Values
-   * - False (**default**)
-   * - True
+   * - False 
+   * - True (**default**)
 
 .. note::
 
@@ -54,6 +54,24 @@ Force the inclusion of images as html objects in the notebook
 .. code-block:: python
 
     jupyter_images_html = True
+
+jupyter_section_blocks
+-----------------------
+
+Writes RST sections to independant markdown blocks in IPYNB
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Values
+   * - False 
+   * - True (**default**)
+
+``conf.py`` usage:
+
+.. code-block:: python
+
+    jupyter_section_blocks = False
 
 jupyter_drop_tests
 ------------------
