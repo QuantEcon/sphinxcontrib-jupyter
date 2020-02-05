@@ -68,15 +68,11 @@ class MakeSiteWriter():
 
         
         ## copies the downloads folder
-        if "jupyter_download_nb" in builder.config and builder.config["jupyter_download_nb"]:
-            if builder.config["jupyter_download_nb_execute"]:
-                sourceDownloads = builder.outdir + "/_downloads/executed"
-            else: 
-                sourceDownloads = builder.outdir + "/_downloads"
-            if os.path.exists(sourceDownloads):
-                shutil.copytree(sourceDownloads, self.downloadipynbdir, symlinks=True)
-            else:
-                self.logger.warning("Downloads folder not created during build")
+        sourceDownloads = builder.outdir + "/_downloads"
+        if os.path.exists(sourceDownloads):
+            shutil.copytree(sourceDownloads, self.downloadipynbdir, symlinks=True)
+        else:
+            self.logger.warning("Downloads folder not created during build")
 
 
 
