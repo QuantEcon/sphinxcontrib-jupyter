@@ -59,25 +59,25 @@ class JupyterHTMLBuilder(Builder):
         doctree = doctree.deepcopy()
         destination = docutils.io.StringOutput(encoding="utf-8")
     
+        nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname, True)       
         # Download Notebooks
-        if "jupyter_download_nb" in self.config and self.config["jupyter_download_nb"]:
-            nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname, True)
-            nb = self.add_download_metadata(nb) ## add metadata for the downloaded notebooks
+
+        nb = self.add_download_metadata(nb) ## add metadata for the downloaded notebooks
         self.save_notebook(outfilename, nb)
 
         # Notebooks for producing HTML
-        nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname)
+        nb, outfilename = self.process_doctree_to_notebook(doctree, destination, docname, False)
         #self.save_notebook(outfilename, nb)
         # Convert IPYNB to HTML
         language_info = nb.metadata.kernelspec.language
         self._convert_class.convert(nb, docname, language_info, nb['metadata']['path'])
 
-    def process_doctree_to_notebook(self, doctree, destination, docname, download_nb=False):
+    def process_doctree_to_notebook(self, doctree, destination, docname, download=False):
         ref_urlpath = None
         jupyter_download_nb_image_urlpath = None
         outdir = self.outdir
 
-        if download_nb:
+        if download:
             ref_urlpath = self.config["jupyter_download_nb_urlpath"]
             jupyter_download_nb_image_urlpath = self.config["jupyter_download_nb_image_urlpath"]
             outdir = self.downloadsdir
@@ -141,8 +141,6 @@ class JupyterHTMLBuilder(Builder):
         return nb
 
     def add_download_metadata(self, nb):
-        self.writer._set_ref_urlpath(self.config["jupyter_download_nb_urlpath"])
-        self.writer._set_jupyter_download_nb_image_urlpath((self.config["jupyter_download_nb_image_urlpath"]))
         nb['metadata']['download_nb'] = self.config['jupyter_download_nb']
         nb['metadata']['download_nb_path'] = self.config['jupyter_download_nb_urlpath']
         return nb

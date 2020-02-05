@@ -30,6 +30,8 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         # HTML Settings
         self.html_ext = ".html"
         self.syntax = HTMLSyntax()
+        self.urlpath = builder.urlpath
+        self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
 
     #-Nodes-#
 
@@ -41,6 +43,11 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         """
         uri = node.attributes["uri"]
         self.images.append(uri)
+        if self.jupyter_download_nb_image_urlpath:
+            for file_path in self.jupyter_static_file_path:
+                if file_path in uri:
+                    uri = uri.replace(file_path +"/", self.jupyter_download_nb_image_urlpath)
+                    break  #don't need to check other matches
         attrs = node.attributes
         self.cell.append(self.syntax.visit_image(uri, attrs))
 
@@ -76,6 +83,8 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
                 # add default extension(.ipynb)
                 if "internal" in node.attributes and node.attributes["internal"] == True:
                     refuri = self.add_extension_to_inline_link(refuri, self.html_ext)
+                    if self.urlpath is not None:
+                        refuri = self.urlpath + refuri
             else:
                 # in-page link
                 if "refid" in node:
@@ -97,7 +106,10 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            formatted_text = "]({})".format(refuri)
+            if self.urlpath:
+                formatted_text = "]({})".format(self.urlpath + refuri)
+            else:
+                formatted_text = "]({})".format(refuri)
 
         if self.toctree:
             formatted_text += "\n"
