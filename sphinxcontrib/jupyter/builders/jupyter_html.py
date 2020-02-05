@@ -26,7 +26,7 @@ class JupyterHTMLBuilder(Builder):
 
     name="jupyterhtml"
     docformat = "ipynb"
-    out_suffix = ".ipynb"
+    out_suffix = ".html"
 
     allow_parallel = True
     _writer_class = JupyterWriter
@@ -45,7 +45,23 @@ class JupyterHTMLBuilder(Builder):
         return docname
 
     def get_outdated_docs(self):
-        return self.env.found_docs
+        for docname in self.env.found_docs:
+            if docname not in self.env.all_docs:
+                yield docname
+                continue
+            targetname = self.env.doc2path(docname, self.outdir + "/html",
+                                           self.out_suffix)
+            try:
+                targetmtime = os.path.getmtime(targetname)
+            except OSError:
+                targetmtime = 0
+            try:
+                srcmtime = os.path.getmtime(self.env.doc2path(docname))
+                # checks if the source file edited time is later then the html build time
+                if srcmtime > targetmtime:
+                    yield docname
+            except EnvironmentError:
+                pass
 
     def prepare_writing(self, docnames):
         self.writer = self._writer_class(self)
@@ -76,6 +92,7 @@ class JupyterHTMLBuilder(Builder):
         ref_urlpath = None
         jupyter_download_nb_image_urlpath = None
         outdir = self.outdir
+        outfilename = ""
 
         if download:
             ref_urlpath = self.config["jupyter_download_nb_urlpath"]
@@ -102,8 +119,9 @@ class JupyterHTMLBuilder(Builder):
 
         nb = combine_executed_files(self.executedir, nb, docname)
 
-        outfilename = os.path.join(outdir, os_path(docname) + self.out_suffix)
-        ensuredir(os.path.dirname(outfilename))
+        if download:
+            outfilename = os.path.join(outdir, os_path(docname) + ".ipynb")
+            ensuredir(os.path.dirname(outfilename))
 
         return nb, outfilename
 
