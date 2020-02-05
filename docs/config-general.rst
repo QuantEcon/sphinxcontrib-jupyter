@@ -84,4 +84,4 @@ Specify path to `_static` folder.
 
 .. todo::
 
-    Is this required?
+    will be deprecated once static assets feature is implemented.

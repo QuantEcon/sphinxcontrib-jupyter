@@ -41,25 +41,28 @@ def setup(app):
     app.add_config_value("jupyter_images_html", True, "jupyter")
     app.add_config_value("jupyter_section_blocks", True, "jupyter")
 
+    app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
+    app.add_config_value("jupyter_html_template", None, "jupyter")
+    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter") #jupyter_coverage_template
 
-    app.add_config_value("jupyter_kernels", None, "jupyter")
-    app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
-    app.add_config_value("jupyter_write_metadata", True, "jupyter")
-    app.add_config_value("jupyter_static_file_path", [], "jupyter")
-    app.add_config_value("jupyter_header_block", None, "jupyter")
-    app.add_config_value("jupyter_options", None, "jupyter")
-    app.add_config_value("jupyter_default_lang", "python3", "jupyter")
-    app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
+    #review
     app.add_config_value("jupyter_drop_solutions", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter")
     app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
     app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
-    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter")
-    app.add_config_value("jupyter_generate_html", False, "jupyter")
-    app.add_config_value("jupyter_html_template", None, "jupyter")
-    app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
-    app.add_config_value("jupyter_make_site", False, "jupyter")
-    app.add_config_value("jupyter_dependency_lists", {}, "jupyter")
+    app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
+    app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
+
+    app.add_config_value("jupyter_kernels", None, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_conversion_mode", "all", "jupyter") #TODO: remove
+    app.add_config_value("jupyter_write_metadata", True, "jupyter") #TODO: deprecated
+    app.add_config_value("jupyter_header_block", None, "jupyter") #TODO: deprecated
+    app.add_config_value("jupyter_options", None, "jupyter") #TODO: remove (Aakash)
+    app.add_config_value("jupyter_default_lang", "python3", "jupyter") #TODO: remove
+    app.add_config_value("jupyter_lang_synonyms", [], "jupyter") #TODO: remove
+    app.add_config_value("jupyter_generate_html", False, "jupyter") #TODO: deprecated 
+    app.add_config_value("jupyter_execute_notebooks", False, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_make_site", False, "jupyter") #TODO: remove
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
     app.add_config_value("jupyter_make_coverage", False, "jupyter")
@@ -68,7 +71,6 @@ def setup(app):
     app.add_config_value("jupyter_theme", None, "jupyter")
     app.add_config_value("jupyter_theme_path", "theme", "jupyter")
     app.add_config_value("jupyter_template_path", "templates", "jupyter")
-    app.add_config_value("jupyter_dependencies", None, "jupyter")
     app.add_config_value("jupyter_download_nb_execute", None, "jupyter")
     app.add_config_value("jupyter_execute_allow_errors", False, "jupyter")
 
@@ -112,7 +114,7 @@ def setup(app):
 
     # jupyter setup
     app.add_transform(JupyterOnlyTransform)
-    app.add_config_value("jupyter_allow_html_only", False, "jupyter")
+    app.add_config_value("jupyter_allow_html_only", False, "")
     app.add_config_value("jupyter_target_html", False, "jupyter")
     app.add_config_value("jupyter_download_nb", False, "jupyter")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
