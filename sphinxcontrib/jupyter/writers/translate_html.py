@@ -32,6 +32,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
         self.syntax = HTMLSyntax()
         self.urlpath = builder.urlpath
         self.jupyter_download_nb_image_urlpath = builder.jupyter_download_nb_image_urlpath
+        self.jupyter_static_file_path = builder.config["jupyter_static_file_path"]
 
     #-Nodes-#
 
@@ -106,10 +107,7 @@ class JupyterHTMLTranslator(JupyterIPYNBTranslator):
             #ignore adjustment when targeting pdf as pandoc doesn't parse %28 correctly
             refuri = refuri.replace("(", "%28")  #Special case to handle markdown issue with reading first )
             refuri = refuri.replace(")", "%29")
-            if self.urlpath:
-                formatted_text = "]({})".format(self.urlpath + refuri)
-            else:
-                formatted_text = "]({})".format(refuri)
+            formatted_text = "]({})".format(refuri)
 
         if self.toctree:
             formatted_text += "\n"
