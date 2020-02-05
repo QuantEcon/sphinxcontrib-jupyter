@@ -188,7 +188,7 @@ class JupyterPDFTranslator(JupyterIPYNBTranslator):
                     if 'references#' in refuri:
                         label = refuri.split("#")[-1]
                         bibtex = self.cell.pop()
-                        if "hyperlink" in self.cell[-1]:
+                        if len(self.cell) > 1 and "hyperlink" in self.cell[-1]:
                             self.cell.pop()
                         refuri = "reference-\\cite{" + label
                         self.add_bib_to_latex(self.output, True)

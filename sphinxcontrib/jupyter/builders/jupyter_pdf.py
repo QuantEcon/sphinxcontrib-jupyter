@@ -64,14 +64,16 @@ class JupyterPDFBuilder(Builder):
             if docname not in self.env.all_docs:
                 yield docname
                 continue
-            targetname = self.env.doc2path(docname, self.outdir,
+            targetname = self.env.doc2path(docname, self.outdir + "/latex",
                                            self.out_suffix)
+                                           
             try:
                 targetmtime = os.path.getmtime(targetname)
             except OSError:
                 targetmtime = 0
             try:
                 srcmtime = os.path.getmtime(self.env.doc2path(docname))
+                # checks if the source file edited time is later then the html build time
                 if srcmtime > targetmtime:
                     yield docname
             except EnvironmentError:
