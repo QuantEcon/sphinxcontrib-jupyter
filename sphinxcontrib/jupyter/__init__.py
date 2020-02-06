@@ -57,8 +57,6 @@ def setup(app):
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
 
-    app.add_config_value("jupyter_write_metadata", True, "jupyter") #TODO: deprecated
-    app.add_config_value("jupyter_header_block", None, "jupyter") #TODO: deprecated
     app.add_config_value("jupyter_options", None, "jupyter") #TODO: remove (Aakash)
     app.add_config_value("jupyter_default_lang", "python3", "jupyter") #TODO: remove
     app.add_config_value("jupyter_lang_synonyms", [], "jupyter") #TODO: remove
