@@ -94,9 +94,6 @@ class JupyterBuilder(Builder):
         # copy all static files
         self.logger.info(bold("copying static files... "), nonl=True)
         ensuredir(os.path.join(self.outdir, '_static'))
-        if (self.config["jupyter_execute_notebooks"]):
-            self.logger.info(bold("copying static files to executed folder... \n"), nonl=True)
-            ensuredir(os.path.join(self.executed_notebook_dir, '_static'))
 
         # excluded = Matcher(self.config.exclude_patterns + ["**/.*"])
         for static_path in self.config["jupyter_static_file_path"]:
@@ -107,8 +104,6 @@ class JupyterBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.outdir, "_static"))
-                if (self.config["jupyter_execute_notebooks"]):
-                    copy_asset(entry, os.path.join(self.executed_notebook_dir, "_static"))
         self.logger.info("done")
 
     def finish(self):
