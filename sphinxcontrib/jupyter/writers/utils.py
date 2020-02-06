@@ -89,9 +89,9 @@ class JupyterOutputCellGenerators(Enum):
         class_list = node.attributes['classes']
 
         for item in class_list:
-            if item == "no-execute" and not obj.jupyter_ignore_no_execute:
+            if item == "no-execute":
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
-            elif item == "skip-test" and not obj.jupyter_ignore_skip_test:
+            elif item == "skip-test":
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT

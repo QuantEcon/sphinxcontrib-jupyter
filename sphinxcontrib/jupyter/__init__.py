@@ -44,12 +44,16 @@ def setup(app):
     app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
     app.add_config_value("jupyter_html_template", None, "jupyter")
     app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter") #jupyter_coverage_template
+    app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
+    app.add_config_value("jupyter_number_workers", 1, "jupyter")
+    app.add_config_value("jupyter_theme", None, "jupyter") 
+
+    #-EXECUTE-#
+    app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
 
     #review
-    app.add_config_value("jupyter_drop_solutions", True, "jupyter")
-    app.add_config_value("jupyter_drop_tests", True, "jupyter")
-    app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
-    app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
+    app.add_config_value("jupyter_drop_solutions", True, "jupyter") #TODO: reimplement as jupyter_solution_notebook = True
+    app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
 
@@ -63,26 +67,22 @@ def setup(app):
     app.add_config_value("jupyter_generate_html", False, "jupyter") #TODO: deprecated 
     app.add_config_value("jupyter_execute_notebooks", False, "jupyter") #TODO: remove
     app.add_config_value("jupyter_make_site", False, "jupyter") #TODO: remove
-    app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
-    app.add_config_value("jupyter_number_workers", 1, "jupyter")
-    app.add_config_value("jupyter_make_coverage", False, "jupyter")
-    app.add_config_value("jupyter_target_pdf", False, "jupyter")
-    app.add_config_value("jupyter_coverage_dir", None, "jupyter")
-    app.add_config_value("jupyter_theme", None, "jupyter")
-    app.add_config_value("jupyter_theme_path", "theme", "jupyter")
-    app.add_config_value("jupyter_template_path", "templates", "jupyter")
-    app.add_config_value("jupyter_download_nb_execute", None, "jupyter")
-    app.add_config_value("jupyter_execute_allow_errors", False, "jupyter")
-
+    app.add_config_value("jupyter_make_coverage", False, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_target_pdf", False, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_coverage_dir", None, "jupyter") #TODO: remove 
+    app.add_config_value("jupyter_theme_path", "theme", "jupyter") #TODO: remove 
+    app.add_config_value("jupyter_template_path", "templates", "jupyter") #TODO: remove
+    app.add_config_value("jupyter_download_nb_execute", None, "jupyter") #TODO: remove
+    
     # Jupyter pdf options
-    app.add_config_value("jupyter_latex_template", None, "jupyter")
-    app.add_config_value("jupyter_latex_template_book", None, "jupyter")
+    app.add_config_value("jupyter_latex_template", None, "jupyter") # jupyter_template_latex
+    app.add_config_value("jupyter_latex_template_book", None, "jupyter") #jupyter_template_latexbook
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
     app.add_config_value("jupyter_bib_file", None, "jupyter")
-    app.add_config_value("jupyter_pdf_author", None, "jupyter")
-    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
+    app.add_config_value("jupyter_pdf_author", None, "jupyter") 
+    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter") #TODO: remove
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
+    app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter") 
     app.add_config_value("jupyter_pdf_book", False, "jupyter")
     app.add_config_value("jupyter_pdf_book_index", None, "jupyter")
     app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
@@ -115,11 +115,11 @@ def setup(app):
     # jupyter setup
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "")
-    app.add_config_value("jupyter_target_html", False, "jupyter")
-    app.add_config_value("jupyter_download_nb", False, "jupyter")
+    app.add_config_value("jupyter_target_html", False, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_download_nb", False, "jupyter") #TODO: remove
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_markdown", False, "jupyter")
+    app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove
 
     return {
         "version": VERSION,
