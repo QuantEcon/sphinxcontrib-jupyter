@@ -55,10 +55,6 @@ class JupyterPDFBuilder(Builder):
         #PDF Writer Object
         self.pdf = MakePDFWriter(self)
 
-        if ("jupyter_target_pdf" in self.config and self.config['jupyter_target_pdf'] is False) or "jupyter_target_pdf" not in self.config:
-            self.config['jupyter_target_pdf'] = True
-            logger.info("target pdf flag is mandatory for pdf conversion, so setting it on for pdf builder.")
-
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
             if docname not in self.env.all_docs:
