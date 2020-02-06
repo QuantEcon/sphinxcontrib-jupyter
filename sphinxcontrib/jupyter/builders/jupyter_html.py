@@ -166,5 +166,4 @@ class JupyterHTMLBuilder(Builder):
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
         #Construct complete website
-        if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
-            self._make_site_class.build_website(self)
+        self._make_site_class.build_website(self)
