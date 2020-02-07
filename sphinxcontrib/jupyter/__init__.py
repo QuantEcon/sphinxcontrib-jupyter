@@ -46,7 +46,7 @@ def setup(app):
     app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter") #jupyter_coverage_template
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
-    app.add_config_value("jupyter_theme", None, "jupyter") 
+    app.add_config_value("jupyter_theme", "theme", "jupyter")
 
     #-EXECUTE-#
     app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
@@ -57,8 +57,6 @@ def setup(app):
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
 
-    app.add_config_value("jupyter_theme_path", "theme", "jupyter") #TODO: remove 
-    app.add_config_value("jupyter_template_path", "templates", "jupyter") #TODO: remove
     app.add_config_value("jupyter_download_nb_execute", None, "jupyter") #TODO: remove
     
     # Jupyter pdf options

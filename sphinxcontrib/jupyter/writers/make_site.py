@@ -25,11 +25,7 @@ class MakeSiteWriter():
         if os.path.exists(self.websitedir):
             shutil.rmtree(self.websitedir)
 
-        builder.themePath = builder.config['jupyter_theme_path']
-        themeFolder = builder.config['jupyter_theme']
-    
-        if themeFolder is not None:
-            builder.themePath = builder.themePath + "/" + themeFolder
+        builder.themePath = builder.config['jupyter_theme']
 
         if os.path.exists(builder.themePath):
             pass
@@ -37,7 +33,6 @@ class MakeSiteWriter():
             self.logger.warning("theme directory not found")
             exit()
 
-        htmlFolder = builder.themePath + "/html/"
         staticFolder = builder.themePath + "/static"
 
         ## copies the html and downloads folder
@@ -51,10 +46,6 @@ class MakeSiteWriter():
             copy_tree(staticFolder, self.websitedir + "_static/", preserve_symlinks=1)
         else:
             self.logger.warning("static folder not present in the themes directory")
-
-        ## copies the helper html files 
-        if os.path.exists(htmlFolder):
-            copy_tree(htmlFolder, self.websitedir, preserve_symlinks=1)
 
         if os.path.exists(builder.executedir):
             self.coveragereport = builder.executedir + "/reports/code-execution-results.json"
