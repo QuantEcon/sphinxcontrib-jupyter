@@ -176,13 +176,6 @@ texinfo_documents = [
 # sphinxcontrib-jupyter Configuration Settings
 # --------------------------------------------
 
-# Conversion Mode Settings
-# If "all", convert codes and texts into jupyter notebook
-# If "code", convert code-blocks only
-jupyter_conversion_mode = "all"
-
-jupyter_write_metadata = False
-
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
 
@@ -192,23 +185,8 @@ jupyter_dependency_lists = {
     'exercises' : ['footnotes'],
 }
 
-# Configure Jupyter Kernels
-jupyter_kernels = {
-    "python3": {
-        "kernelspec": {
-            "display_name": "Python",
-            "language": "python3",
-            "name": "python3"
-        },
-        "file_extension": ".py",
-    },
-}
-
 # Default language for Jupyter notebooks
-jupyter_default_lang = "python3"
-
-# Prepend a Welcome Message to Each Notebook
-jupyter_welcome_block = "welcome.rst"
+jupyter_default_language = "python3"
 
 # Solutions Configuration
 jupyter_drop_solutions = True
@@ -217,7 +195,7 @@ jupyter_drop_solutions = True
 jupyter_drop_tests = True
 
 # Add Ipython, Pycon and python as language synonyms
-jupyter_lang_synonyms = ["ipython", "python", "pycon"]
+jupyter_language_synonyms = ["ipython", "python", "pycon"]
 
 exercise_include_exercises = True
 exercise_inline_exercises = False

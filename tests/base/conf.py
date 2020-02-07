@@ -176,13 +176,6 @@ texinfo_documents = [
 # sphinxcontrib-jupyter Configuration Settings
 # --------------------------------------------
 
-# Conversion Mode Settings
-# If "all", convert codes and texts into jupyter notebook
-# If "code", convert code-blocks only
-jupyter_conversion_mode = "all"
-
-jupyter_write_metadata = False
-
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
 
@@ -192,23 +185,8 @@ jupyter_dependency_lists = {
     'exercises' : ['footnotes'],
 }
 
-# Configure Jupyter Kernels
-jupyter_kernels = {
-    "python3": {
-        "kernelspec": {
-            "display_name": "Python",
-            "language": "python3",
-            "name": "python3"
-        },
-        "file_extension": ".py",
-    },
-}
-
 # Default language for Jupyter notebooks
 jupyter_language = "python3"
-
-# Prepend a Welcome Message to Each Notebook
-jupyter_welcome_block = "welcome.rst"
 
 # Solutions Configuration
 jupyter_drop_solutions = True
@@ -223,19 +201,13 @@ exercise_include_exercises = True
 exercise_inline_exercises = True
 
 # Location of template folder for coverage reports
-jupyter_template_coverage_file_path = False
-
-# generate html from IPYNB files
-jupyter_generate_html = False
+jupyter_coverage_template = False
 
 # html template specific to your website needs
 jupyter_html_template = ""
 
 # latex template specific to your website needs
 jupyter_template_latex = ""
-
-#make website
-jupyter_make_site = False
 
 #force markdown image inclusion
 jupyter_images_markdown = True
@@ -244,8 +216,7 @@ jupyter_images_markdown = True
 jupyter_allow_html_only=True
 
 ## Theme specific variables
-jupyter_theme_path = 'theme'
-jupyter_template_path = 'theme/templates'
+jupyter_theme = 'theme'
 
 ### pdf options
 jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"

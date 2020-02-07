@@ -172,43 +172,17 @@ texinfo_documents = [
 # sphinxcontrib-jupyter Configuration Settings
 # --------------------------------------------
 
-# Conversion Mode Settings
-# If "all", convert codes and texts into jupyter notebook
-# If "code", convert code-blocks only
-jupyter_conversion_mode = "all"
-
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
 
-# Configure Jupyter Kernels
-jupyter_kernels = {
-    "python3": {
-        "kernelspec": {
-            "display_name": "Python",
-            "language": "python3",
-            "name": "python3"
-        },
-        "file_extension": ".py",
-    },
-}
-
 # Default language for Jupyter notebooks
-jupyter_default_lang = "python3"
-
-jupyter_execute_notebooks = True
+jupyter_language = "python3"
 
 ## Theme specific variables
-jupyter_theme_path = 'theme'
-jupyter_template_path = 'theme/templates'
+jupyter_theme = 'theme'
 
 # latex template specific to your website needs
 jupyter_template_latex = "latex.tpl"
-
-# Target PDF Construction
-jupyter_target_pdf = True
-
-#Switch Off Notebook Metadata
-jupyter_write_metadata = False
 
 jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"
 
