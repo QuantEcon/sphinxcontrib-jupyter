@@ -56,8 +56,6 @@ def setup(app):
     app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
-
-    app.add_config_value("jupyter_download_nb_execute", None, "jupyter") #TODO: remove
     
     # Jupyter pdf options
     app.add_config_value("jupyter_latex_template", None, "jupyter") # jupyter_template_latex
