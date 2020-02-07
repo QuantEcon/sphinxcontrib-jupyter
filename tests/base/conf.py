@@ -232,7 +232,7 @@ jupyter_generate_html = False
 jupyter_html_template = ""
 
 # latex template specific to your website needs
-jupyter_latex_template = ""
+jupyter_template_latex = ""
 
 #make website
 jupyter_make_site = False

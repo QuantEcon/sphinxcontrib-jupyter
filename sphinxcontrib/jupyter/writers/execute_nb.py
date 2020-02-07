@@ -312,7 +312,7 @@ class ExecuteNotebookWriter():
                 errors_by_language[language_name]['files'][filename] = error_result
 
         # Create the error report from the HTML template, if it exists.
-        error_report_template_file = builder.config["jupyter_template_coverage_file_path"]
+        error_report_template_file = builder.config["jupyter_coverage_template"]
 
         error_report_template = []
         if not os.path.isfile(error_report_template_file):

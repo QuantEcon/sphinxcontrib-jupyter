@@ -43,7 +43,7 @@ def setup(app):
 
     app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
     app.add_config_value("jupyter_html_template", None, "jupyter")
-    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter") #jupyter_coverage_template
+    app.add_config_value("jupyter_coverage_template", None, "jupyter")
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
     app.add_config_value("jupyter_theme", "theme", "jupyter")
@@ -58,8 +58,8 @@ def setup(app):
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
     
     # Jupyter pdf options
-    app.add_config_value("jupyter_latex_template", None, "jupyter") # jupyter_template_latex
-    app.add_config_value("jupyter_latex_template_book", None, "jupyter") #jupyter_template_latexbook
+    app.add_config_value("jupyter_template_latex", None, "jupyter")
+    app.add_config_value("jupyter_template_latexbook", None, "jupyter")
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
     app.add_config_value("jupyter_bib_file", None, "jupyter")
     app.add_config_value("jupyter_pdf_author", None, "jupyter")

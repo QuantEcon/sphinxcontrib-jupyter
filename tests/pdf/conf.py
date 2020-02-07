@@ -202,7 +202,7 @@ jupyter_theme_path = 'theme'
 jupyter_template_path = 'theme/templates'
 
 # latex template specific to your website needs
-jupyter_latex_template = "latex.tpl"
+jupyter_template_latex = "latex.tpl"
 
 # Target PDF Construction
 jupyter_target_pdf = True

@@ -195,7 +195,7 @@ jupyter_download_nb_urlpath = "https://lectures.quantecon.org"
 jupyter_download_nb = False
 
 # Location of template folder for coverage reports
-jupyter_template_coverage_file_path = "theme/templates/error_report_template.html"
+jupyter_coverage_template = "theme/templates/error_report_template.html"
 
 # generate html from IPYNB files
 jupyter_generate_html = False

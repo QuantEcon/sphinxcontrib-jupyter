@@ -88,7 +88,7 @@ class MakePDFWriter():
 
         fl_ipynb = builder.texdir + "/" + "{}.ipynb".format(filename)
         fl_tex = builder.texdir + "/" + "{}.tex".format(filename)
-        fl_tex_template = builder.confdir + "/" + builder.config['jupyter_latex_template']
+        fl_tex_template = builder.confdir + "/" + builder.config['jupyter_template_latex']
 
         ## do not convert excluded patterns to latex
         excluded_files = [x in filename for x in builder.config['jupyter_pdf_excludepatterns']]
@@ -141,7 +141,7 @@ class MakePDFWriter():
     def nbconvert_index(self, builder):
         ## converts index ipynb file of book to tex with the help of the specified template
         fl_ipynb = builder.texbookdir + "/" + self.index_book + ".ipynb"
-        fl_tex_template = builder.confdir + "/" + builder.config['jupyter_latex_template_book']
+        fl_tex_template = builder.confdir + "/" + builder.config['jupyter_template_latexbook']
 
 
         if sys.version_info[0] < 3:
