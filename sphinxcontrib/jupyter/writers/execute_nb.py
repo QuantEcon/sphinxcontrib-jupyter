@@ -107,7 +107,6 @@ class ExecuteNotebookWriter():
         executed_nb = nb[0]
         language_info = executed_nb['metadata']['kernelspec']
         executed_nb['metadata']['filename_with_path'] = filename_with_path
-        executed_nb['metadata']['download_nb'] = builder.config['jupyter_download_nb']
 
         # store the exceptions in an error result array
         for cell in nb[0].cells:
@@ -123,8 +122,6 @@ class ExecuteNotebookWriter():
                 if 'jupyter_execute_allow_errors' in builder.config and builder.config['jupyter_execute_allow_errors'] is False:
                     self.halt_execution(builder, params['futures'], traceback, filename)
 
-        if (builder.config['jupyter_download_nb']):
-            executed_nb['metadata']['download_nb_path'] = builder.config['jupyter_download_nb_urlpath']
         if (futures_name.startswith('delayed') != -1):
             # adding in executed notebooks list
             params['executed_notebooks'].append(filename)

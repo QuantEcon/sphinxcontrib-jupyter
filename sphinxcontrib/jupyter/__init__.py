@@ -62,8 +62,7 @@ def setup(app):
     app.add_config_value("jupyter_latex_template_book", None, "jupyter") #jupyter_template_latexbook
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
     app.add_config_value("jupyter_bib_file", None, "jupyter")
-    app.add_config_value("jupyter_pdf_author", None, "jupyter") 
-    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter") #TODO: remove
+    app.add_config_value("jupyter_pdf_author", None, "jupyter")
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
     app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter") 
     app.add_config_value("jupyter_pdf_book", False, "jupyter")
@@ -98,8 +97,6 @@ def setup(app):
     # jupyter setup
     app.add_transform(JupyterOnlyTransform)
     app.add_config_value("jupyter_allow_html_only", False, "")
-    app.add_config_value("jupyter_target_html", False, "jupyter") #TODO: remove
-    app.add_config_value("jupyter_download_nb", False, "jupyter") #TODO: remove
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
     app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove

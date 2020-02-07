@@ -156,7 +156,6 @@ class JupyterHTMLBuilder(Builder):
         return nb
 
     def add_download_metadata(self, nb):
-        nb['metadata']['download_nb'] = self.config['jupyter_download_nb']
         nb['metadata']['download_nb_path'] = self.config['jupyter_download_nb_urlpath']
         return nb
 
