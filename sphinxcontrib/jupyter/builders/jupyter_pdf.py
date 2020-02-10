@@ -23,7 +23,7 @@ class JupyterPDFBuilder(Builder):
 
     name="jupyterpdf"
     docformat = "ipynb"
-    out_suffix = ".ipynb"
+    out_suffix = ".pdf"
     allow_parallel = True
     _writer_class = JupyterWriter
 
@@ -57,12 +57,13 @@ class JupyterPDFBuilder(Builder):
 
     def get_outdated_docs(self):
         for docname in self.env.found_docs:
+            if docname in self.config['jupyter_pdf_excludepatterns']:
+                continue
             if docname not in self.env.all_docs:
                 yield docname
                 continue
-            targetname = self.env.doc2path(docname, self.outdir + "/latex",
+            targetname = self.env.doc2path(docname, self.outdir + "/pdf",
                                            self.out_suffix)
-                                           
             try:
                 targetmtime = os.path.getmtime(targetname)
             except OSError:
@@ -112,7 +113,7 @@ class JupyterPDFBuilder(Builder):
         nb = self.add_latex_metadata(nb, docname)
 
         ### mkdir if the directory does not exist
-        outfilename = os.path.join(self.texdir, os_path(docname) + self.out_suffix)
+        outfilename = os.path.join(self.texdir, os_path(docname) + ".ipynb")
         ensuredir(os.path.dirname(outfilename))
 
         try:
