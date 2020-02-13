@@ -8,7 +8,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
-from packaging import version
 from io import open
 import sys
 
@@ -108,6 +107,7 @@ class ExecuteNotebookWriter():
         if (self.startFlag == 0):
             self.startFlag = 1
             builderSelf.client.get_task_stream()
+
 
         future = builderSelf.client.submit(ep.preprocess, nb, {"metadata": {"path": builderSelf.executed_notebook_dir, "filename": filename, "filename_with_path": full_path}})
 
