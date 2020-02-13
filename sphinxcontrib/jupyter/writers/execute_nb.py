@@ -7,6 +7,7 @@ import json
 from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
+import dask
 from dask.distributed import as_completed
 from packaging import version
 from io import open
