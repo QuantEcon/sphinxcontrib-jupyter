@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-VERSION = 'v0.5.2'
+VERSION = 'v0.5.3'
 
 LONG_DESCRIPTION = """
 This package contains a `Sphinx <http://www.sphinx-doc.org/en/master/>`_ extension 
@@ -67,6 +67,6 @@ setup(
     platforms='any',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['docutils', 'nbformat', 'sphinx', 'dask==2.10.1', 'dask[distributed]==2.10.0', 'ipython', 'nbconvert', 'jupyter_client'],
+    install_requires=['docutils', 'nbformat', 'sphinx', 'dask==2.10.0', 'dask[distributed]==2.10.0', 'ipython', 'nbconvert', 'jupyter_client'],
     namespace_packages=['sphinxcontrib'],
 )
