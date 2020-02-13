@@ -8,6 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from ..writers.convert import convertToHtmlWriter
 from sphinx.util import logging
 from dask.distributed import as_completed
+from packaging import version
 from io import open
 import sys
 
@@ -122,7 +123,11 @@ class ExecuteNotebookWriter():
         ## calculates execution time of each task in client using get task stream
         task_Info_latest = builderSelf.client.get_task_stream()[-1]
         time_tuple = task_Info_latest['startstops'][0]
-        computing_time = time_tuple['stop'] - time_tuple['start']
+
+        if version.parse(dask.__version__) <  version.parse("2.10.0"):
+            computing_time = time_tuple[2] - time_tuple[1]
+        else:
+            computing_time = time_tuple['stop'] - time_tuple['start']
         return computing_time
 
     def check_execution_completion(self, builderSelf, future, nb, error_results, count, total_count, futures_name, params):
