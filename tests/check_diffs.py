@@ -12,7 +12,7 @@ that will cause the diff checker to fail.
 import nbformat
 import glob
 import os
-from nbdime.diffing.notebooks import diff_notebooks, set_notebook_diff_targets
+from nbdime.diffing.notebooks import diff_notebooks, set_notebook_diff_targets, set_notebook_diff_ignores
 import sphinx
 import re
 import sys
@@ -29,6 +29,7 @@ CONFIGSETS = {
 
 #-Diff Configuration-#
 NB_VERSION = 4
+set_notebook_diff_ignores({"/nbformat_minor" : True})
 set_notebook_diff_targets(metadata=False)
 
 # Specify which version of sphinx that should exclude comparison files
