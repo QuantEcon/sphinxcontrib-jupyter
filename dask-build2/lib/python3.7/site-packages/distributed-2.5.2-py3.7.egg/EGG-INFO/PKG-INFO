@@ -1,0 +1,42 @@
+Metadata-Version: 2.1
+Name: distributed
+Version: 2.5.2
+Summary: Distributed scheduler for Dask
+Home-page: https://distributed.dask.org
+Maintainer: Matthew Rocklin
+Maintainer-email: mrocklin@gmail.com
+License: BSD
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: System :: Distributed Computing
+Requires-Python: >=3.5
+Requires-Dist: click (>=6.6)
+Requires-Dist: cloudpickle (>=0.2.2)
+Requires-Dist: dask (>=2.3)
+Requires-Dist: msgpack
+Requires-Dist: psutil (>=5.0)
+Requires-Dist: sortedcontainers (!=2.0.0,!=2.0.1)
+Requires-Dist: tblib
+Requires-Dist: toolz (>=0.7.4)
+Requires-Dist: tornado (>=5)
+Requires-Dist: zict (>=0.1.3)
+Requires-Dist: pyyaml
+
+Distributed
+===========
+
+A library for distributed computation.  See documentation_ for more details.
+
+
+.. _documentation: https://distributed.readthedocs.io/en/latest
+
+

@@ -1,0 +1,14 @@
+zict/__init__.py,sha256=sOGAaJkFjXQMxf6ByS5Lxy2_MhLVoC5pjEAm-zlkz_0,186
+zict/buffer.py,sha256=H-DRzVZB4hrHfWvgksazD1YtEllvGTzRVLGj4UVGtzo,3749
+zict/common.py,sha256=HMY4psyaRD8_DWPbnYT-Kws_Wc7U74tCIXRzSEpzMMM,1511
+zict/file.py,sha256=n3IfnKrXygUD8NI7nSyFUW1cBVwIsnu6QIVJCvseNcU,2629
+zict/func.py,sha256=_q-mwCbllA93aNLJFiOXWaelZPldeCVxmQcS4_iz7pI,1951
+zict/lmdb.py,sha256=wtdndt1Bz-iWDBmzlJhBU9a8xVL3KjzoLxlw9BsRghs,2922
+zict/lru.py,sha256=jGbll_kWIho_BykwSoWQETh8B2lZF35IaKOgenDtodI,3047
+zict/sieve.py,sha256=nqyeqSv2czxHAee3xjiLzodSD8PybK934C0I_o5Jdts,3201
+zict/zip.py,sha256=MqbyUCzZYLuDu-kano-Q288tpmz9TK6STkIfyCA-zCs,2143
+zict-1.0.0.dist-info/LICENSE.txt,sha256=fYYprwbisgVMkmgWiw1EfvwzAwN2pIBJBHfxTnAthHI,1492
+zict-1.0.0.dist-info/METADATA,sha256=mBEMSQYEFYytGgu9kFfYQmgPGpGH36-GjmKInKn0A7s,541
+zict-1.0.0.dist-info/WHEEL,sha256=_wJFdOYk7i3xxT8ElOkUJvOdOvfNGbR9g-bf6UQT6sU,110
+zict-1.0.0.dist-info/top_level.txt,sha256=ru4yqvaDGmbFDXeEif4vJBPJve86WggecSuZ07bdYIg,5
+zict-1.0.0.dist-info/RECORD,,

@@ -1,0 +1,6 @@
+
+[test]
+flake8
+html5lib
+mypy
+pytest

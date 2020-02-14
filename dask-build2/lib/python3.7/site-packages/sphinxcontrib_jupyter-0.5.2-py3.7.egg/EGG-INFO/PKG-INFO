@@ -1,0 +1,54 @@
+Metadata-Version: 1.1
+Name: sphinxcontrib-jupyter
+Version: 0.5.2
+Summary: Sphinx "Jupyter" extension: Convert your RST files into executable Jupyter notebooks.
+Home-page: https://github.com/QuantEcon/sphinxcontrib-jupyter
+Author: QuantEcon
+Author-email: admin@quantecon.org
+License: BSD
+Download-URL: https://github.com/QuantEcon/sphinxcontrib-jupyter/archive/v0.5.2.tar.gz
+Description: 
+        This package contains a `Sphinx <http://www.sphinx-doc.org/en/master/>`_ extension 
+        for compiling RST to Jupyter notebooks. 
+        
+        It contains two primary builders:
+        
+        1. jupyter
+        2. jupyterpdf
+        
+        The default behaviour of the `jupyter` builder is to provide notebooks that are readable 
+        with an emphasis on adding markdown into the notebooks. However, it can also be configured
+        to generate websites (such as `python.quantecon.org <https://python.quantcon.org>`_) 
+        and run coverage tests, which uses `ipynb` as an intermediate format. 
+        
+        The `jupyterpdf` builder is focused on building `pdf` files (via an intermediate ipynb format).
+        
+        This project is maintained and supported by `QuantEcon <http://quantecon.org/>`_.
+        
+        
+        Status
+        ------
+        
+        |status-docs| |status-travis|
+        
+        .. |status-docs| image:: https://readthedocs.org/projects/sphinxcontrib-jupyter/badge/?version=latest
+           :target: http://sphinxcontrib-jupyter.readthedocs.io/en/latest/?badge=latest
+           :alt: Documentation Status
+        
+        .. |status-travis| image:: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter.svg?branch=master
+           :target: https://travis-ci.org/QuantEcon/sphinxcontrib-jupyter
+        
+        
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Sphinx
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Framework :: Sphinx :: Extension
+Classifier: Topic :: Documentation
+Classifier: Topic :: Utilities

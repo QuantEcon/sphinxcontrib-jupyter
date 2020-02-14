@@ -1,0 +1,9 @@
+parso>=0.5.2
+
+[qa]
+flake8==3.7.9
+
+[testing]
+colorama==0.4.1
+docopt
+pytest<5.0.0,>=3.9.0

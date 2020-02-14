@@ -1,0 +1,15 @@
+Metadata-Version: 2.1
+Name: jupyterlab-pygments
+Version: 0.1.0
+Summary: Pygments theme
+Home-page: UNKNOWN
+Author: QuantStack
+Author-email: info@quantstack.net
+License: UNKNOWN
+Keywords: jupyterlab,pygments
+Platform: UNKNOWN
+Requires-Dist: pygments (<3,>=2.4.1)
+
+UNKNOWN
+
+

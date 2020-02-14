@@ -1,0 +1,24 @@
+Metadata-Version: 2.1
+Name: zict
+Version: 1.0.0
+Summary: Mutable mapping tools
+Home-page: http://zict.readthedocs.io/en/latest/
+Maintainer: Matthew Rocklin
+Maintainer-email: mrocklin@gmail.com
+License: BSD
+Keywords: mutable mapping,dict,dask
+Platform: UNKNOWN
+Requires-Dist: heapdict
+
+Zict
+====
+
+|Build Status|
+
+Mutable Mapping interfaces.  See documentation_.
+
+.. _documentation: http://zict.readthedocs.io/en/latest/
+.. |Build Status| image:: https://travis-ci.org/dask/zict.svg?branch=master
+   :target: https://travis-ci.org/dask/zict
+
+

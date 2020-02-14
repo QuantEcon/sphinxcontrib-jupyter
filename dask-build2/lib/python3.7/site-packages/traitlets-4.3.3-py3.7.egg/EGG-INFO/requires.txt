@@ -1,0 +1,6 @@
+decorator
+ipython-genutils
+six
+
+[test]
+pytest
