@@ -32,13 +32,8 @@ addons:
     - pandoc
 
 install:
-  - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
-      pip install sphinx==$SPHINX_VERSION nbconvert nbformat dask distributed nbdime;
-      pip install sphinxcontrib-bibtex==0.4.2;
-    else
-      pip install sphinx==$SPHINX_VERSION nbconvert nbformat dask==2.5.2 distributed==2.5.2 nbdime;
-      pip install sphinxcontrib-bibtex;
-    fi
+  - pip install sphinx==$SPHINX_VERSION nbconvert nbformat dask==2.5.2 distributed==2.5.2 nbdime;
+  - pip install sphinxcontrib-bibtex;
   - python setup.py install
 
 script:
