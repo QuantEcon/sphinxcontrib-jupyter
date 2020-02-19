@@ -15,7 +15,7 @@ from sphinx.util.osutil import ensuredir
 from sphinx.util import logging
 from nbconvert.preprocessors import LatexPreprocessor
 from distutils.dir_util import copy_tree
-from .utils import python27_glob, get_list_of_files, get_subdirectory_and_filename
+from .utils import get_list_of_files, get_subdirectory_and_filename
 
 class MakePDFWriter():
     """
@@ -43,10 +43,7 @@ class MakePDFWriter():
                 source = root + "/" + name
                 subdirectory = source.replace(builder.texdir, "")
                 destination = builder.pdfdir + subdirectory
-                if sys.version_info[0] < 3:
-                    pdfs = python27_glob(presentdir +"/", "*.pdf")
-                else:
-                    pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
+                pdfs = glob.glob(presentdir + "/*.pdf", recursive=True)
                 if subdirectory in dir_lists:
                     continue
                 if len(pdfs):
@@ -96,10 +93,7 @@ class MakePDFWriter():
         if not True in excluded_files:    
             ## --output-dir - forms a directory in the same path as fl_ipynb - need a way to specify properly?
             ### converting to pdf using xelatex subprocess
-            if sys.version_info[0] < 3:
-                subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
-            else:
-                subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+            subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
 
             ### check if subdirectory
             subdirectory, filename = get_subdirectory_and_filename(filename)
@@ -143,11 +137,7 @@ class MakePDFWriter():
         fl_ipynb = builder.texbookdir + "/" + self.index_book + ".ipynb"
         fl_tex_template = builder.confdir + "/" + builder.config['jupyter_template_latexbook']
 
-
-        if sys.version_info[0] < 3:
-            subprocess.call(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
-        else:
-            subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
+        subprocess.run(["jupyter", "nbconvert","--to","latex","--template",fl_tex_template,"from", fl_ipynb])
 
     def create_pdf_from_latex(self, fl_tex, filename):
         ## parses the latex file to create pdf
