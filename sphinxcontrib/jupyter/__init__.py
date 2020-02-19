@@ -52,7 +52,7 @@ def setup(app):
     app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
 
     #review
-    app.add_config_value("jupyter_drop_solutions", True, "jupyter") #TODO: reimplement as jupyter_solution_notebook = True
+    app.add_config_value("jupyter_solution_notebook", True, "jupyter")
     app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename

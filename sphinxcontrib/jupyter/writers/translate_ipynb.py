@@ -559,6 +559,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             else:
                 self.add_newparagraph()
 
+    def visit_problematic(self, node):
+        pass
+
+    def depart_problematic(self, node):
+        pass
+
     def visit_raw(self, node):
         pass
     

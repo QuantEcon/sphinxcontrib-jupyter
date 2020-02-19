@@ -189,7 +189,7 @@ jupyter_dependency_lists = {
 jupyter_default_language = "python3"
 
 # Solutions Configuration
-jupyter_drop_solutions = True
+jupyter_solution_notebook = True
 
 # Tests configurations
 jupyter_drop_tests = True
