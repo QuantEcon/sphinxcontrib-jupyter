@@ -701,6 +701,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.add_newparagraph()
         elif self.literal_block['in']:
             self.cell.append(text)
+            self.add_newline()
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
                 self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are prepended (TODO: should this be in MarkdownSyntax)
