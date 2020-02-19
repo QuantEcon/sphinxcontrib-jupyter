@@ -33,6 +33,9 @@ before_install:
   - travis_wait 45 bash ./util/setup_latex.sh
   - export PATH="/tmp/texlive/bin/x86_64-linux:$PATH"
 
+addons:
+  apt_packages:
+    - pandoc
 
 install:
   - if [ $TRAVIS_PYTHON_VERSION == 2.7 ]; then
