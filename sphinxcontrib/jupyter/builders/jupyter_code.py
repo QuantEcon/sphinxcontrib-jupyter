@@ -46,6 +46,7 @@ class JupyterCodeBuilder(Builder):
         """
         self.executenb = ExecuteNotebookWriter(self)
         self.executedir = self.outdir
+        self.codetreedir = self.outdir + "/execute/"
         self.reportdir = self.outdir + '/reports/'
         self.errordir = self.outdir + "/reports/{}"
         self.client = None
@@ -77,14 +78,8 @@ class JupyterCodeBuilder(Builder):
         return docname
 
     def get_outdated_docs(self):                                      #TODO: @aakash is this different to method in sphinx.builder?
-        for docname in self.env.found_docs:
-            if docname not in self.env.all_docs:
-                yield docname
-                continue
-            targetname = self.env.doc2path(docname, self.executedir,
-                                           self.out_suffix)
-            if not os.path.exists(targetname):
-                yield docname
+        return ''
+            
 
     def prepare_writing(self, docnames):                                #TODO: @aakash is this different to method in sphinx.builder?
         self.writer = self._writer_class(self)
