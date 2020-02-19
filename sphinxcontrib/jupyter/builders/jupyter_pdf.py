@@ -141,7 +141,6 @@ class JupyterPDFBuilder(Builder):
                     .format(entry))
             else:
                 copy_asset(entry, os.path.join(self.texdir, "_static"))
-        logger.info("done")
         self.copy_static_folder_to_subfolders(self.texdir, True)
 
     # Copying static folder to subfolders - TODO: will remove this later
