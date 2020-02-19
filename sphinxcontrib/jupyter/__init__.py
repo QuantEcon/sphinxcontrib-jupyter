@@ -45,7 +45,7 @@ def setup(app):
     #-HTML-#
     app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
     app.add_config_value("jupyter_html_template", None, "jupyter")
-    app.add_config_value("jupyter_theme", "theme", "jupyter")
+    app.add_config_value("jupyter_html_theme", "theme", "jupyter")
     app.add_config_value("jupyter_allow_html_only", False, "")
     app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
     app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
