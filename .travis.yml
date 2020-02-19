@@ -3,18 +3,12 @@
 sudo: false        #Use new Container Infrastructure
 language: python
 python:
-  - 2.7
   - 3.7
 
 env:
-  - SPHINX_VERSION=1.7.9
   - SPHINX_VERSION=1.8.5
   - SPHINX_VERSION=2.1.2
-
-matrix:
-  exclude:
-  - python: 2.7
-    env: SPHINX_VERSION=2.1.2
+  - SPHINX_VERSION=2.4.1
 
 directories:
   - "/tmp/texlive"
