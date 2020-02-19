@@ -103,18 +103,18 @@ class JupyterHTMLBuilder(Builder):
 
         nb = nbformat.reads(self.writer.output, as_version=4)
 
-        ### check for codetree else, create it
-        update = check_codetree_validity(self, nb, docname)
-
         os.chdir(self.confdir)
-        
-        if update and self.config["jupyter_execute"]:
-            run_build('execute')
+        if self.config["jupyter_execute"]:
+            ### check for codetree else, create it
+            update = check_codetree_validity(self, nb, docname)
+            
+            if update and self.config["jupyter_execute"]:
+                run_build('execute')
+            
+            nb = combine_executed_files(self.executedir, nb, docname)
 
         ## adding the site metadata here
         nb = self.add_site_metadata(nb, docname)
-
-        nb = combine_executed_files(self.executedir, nb, docname)
 
         if download:
             outfilename = os.path.join(outdir, os_path(docname) + ".ipynb")

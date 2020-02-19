@@ -52,6 +52,7 @@ def setup(app):
     app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove
 
     #-EXECUTE-#
+    app.add_config_value("jupyter_execute", True, "jupyter")
     app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
     app.add_config_value("jupyter_coverage_template", None, "jupyter")
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")

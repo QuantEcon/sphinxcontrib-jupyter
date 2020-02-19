@@ -98,16 +98,16 @@ class JupyterPDFBuilder(Builder):
         ## get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
 
-        ### check for codetree else, create it
-        update = check_codetree_validity(self, nb, docname)
-
         os.chdir(self.confdir)
-        
-        if update and self.config["jupyter_execute"]:
-            run_build('execute')
+        if self.config["jupyter_execute"]:
+            ### check for codetree else, create it
+            update = check_codetree_validity(self, nb, docname)
+            
+            if update:
+                run_build('execute')
 
-        ## combine the executed code with output of this builder
-        nb = combine_executed_files(self.executedir, nb, docname)
+            ## combine the executed code with output of this builder
+            nb = combine_executed_files(self.executedir, nb, docname)
 
         ## adding latex metadata
         nb = self.add_latex_metadata(nb, docname)
