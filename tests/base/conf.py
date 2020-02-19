@@ -176,6 +176,8 @@ texinfo_documents = [
 # sphinxcontrib-jupyter Configuration Settings
 # --------------------------------------------
 
+jupyter_execute = False
+
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
 
