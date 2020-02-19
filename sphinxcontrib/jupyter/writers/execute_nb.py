@@ -53,12 +53,7 @@ class ExecuteNotebookWriter():
 
         ## specifying kernels
         if language == 'python':
-            if (sys.version_info > (3, 0)):
-                # Python 3 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python3')
-            else:
-                # Python 2 code in this block
-                ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python2')
+            ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors, kernel_name='python3')
         elif language == 'julia':
             ep = ExecutePreprocessor(timeout=-1, allow_errors=allow_errors)
 
@@ -250,15 +245,8 @@ class ExecuteNotebookWriter():
         json_data['run_time'] = time.strftime("%d-%m-%Y %H:%M:%S")
 
         try:
-            if (sys.version_info > (3, 0)):
-                with open(json_filename, "w") as json_file:
-                    json.dump(json_data, json_file)
-            else:
-                with open(json_filename, "w") as json_file:
-                    x = json.dumps(json_data, ensure_ascii=False)
-                    if isinstance(x,str):
-                        x = unicode(x, 'UTF-8')
-                    json_file.write(x)
+            with open(json_filename, "w") as json_file:
+                json.dump(json_data, json_file)
         except IOError:
             logger.warning("Unable to save lecture status JSON file. Does the {} directory exist?".format(builder.reportdir))
 
@@ -272,15 +260,8 @@ class ExecuteNotebookWriter():
         json_filename = builder.reportdir + fln
 
         try:
-            if (sys.version_info > (3, 0)):
-                with open(json_filename, "w") as json_file:
-                    json.dump(self.dask_log, json_file)
-            else:
-               with open(json_filename, "w") as json_file:
-                    x = json.dumps(self.dask_log, ensure_ascii=False)
-                    if isinstance(x,str):
-                        x = unicode(x, 'UTF-8')
-                    json_file.write(x)
+            with open(json_filename, "w") as json_file:
+                json.dump(self.dask_log, json_file)
         except IOError:
             logger.warning("Unable to save dask reports JSON file. Does the {} directory exist?".format(builder.reportdir))
 

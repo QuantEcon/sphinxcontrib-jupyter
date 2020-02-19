@@ -37,27 +37,29 @@ def setup(app):
     app.add_builder(JupyterPDFBuilder)
     app.add_config_value("jupyter_language", "python3", "jupyter")
     app.add_config_value("jupyter_language_synonyms", [], "jupyter")
+    
     #-IPYNB-#
     app.add_config_value("jupyter_images_html", True, "jupyter")
     app.add_config_value("jupyter_section_blocks", True, "jupyter")
 
+    #-HTML-#
     app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
     app.add_config_value("jupyter_html_template", None, "jupyter")
-    app.add_config_value("jupyter_coverage_template", None, "jupyter")
-    app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
-    app.add_config_value("jupyter_number_workers", 1, "jupyter")
-    app.add_config_value("jupyter_theme", "theme", "jupyter")
+    app.add_config_value("jupyter_html_theme", "theme", "jupyter")
+    app.add_config_value("jupyter_allow_html_only", False, "")
+    app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove
 
     #-EXECUTE-#
     app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
-
-    #review
-    app.add_config_value("jupyter_solution_notebook", True, "jupyter")
-    app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
+    app.add_config_value("jupyter_coverage_template", None, "jupyter")
+    app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
+    app.add_config_value("jupyter_number_workers", 1, "jupyter")
     app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
     app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
-    
-    # Jupyter pdf options
+
+    #-PDF-#
     app.add_config_value("jupyter_template_latex", None, "jupyter")
     app.add_config_value("jupyter_template_latexbook", None, "jupyter")
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
@@ -70,15 +72,16 @@ def setup(app):
     app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
     app.add_config_value("jupyter_pdf_book_name", None, "jupyter")
 
-
-
+    #TODO: REVIEW
+    app.add_config_value("jupyter_solution_notebook", True, "jupyter")
+    app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
     
-    # Jupyter Directive
+    # Jupyter Directive-#
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
-    # Exercise directive
+    #-Exercise Directive-#
     if SPHINX_VERSION[0] >= 2:
         app.add_config_value('exercise_include_exercises', True, 'html')
         app.add_config_value('exercise_inline_exercises', False, 'html')
@@ -94,12 +97,8 @@ def setup(app):
         app.connect('doctree-resolved', exercise.process_exercise_nodes)
         app.connect('env-purge-doc', exercise.purge_exercises)
 
-    # jupyter setup
+    #-Transforms-#
     app.add_transform(JupyterOnlyTransform)
-    app.add_config_value("jupyter_allow_html_only", False, "")
-    app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove
 
     return {
         "version": VERSION,

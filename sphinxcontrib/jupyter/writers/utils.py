@@ -9,9 +9,6 @@ from shutil import copy
 import nbformat.v4
 
 
-if sys.version_info.major == 2:
-    import fnmatch
-
 
 class LanguageTranslator(object):
     """
@@ -146,13 +143,6 @@ def _str_to_lines(x):
 
     return x
 
-
-def python27_glob(path, pattern):
-    matches = []
-    for root, dirnames, filenames in os.walk(path):
-        for filename in fnmatch.filter(filenames, pattern):
-            matches.append(os.path.join(root, filename))
-    return matches
 
 def get_list_of_files(dirname):
     # create a list of file and sub directories 

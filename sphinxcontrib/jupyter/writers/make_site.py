@@ -25,7 +25,7 @@ class MakeSiteWriter():
         if os.path.exists(self.websitedir):
             shutil.rmtree(self.websitedir)
 
-        builder.themePath = builder.config['jupyter_theme']
+        builder.themePath = builder.config['jupyter_html_theme']
 
         if os.path.exists(builder.themePath):
             pass

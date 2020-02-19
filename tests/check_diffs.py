@@ -16,8 +16,6 @@ from nbdime.diffing.notebooks import diff_notebooks, set_notebook_diff_targets, 
 import sphinx
 import re
 import sys
-if sys.version_info.major == 2:
-    import fnmatch
 
 
 SPHINX_VERSION = sphinx.version_info
@@ -46,16 +44,10 @@ def python27_glob(path, pattern):
     return matches
 
 def check_set(PATH, BUILDER):
-    if sys.version_info.major == 2:
-        GENERATED_IPYNB_FILES = python27_glob(PATH+"/_build/" + BUILDER + "/", "*.ipynb")
-        GENERATED_IPYNB_FILES = [fl for fl in GENERATED_IPYNB_FILES if "/executed/" not in fl]      #Only compare Generated Versions (not Executed)
-        ref_files = python27_glob(PATH + "/ipynb/", "*.ipynb")
-        REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files] 
-    else:
-        GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/" + BUILDER + "/**/*.ipynb", recursive=True)
-        GENERATED_IPYNB_FILES = [fl for fl in GENERATED_IPYNB_FILES if "/executed/" not in fl]      #Only compare Generated Versions (not Executed)
-        ref_files = glob.glob(PATH + "/ipynb/**/*.ipynb", recursive=True)
-        REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
+    GENERATED_IPYNB_FILES = glob.glob(PATH + "/_build/" + BUILDER + "/**/*.ipynb", recursive=True)
+    GENERATED_IPYNB_FILES = [fl for fl in GENERATED_IPYNB_FILES if "/executed/" not in fl]      #Only compare Generated Versions (not Executed)
+    ref_files = glob.glob(PATH + "/ipynb/**/*.ipynb", recursive=True)
+    REFERENCE_IPYNB_FILES = [fl.split("ipynb/")[-1] for fl in ref_files]
     failed = 0
     for fl in GENERATED_IPYNB_FILES:
         flname = fl.split(BUILDER + "/")[-1]
