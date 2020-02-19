@@ -8,20 +8,21 @@ LONG_DESCRIPTION = """
 This package contains a `Sphinx <http://www.sphinx-doc.org/en/master/>`_ extension 
 for compiling RST to Jupyter notebooks. 
 
-It contains two primary builders:
+It contains four primary builders:
 
-1. jupyter
-2. jupyterpdf
+1. JupyterBuilder
+2. JupyterCodeBuilder
+3. JupyterHTMLBuilder
+4. JupyterPDFBuilder
 
-The default behaviour of the `jupyter` builder is to provide notebooks that are readable 
-with an emphasis on adding markdown into the notebooks. However, it can also be configured
-to generate websites (such as `python.quantecon.org <https://python.quantcon.org>`_) 
-and run coverage tests, which uses `ipynb` as an intermediate format. 
+The default behavior of `JupyterBuilder` is to provide notebooks that are readable 
+with an emphasis on adding markdown into the notebooks. 
 
-The `jupyterpdf` builder is focused on building `pdf` files (via an intermediate ipynb format).
+`JupyterHTMLBuilder` is useful for targetting the construction of websites
+
+`JupyterPDFBuilder` is useful for building PDF files. 
 
 This project is maintained and supported by `QuantEcon <http://quantecon.org/>`_.
-
 
 Status
 ------
