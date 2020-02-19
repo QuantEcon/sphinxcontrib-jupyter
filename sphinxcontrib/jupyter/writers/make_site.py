@@ -18,7 +18,7 @@ class MakeSiteWriter():
             builddir = builddir[0:index]    
         
         ## defining directories
-        self.websitedir = builddir + "/jupyter_html/"
+        self.websitedir = builddir + "/website/"
         self.downloadipynbdir = self.websitedir + "/_downloads/ipynb/"
 
     def build_website(self, builder):

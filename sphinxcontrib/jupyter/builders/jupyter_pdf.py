@@ -103,7 +103,7 @@ class JupyterPDFBuilder(Builder):
 
         os.chdir(self.confdir)
         
-        if update:
+        if update and self.config["jupyter_execute"]:
             run_build('execute')
 
         ## combine the executed code with output of this builder

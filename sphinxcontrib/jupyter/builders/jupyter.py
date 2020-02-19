@@ -78,7 +78,7 @@ class JupyterBuilder(Builder):
         nb = nbformat.reads(self.writer.output, as_version=4)
         # Combine the executed code with output of this builder
         update = check_codetree_validity(self, nb, docname)
-        if update:
+        if update and self.config["jupyter_execute"]:
             run_build('execute')
         nb = combine_executed_files(self.executedir, nb, docname)
         outfilename = os.path.join(self.outdir, os_path(docname) + self.out_suffix)

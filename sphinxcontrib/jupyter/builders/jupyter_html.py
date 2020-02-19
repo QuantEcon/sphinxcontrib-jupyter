@@ -108,7 +108,7 @@ class JupyterHTMLBuilder(Builder):
 
         os.chdir(self.confdir)
         
-        if update:
+        if update and self.config["jupyter_execute"]:
             run_build('execute')
 
         ## adding the site metadata here
