@@ -1,5 +1,9 @@
 import yaml
-yaml.warnings({'YAMLLoadWarning': False})
+
+try:
+    yaml.warnings({'YAMLLoadWarning': False})  # not all versions of YAML support this
+except AttributeError:
+    pass
 
 from .builders.jupyter import JupyterBuilder
 from .builders.jupyterpdf import JupyterPDFBuilder
