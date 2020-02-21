@@ -3,6 +3,7 @@
 
 This sphinx extension can be used to build a collection of
 `Jupyter <http://jupyter.org>`__ notebooks for Sphinx Projects.
+It can also be used to manage websites and build pdf files.
 
 .. note:: 
 
@@ -23,10 +24,9 @@ the task of version control for large projects.
    installation
    config-sphinx
    config-extension
+   builders
    examples
    config-example
-   config-project
-   builders
 
 
 Credits
@@ -36,11 +36,10 @@ This project is supported by `QuantEcon <https://www.quantecon.org>`__
 
 Many thanks to the lead developers of this project.
 
-
 * `@AakashGfude <https://github.com/AakashGfude>`__
 * `@mmcky <https://github.com/mmcky>`__
 
-Contributors
+Past Contributors
 
 * `FelipeMaldonado <https://github.com/FelipeMaldonado>`__
 * `@myuuuuun <https://github.com/myuuuuun>`__ 
@@ -49,7 +48,9 @@ Contributors
 Projects using Extension
 ------------------------
 
-1. `QuantEcon Lectures <https://lectures.quantecon.org>`__
+1. `QuantEcon Python Lectures <https://python.quantecon.org>`__
+1. `QuantEcon Julia Lectures <https://julia.quantecon.org>`__
+1. `QuantEcon Datascience Lectures <https://datascience.quantecon.org>`__
 
 If you find this extension useful please let us know at
 contact@quantecon.org
@@ -57,7 +58,7 @@ contact@quantecon.org
 LICENSE
 =======
 
-Copyright © 2019 QuantEcon Development Team: BSD-3 All rights reserved.
+Copyright © 2020 QuantEcon Development Team: BSD-3 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are

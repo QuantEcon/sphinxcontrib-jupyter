@@ -12,6 +12,7 @@ tests/pdf/_build/
 tests/pdf/_static/
 tests/pdf/theme/
 tests/no_inline_exercises/_build
+tests/execute/_build/
 tests/ipynb/*checkpoints
 *.pyc
 .DS_Store

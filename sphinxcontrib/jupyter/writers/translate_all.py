@@ -540,7 +540,7 @@ class JupyterTranslator(JupyterCodeTranslator, object):
 
     def depart_reference(self, node):
         subdirectory = False
-
+        
         ## removing zreferences from the index file
         if self.in_book_index and node.attributes['refuri'] == 'zreferences':
             return

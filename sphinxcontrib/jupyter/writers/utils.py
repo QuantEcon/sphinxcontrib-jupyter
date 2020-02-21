@@ -1,16 +1,16 @@
 import os.path
 import os
 import sys
-import nbformat.v4
 from xml.etree.ElementTree import ElementTree
 from enum import Enum
 from sphinx.util.osutil import ensuredir
 from shutil import copy
 
-if sys.version_info.major == 2:
-    import fnmatch
+import nbformat.v4
 
-class LanguageTranslator:
+
+
+class LanguageTranslator(object):
     """
     Simple extensible translator for programming language names between Sphinx
     and Jupyter.
@@ -21,7 +21,7 @@ class LanguageTranslator:
 
     The data itself is stored in an XML file within the templates directory configured
     in conf.py; deciding whether this is the most appropriate place to store that
-    information is a @todo
+    information is a @TODO
 
     By default, if there is no entry in the XML file for a given language, the translator
     will return the language it was given; this decision was predicated on the fact that
@@ -86,9 +86,9 @@ class JupyterOutputCellGenerators(Enum):
         class_list = node.attributes['classes']
 
         for item in class_list:
-            if item == "no-execute" and not obj.jupyter_ignore_no_execute:
+            if item == "no-execute":
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
-            elif item == "skip-test" and not obj.jupyter_ignore_skip_test:
+            elif item == "skip-test":
                 res["type"] = JupyterOutputCellGenerators.MARKDOWN
             elif item == "output":
                 res["type"] = JupyterOutputCellGenerators.CODE_OUTPUT
@@ -143,57 +143,31 @@ def _str_to_lines(x):
 
     return x
 
-def copy_dependencies(builderSelf, outdir = None):
-    """
-    Copies the dependencies of source files or folders specified in the config to their respective output directories
-    """
-    if outdir is None:
-        outdir = builderSelf.outdir
-    else:
-        outdir = outdir
-    srcdir = builderSelf.srcdir
-    if 'jupyter_dependencies' in builderSelf.config and builderSelf.config['jupyter_dependencies'] is not None:
-        depenencyObj = builderSelf.config['jupyter_dependencies']
-        for key, deps in depenencyObj.items():
-            full_src_path = srcdir + "/" + key
-            if full_src_path.find('.') == -1:
-                ## handling the case of key being a directory
-                full_dest_path = outdir + "/" + key
-                ensuredir(full_dest_path)
-                for dep in deps:
-                    copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
-            elif os.path.isfile(full_src_path):
-                ## handling the case of key being a file
-                # removing the filename to get the directory path
-                index = key.rfind('/')
-                if index!=0 and index != -1:
-                    key = key[0:index]
-                
-                full_src_path = srcdir + "/" + key
-                full_dest_path = outdir + "/" + key
-                for dep in deps:
-                    copy(full_src_path + "/" + dep, full_dest_path,follow_symlinks=True)
 
-
-def python27_glob(path, pattern):
-    matches = []
-    for root, dirnames, filenames in os.walk(path):
-        for filename in fnmatch.filter(filenames, pattern):
-            matches.append(os.path.join(root, filename))
-    return matches
-
-def get_list_of_files(dirName):
+def get_list_of_files(dirname):
     # create a list of file and sub directories 
     # names in the given directory 
-    list_of_file = os.listdir(dirName)
+    list_of_file = os.listdir(dirname)
     all_files = list()
     # Iterate over all the entries
     for entry in list_of_file:
         # Create full path
-        full_path = os.path.join(dirName, entry)
+        full_path = os.path.join(dirname, entry)
         # If entry is a directory then get the list of files in this directory 
         if os.path.isdir(full_path):
             all_files = all_files + get_list_of_files(full_path)
         else:
             all_files.append(full_path)
     return all_files
+
+def get_subdirectory_and_filename(filename):
+    """
+    Gets the subdirectory path and the filename from the full path
+    """
+    subdirectory = ''
+    index = filename.rfind('/')
+    if index > 0:
+        subdirectory = filename[0:index]
+        filename = filename[index + 1:]
+    
+    return subdirectory, filename

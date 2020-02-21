@@ -1,12 +1,11 @@
-.. _config_extension_pdf:
+.. _config_html_translator:
 
-Converting Notebooks to PDF
-============================
+IPYNB(PDF) Notebook Translator
+===============================
 
 .. contents:: Options
     :depth: 1
     :local:
-
 
 jupyter_latex_template
 -----------------------
@@ -29,7 +28,6 @@ Add project logo to pdf document
 .. code-block:: python
 
     jupyter_pdf_logo = "theme/img/logo.png"
-
 
 jupyter_bib_file
 -----------------

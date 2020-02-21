@@ -6,7 +6,9 @@ except AttributeError:
     pass
 
 from .builders.jupyter import JupyterBuilder
-from .builders.jupyterpdf import JupyterPDFBuilder
+from .builders.jupyter_pdf import JupyterPDFBuilder
+from .builders.jupyter_code import JupyterCodeBuilder
+from .builders.jupyter_html import JupyterHTMLBuilder
 from .directive.jupyter import jupyter_node
 from .directive.jupyter import Jupyter as JupyterDirective
 from .directive.jupyter import JupyterDependency
@@ -29,72 +31,62 @@ def depart_exercise_node(self, node):
     
 
 def setup(app):
-    execute_nb_obj = {
-        "no-text": True,
-        "timeout": 600,
-        "text_reports": True,
-        "coverage": False,
-    }
-
     #Add Sphinx Version to ENV Configuration
     app.add_config_value('SPHINX_VERSION', SPHINX_VERSION, 'env')
 
     # Jupyter Builder and Options
-    app.add_builder(JupyterPDFBuilder)
     app.add_builder(JupyterBuilder)
-    app.add_config_value("jupyter_kernels", None, "jupyter")
-    app.add_config_value("jupyter_conversion_mode", "all", "jupyter")
-    app.add_config_value("jupyter_write_metadata", True, "jupyter")
-    app.add_config_value("jupyter_static_file_path", [], "jupyter")
-    app.add_config_value("jupyter_header_block", None, "jupyter")
-    app.add_config_value("jupyter_options", None, "jupyter")
-    app.add_config_value("jupyter_default_lang", "python3", "jupyter")
-    app.add_config_value("jupyter_lang_synonyms", [], "jupyter")
-    app.add_config_value("jupyter_drop_solutions", True, "jupyter")
-    app.add_config_value("jupyter_drop_tests", True, "jupyter")
-    app.add_config_value("jupyter_ignore_no_execute", False, "jupyter")
-    app.add_config_value("jupyter_ignore_skip_test", False, "jupyter")
-    app.add_config_value("jupyter_execute_nb", execute_nb_obj, "jupyter")
-    app.add_config_value("jupyter_template_coverage_file_path", None, "jupyter")
-    app.add_config_value("jupyter_generate_html", False, "jupyter")
+    app.add_builder(JupyterCodeBuilder)
+    app.add_builder(JupyterHTMLBuilder)
+    app.add_builder(JupyterPDFBuilder)
+    app.add_config_value("jupyter_language", "python3", "jupyter")
+    app.add_config_value("jupyter_language_synonyms", [], "jupyter")
+    
+    #-IPYNB-#
+    app.add_config_value("jupyter_images_html", True, "jupyter")
+    app.add_config_value("jupyter_section_blocks", True, "jupyter")
+
+    #-HTML-#
+    app.add_config_value("jupyter_static_file_path", [], "jupyter") #TODO: future deprecation
     app.add_config_value("jupyter_html_template", None, "jupyter")
-    app.add_config_value("jupyter_execute_notebooks", False, "jupyter")
-    app.add_config_value("jupyter_make_site", False, "jupyter")
-    app.add_config_value("jupyter_dependency_lists", {}, "jupyter")
+    app.add_config_value("jupyter_html_theme", "theme", "jupyter")
+    app.add_config_value("jupyter_allow_html_only", False, "")
+    app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
+    app.add_config_value("jupyter_images_markdown", False, "jupyter") #TODO: remove
+
+    #-EXECUTE-#
+    app.add_config_value("jupyter_execute", True, "jupyter")
+    app.add_config_value("jupyter_execute_allow_errors", True, "jupyter")
+    app.add_config_value("jupyter_coverage_template", None, "jupyter")
     app.add_config_value("jupyter_threads_per_worker", 1, "jupyter")
     app.add_config_value("jupyter_number_workers", 1, "jupyter")
-    app.add_config_value("jupyter_make_coverage", False, "jupyter")
-    app.add_config_value("jupyter_target_pdf", False, "jupyter")
-    app.add_config_value("jupyter_coverage_dir", None, "jupyter")
-    app.add_config_value("jupyter_theme", None, "jupyter")
-    app.add_config_value("jupyter_theme_path", "theme", "jupyter")
-    app.add_config_value("jupyter_template_path", "templates", "jupyter")
-    app.add_config_value("jupyter_dependencies", None, "jupyter")
-    app.add_config_value("jupyter_download_nb_execute", None, "jupyter")
+    app.add_config_value("jupyter_dependencies", None, "jupyter") #TODO: rename
+    app.add_config_value("jupyter_dependency_lists", {}, "jupyter") #TODO: rename
 
-    # Jupyter pdf options
-    app.add_config_value("jupyter_latex_template", None, "jupyter")
-    app.add_config_value("jupyter_latex_template_book", None, "jupyter")
+    #-PDF-#
+    app.add_config_value("jupyter_template_latex", None, "jupyter")
+    app.add_config_value("jupyter_template_latexbook", None, "jupyter")
     app.add_config_value("jupyter_pdf_logo", None, "jupyter")
     app.add_config_value("jupyter_bib_file", None, "jupyter")
     app.add_config_value("jupyter_pdf_author", None, "jupyter")
-    app.add_config_value("jupyter_pdf_showcontentdepth", 2, "jupyter")
     app.add_config_value("jupyter_pdf_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter")
+    app.add_config_value("jupyter_pdf_excludepatterns", [], "jupyter") 
     app.add_config_value("jupyter_pdf_book", False, "jupyter")
     app.add_config_value("jupyter_pdf_book_index", None, "jupyter")
     app.add_config_value("jupyter_pdf_book_title", None, "jupyter")
     app.add_config_value("jupyter_pdf_book_name", None, "jupyter")
 
-
-
+    #TODO: REVIEW
+    app.add_config_value("jupyter_solution_notebook", True, "jupyter")
+    app.add_config_value("jupyter_drop_tests", True, "jupyter") #TODO: class hide
     
-    # Jupyter Directive
+    # Jupyter Directive-#
     app.add_node(jupyter_node, html=(_noop, _noop), latex=(_noop, _noop))
     app.add_directive("jupyter", JupyterDirective)
     app.add_directive("jupyter-dependency", JupyterDependency)
 
-    # Exercise directive
+    #-Exercise Directive-#
     if SPHINX_VERSION[0] >= 2:
         app.add_config_value('exercise_include_exercises', True, 'html')
         app.add_config_value('exercise_inline_exercises', False, 'html')
@@ -110,14 +102,8 @@ def setup(app):
         app.connect('doctree-resolved', exercise.process_exercise_nodes)
         app.connect('env-purge-doc', exercise.purge_exercises)
 
-    # jupyter setup
+    #-Transforms-#
     app.add_transform(JupyterOnlyTransform)
-    app.add_config_value("jupyter_allow_html_only", False, "jupyter")
-    app.add_config_value("jupyter_target_html", False, "jupyter")
-    app.add_config_value("jupyter_download_nb", False, "jupyter")
-    app.add_config_value("jupyter_download_nb_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_download_nb_image_urlpath", None, "jupyter")
-    app.add_config_value("jupyter_images_markdown", False, "jupyter")
 
     return {
         "version": VERSION,

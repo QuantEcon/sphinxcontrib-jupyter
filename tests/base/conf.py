@@ -176,12 +176,7 @@ texinfo_documents = [
 # sphinxcontrib-jupyter Configuration Settings
 # --------------------------------------------
 
-# Conversion Mode Settings
-# If "all", convert codes and texts into jupyter notebook
-# If "code", convert code-blocks only
-jupyter_conversion_mode = "all"
-
-jupyter_write_metadata = False
+jupyter_execute = False
 
 # Location for _static folder
 jupyter_static_file_path = ["_static"]
@@ -192,32 +187,62 @@ jupyter_dependency_lists = {
     'exercises' : ['footnotes'],
 }
 
-# Configure Jupyter Kernels
-jupyter_kernels = {
-    "python3": {
-        "kernelspec": {
-            "display_name": "Python",
-            "language": "python3",
-            "name": "python3"
-        },
-        "file_extension": ".py",
-    },
-}
-
 # Default language for Jupyter notebooks
-jupyter_default_lang = "python3"
-
-# Prepend a Welcome Message to Each Notebook
-jupyter_welcome_block = "welcome.rst"
+jupyter_language = "python3"
 
 # Solutions Configuration
-jupyter_drop_solutions = True
+jupyter_solution_notebook = True
 
 # Tests configurations
 jupyter_drop_tests = True
 
 # Add Ipython, Pycon and python as language synonyms
-jupyter_lang_synonyms = ["ipython", "python", "pycon", "ipython3"]
+jupyter_language_synonyms = ["ipython", "python", "pycon", "ipython3"]
 
 exercise_include_exercises = True
 exercise_inline_exercises = True
+
+# Location of template folder for coverage reports
+jupyter_coverage_template = False
+
+# html template specific to your website needs
+jupyter_html_template = ""
+
+# latex template specific to your website needs
+jupyter_template_latex = ""
+
+#force markdown image inclusion
+jupyter_images_markdown = True
+
+#This is set true by default to pass html to the notebooks
+jupyter_allow_html_only=True
+
+## Theme specific variables
+jupyter_theme = 'theme'
+
+### pdf options
+jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"
+
+jupyter_bib_file = "_static/quant-econ"
+
+jupyter_pdf_author = "Thomas J. Sargent and John Stachurski"
+
+# Exclude Document Patterns for PDF Construction
+jupyter_pdf_excludepatterns = ["404", "index", "references"]
+
+# Set urlpath for html links in documents
+jupyter_pdf_urlpath = "https://lectures.quantecon.org/py/"
+
+# make book
+jupyter_pdf_book = True
+
+# book title
+jupyter_pdf_book_title = "Quantitative Economics with Python"
+
+# pdf book name
+jupyter_pdf_book_name = "quantitative_economics_with_python"
+
+# pdf toc file
+jupyter_pdf_book_index = "index"
+
+jupyter_execute_allow_errors = True
