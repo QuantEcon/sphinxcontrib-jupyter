@@ -45,6 +45,7 @@ class JupyterBuilder(Builder):
         self.downloadsdir = self.outdir + "/_downloads"
         self.downloadsExecutedir = self.downloadsdir + "/executed"
         self.client = None
+        self.execution_status_code = 0
 
         # Check default language is defined in the jupyter kernels
         def_lng = self.config["jupyter_default_lang"]
@@ -263,3 +264,5 @@ class JupyterBuilder(Builder):
                 error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
 
                 self._execute_notebook_class.create_coverage_report(self, error_results, params)
+            
+            exit(self.execution_status_code)
