@@ -91,7 +91,6 @@ class ExecuteNotebookWriter():
 
         ## ensure that executed notebook directory
         ensuredir(builderSelf.executed_notebook_dir)
-
         ## specifying kernels
         if language == 'python':
             if (sys.version_info > (3, 0)):
@@ -136,6 +135,11 @@ class ExecuteNotebookWriter():
         # store the exceptions in an error result array
         if future.status == 'error':
             status = 'fail'
+            try:
+                builderSelf.execution_status_code = 1
+            except:
+                self.logger.warning("No execution status code defined in builder")
+
             for key,val in builderSelf.futuresInfo.items():
                 if key == future.key:
                     filename_with_path = val['filename_with_path']
