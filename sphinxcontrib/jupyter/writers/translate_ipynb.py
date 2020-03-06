@@ -9,6 +9,7 @@ from docutils import nodes, writers
 from shutil import copyfile
 import copy
 import os
+import time
 
 from sphinx.util import logging
 from sphinx.util.docutils import SphinxTranslator
@@ -134,6 +135,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
 
     def depart_document(self, node):
         self.output.add_metadata_notebook({"filename": self.source_file_name.split("/")[-1], "title": self.title})
+        self.output.add_metadata_notebook({"date" : time.time()})
         self.cell_to_notebook()
         #TODO: Should this be in the `builder` (otherwise helper function should be used)
         if len(self.files) > 0:
