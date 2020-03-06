@@ -32,6 +32,7 @@ Welcome to sphinxcontrib-jupyter.minimal's documentation!
    simple_notebook
    slides
    solutions
+   syntax
    tables
    tests
 
