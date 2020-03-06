@@ -97,7 +97,7 @@ class MarkdownSyntax:
         if language is None:
             return "```"
         else:
-            return "``` {}".format(language)
+            return "```{}".format(language)
 
     def depart_literal_block(self):
         return "```"

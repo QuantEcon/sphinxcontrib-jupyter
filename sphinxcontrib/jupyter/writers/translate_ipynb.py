@@ -57,6 +57,7 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     literal_block = dict()
     literal_block['in'] = False
     literal_block['no-execute'] = False
+    literal_block['hide-output'] = False
     #Configuration (Math)
     math = dict()
     math['in'] = False
@@ -75,6 +76,8 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     files = []
     #Configuration (Tables)
     Table = None
+    #Configuration (Text)
+    text = None
     #Configuration (Titles)
     visit_first_title = True
     title = ""
@@ -449,6 +452,12 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         else:
             self.literal_block['no-execute'] = False
 
+        #Check for hide-output status
+        if  "classes" in node.attributes and "hide-output" in node.attributes["classes"]:
+            self.literal_block['hide-output'] = True
+        else:
+            self.literal_block['hide-output'] = False
+
         ## Check node language is the same as notebook language else make it markdown
         if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             logger.warning("Found a code-block with different programming \
@@ -462,7 +471,14 @@ class JupyterIPYNBTranslator(SphinxTranslator):
     def depart_literal_block(self, node):
         if (self.nodelang != self.language and self.nodelang not in self.language_synonyms) or self.literal_block['no-execute']:
             self.cell.append(self.syntax.depart_literal_block())
-        self.cell_to_notebook()
+        if self.cell_type == "code":
+            meta = {
+                'no-execute' : self.literal_block['no-execute'],
+                'hide-output' : self.literal_block['hide-output']
+            }
+            self.cell_to_notebook(metadata=meta)
+        else:
+            self.cell_to_notebook()
         #Initialise new cell
         self.new_cell()
         self.literal_block['in'] = False
@@ -689,31 +705,30 @@ class JupyterIPYNBTranslator(SphinxTranslator):
             self.math_block['math_block_label'] = None
         elif self.math_block['in']:
             text = self.syntax.visit_math_block(text.strip())
+        
+        self.text = text
 
-        #List and Table objects should be updated first. 
-        #TODO: Append Text to Cell (Should this be moved to depart_Text?)
+    def depart_Text(self, node):
+        #Add text to cell        
         if self.List:
-            self.List.add_item(text)
+            self.List.add_item(self.text)
         elif self.Table:
-            self.Table.add_item(text)
+            self.Table.add_item(self.text)
         elif self.math_block['in']:
-            self.cell.append(text)
+            self.cell.append(self.text)
             self.add_newparagraph()
         elif self.literal_block['in']:
-            self.cell.append(text)
+            self.cell.append(self.text)
             self.add_newline()
         elif self.block_quote['in'] or self.note:
             if self.block_quote['block_quote_type'] == "epigraph":
-                self.cell.append(text.replace("\n", "\n> ")) #Ensure all lines are prepended (TODO: should this be in MarkdownSyntax)
+                self.cell.append(self.text.replace("\n", "\n> ")) #Ensure all lines are prepended (TODO: should this be in MarkdownSyntax)
             else:
-                self.cell.append(text)
+                self.cell.append(self.text)
         elif self.caption and self.toctree:         #TODO: Check this condition
-            self.cell.append("# {}".format(text))
+            self.cell.append("# {}".format(self.text))
         else:
-            self.cell.append(text)
-
-    def depart_Text(self, node):
-        pass
+            self.cell.append(self.text)
 
     #Text(End)
 
@@ -873,14 +888,15 @@ class JupyterIPYNBTranslator(SphinxTranslator):
         self.cell = []
         self.cell_type = cell_type
 
-    def cell_to_notebook(self):
+    def cell_to_notebook(self, metadata=None):
         if len(self.cell) == 0:
             return
         # Default Cell type if not specified
         if not self.cell_type:
             self.cell_type = "markdown"
         source = "".join(self.cell)
-        self.output.add_cell(source, self.cell_type)
+        source = source.rstrip("\n") #Trim all trailing newlines before adding to notebook
+        self.output.add_cell(source, self.cell_type, metadata)
 
     def add_space(self, n=1):
         self.cell.append(" " * n)
