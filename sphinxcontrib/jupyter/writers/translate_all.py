@@ -732,8 +732,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         self.list_level -= 1
         if self.list_level == 0:
             self.markdown_lines.append(self.sep_paras)
-        self.bullets.pop()
-        self.indents.pop()
+        if len(self.bullets):
+            self.bullets.pop()
+            self.indents.pop()
 
     def visit_list_item(self, node):
 
