@@ -288,8 +288,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if node["label"]:
             #Use \tags in the LaTeX environment
             if self.jupyter_target_pdf:
-                #pdf should have label following tag and removed html id tags in visit_target
-                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
+                if "ids" in node and len(node["ids"]):
+                    #pdf should have label following tag and removed html id tags in visit_target
+                    referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
             else:
                 referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"                  #node["ids"] should always exist for labelled displaymath
             formatted_text = formatted_text.rstrip("$$\n") + referenceBuilder + "$${}".format(self.sep_paras)
@@ -313,8 +314,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         if node["label"]:
             #Use \tags in the LaTeX environment
             if self.jupyter_target_pdf:
-                #pdf should have label following tag and removed html id tags in visit_target
-                referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
+                if "ids" in node and len(node["ids"]):
+                    #pdf should have label following tag and removed html id tags in visit_target
+                    referenceBuilder = " \\tag{" + str(node["number"]) + "}" + "\\label{" + node["ids"][0] + "}\n"
             else:
                 referenceBuilder = " \\tag{" + str(node["number"]) + "}\n"
             #node["ids"] should always exist for labelled displaymath
