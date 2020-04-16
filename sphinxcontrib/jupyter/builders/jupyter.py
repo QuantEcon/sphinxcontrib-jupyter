@@ -234,7 +234,6 @@ class JupyterBuilder(Builder):
 
 
     def finish(self):
-
         self.finish_tasks.add_task(self.copy_static_files)
         
         if self.config["jupyter_execute_notebooks"]:
@@ -245,6 +244,8 @@ class JupyterBuilder(Builder):
 
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
+        
+        exit(self.execution_status_code)
 
     def save_executed_and_generate_coverage(self, params, target, coverage = False):
 
@@ -264,5 +265,3 @@ class JupyterBuilder(Builder):
                 error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
 
                 self._execute_notebook_class.create_coverage_report(self, error_results, params)
-            
-            exit(self.execution_status_code)

@@ -161,7 +161,9 @@ class ExecuteNotebookWriter():
             language_info = executed_nb['metadata']['kernelspec']
             executed_nb['metadata']['filename_with_path'] = filename_with_path
             executed_nb['metadata']['download_nb'] = builderSelf.config['jupyter_download_nb']
-            if (builderSelf.config['jupyter_download_nb']):
+            if "jupyter_pdf_book_title" in builderSelf.config and builderSelf.config['jupyter_pdf_book_title']:
+                executed_nb['metadata']['site_title'] = builderSelf.config['jupyter_pdf_book_title']
+            if "jupyter_download_nb" in builderSelf.config and builderSelf.config['jupyter_download_nb']:
                 executed_nb['metadata']['download_nb_path'] = builderSelf.config['jupyter_download_nb_urlpath']
             if (futures_name.startswith('delayed') != -1):
                 # adding in executed notebooks list
