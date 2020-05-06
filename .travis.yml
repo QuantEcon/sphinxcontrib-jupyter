@@ -10,6 +10,7 @@ env:
   - SPHINX_VERSION=1.7.9
   - SPHINX_VERSION=1.8.5
   - SPHINX_VERSION=2.1.2
+  - SPHINX_VERSION=3.0.3
 
 directories:
   - "/tmp/texlive"
