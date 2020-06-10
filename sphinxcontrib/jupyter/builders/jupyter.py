@@ -139,7 +139,7 @@ class JupyterBuilder(Builder):
 
         if (self.config["jupyter_download_nb_execute"]):
             copy_dependencies(self, self.downloadsExecutedir)
-            
+
     def write_doc(self, docname, doctree):
         # work around multiple string % tuple issues in docutils;
         # replace tuples in attribute values with lists
@@ -156,7 +156,7 @@ class JupyterBuilder(Builder):
 
             # get a NotebookNode object from a string
             nb = nbformat.reads(self.writer.output, as_version=4)
-            nb = self.update_Metadata(nb)
+            nb = self.update_Metadata(docname, nb)
             try:
                 with codecs.open(outfilename, "w", "utf-8") as f:
                     self.writer.output = nbformat.writes(nb, version=4)
@@ -179,7 +179,7 @@ class JupyterBuilder(Builder):
 
         # get a NotebookNode object from a string
         nb = nbformat.reads(self.writer.output, as_version=4)
-        nb = self.update_Metadata(nb)
+        nb = self.update_Metadata(docname, nb)
 
         ### execute the notebook
         if (self.config["jupyter_execute_notebooks"]):
@@ -206,7 +206,31 @@ class JupyterBuilder(Builder):
         except (IOError, OSError) as err:
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
-    def update_Metadata(self, nb):
+    def update_Metadata(self, docname, nb):
+        if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
+            # Set Next and Previous
+            relations = self.env.collect_relations()
+            related = relations.get(docname)
+            titles = self.env.titles
+            if related and related[2]:
+                try:
+                    next_doc = {
+                        'link': self.get_relative_uri(docname, related[2]),
+                        'title': titles[related[2]].children[0].astext()
+                    }
+                    nb.metadata.next_doc = next_doc
+                except KeyError:
+                    nb.metadata.next_doc = False
+            if related and related[1]:
+                try:
+                    prev_doc = {
+                        'link': self.get_relative_uri(docname, related[1]),
+                        'title': titles[related[1]].children[0].astext()
+                    }
+                    nb.metadata.prev_doc = prev_doc
+                except KeyError:
+                    nb.metadata.prev_doc = False
+        # Set Compile Datetime
         nb.metadata.date = time.time()
         return nb
 
