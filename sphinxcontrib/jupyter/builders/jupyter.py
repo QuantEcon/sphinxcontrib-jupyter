@@ -80,7 +80,7 @@ class JupyterBuilder(Builder):
 
         # start a dask client to process the notebooks efficiently. 
         # processes = False. This is sometimes preferable if you want to avoid inter-worker communication and your computations release the GIL. This is common when primarily using NumPy or Dask Array.
-        
+
         if (self.config["jupyter_execute_notebooks"]):
             self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
             self.execution_vars = {
@@ -92,7 +92,7 @@ class JupyterBuilder(Builder):
                 'delayed_futures': [],
                 'destination': self.executedir
             }
-        
+
         if (self.config["jupyter_download_nb_execute"]):
             if self.client is None:
                 self.client = Client(processes=False, threads_per_worker = self.threads_per_worker, n_workers = self.n_workers)
@@ -169,7 +169,7 @@ class JupyterBuilder(Builder):
                 strDocname = str(docname)
                 if strDocname in self.download_execution_vars['dependency_lists'].keys():
                     self.download_execution_vars['delayed_notebooks'].update({strDocname: nb})
-                else:        
+                else:
                     self._execute_notebook_class.execute_notebook(self, nb, docname, self.download_execution_vars, self.download_execution_vars['futures'])
 
         ### output notebooks for executing
@@ -186,7 +186,7 @@ class JupyterBuilder(Builder):
             strDocname = str(docname)
             if strDocname in self.execution_vars['dependency_lists'].keys():
                 self.execution_vars['delayed_notebooks'].update({strDocname: nb})
-            else:        
+            else:
                 self._execute_notebook_class.execute_notebook(self, nb, docname, self.execution_vars, self.execution_vars['futures'])
         else:
             #do not execute
@@ -259,7 +259,7 @@ class JupyterBuilder(Builder):
 
     def finish(self):
         self.finish_tasks.add_task(self.copy_static_files)
-        
+
         if self.config["jupyter_execute_notebooks"]:
             self.save_executed_and_generate_coverage(self.execution_vars,'website', self.config['jupyter_make_coverage'])
 
@@ -268,7 +268,7 @@ class JupyterBuilder(Builder):
 
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             self._make_site_class.build_website(self)
-        
+
         exit(self.execution_status_code)
 
     def save_executed_and_generate_coverage(self, params, target, coverage = False):
@@ -284,7 +284,7 @@ class JupyterBuilder(Builder):
             if coverage:
                 ## produces a JSON file of dask execution
                 self._execute_notebook_class.produce_dask_processing_report(self, params)
-                
+
                 ## generate the JSON code execution reports file
                 error_results  = self._execute_notebook_class.produce_code_execution_report(self, error_results, params)
 
