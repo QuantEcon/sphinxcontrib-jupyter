@@ -207,6 +207,7 @@ class JupyterBuilder(Builder):
             self.logger.warning("error writing file %s: %s" % (outfilename, err))
 
     def update_Metadata(self, docname, nb):
+        """Update Metadata for Jupyter Notebook"""
         if "jupyter_make_site" in self.config and self.config['jupyter_make_site']:
             # Set Next and Previous
             relations = self.env.collect_relations()
