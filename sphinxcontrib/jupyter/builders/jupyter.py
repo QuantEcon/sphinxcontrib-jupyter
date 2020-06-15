@@ -215,20 +215,32 @@ class JupyterBuilder(Builder):
             titles = self.env.titles
             if related and related[2]:
                 try:
-                    next_doc = {
-                        'link': self.get_relative_uri(docname, related[2]),
-                        'title': titles[related[2]].children[0].astext()
-                    }
-                    nb.metadata.next_doc = next_doc
+                    link = self.get_relative_uri(docname, related[2])
+                    title = titles[related[2]].children[0].astext()
+                    # link is document uri (i.e. docname) as specified in index
+                    if link in self.config.jupyter_nextprev_ignore:
+                        pass
+                    else:
+                        next_doc = {
+                            'link': link,
+                            'title': title
+                        }
+                        nb.metadata.next_doc = next_doc
                 except KeyError:
                     nb.metadata.next_doc = False
             if related and related[1]:
                 try:
-                    prev_doc = {
-                        'link': self.get_relative_uri(docname, related[1]),
-                        'title': titles[related[1]].children[0].astext()
-                    }
-                    nb.metadata.prev_doc = prev_doc
+                    link = self.get_relative_uri(docname, related[1])
+                    title = titles[related[1]].children[0].astext()
+                    # link is document uri (i.e. docname) as specified in index
+                    if link in self.config.jupyter_nextprev_ignore:
+                        pass
+                    else:
+                        prev_doc = {
+                            'link': link,
+                            'title': title
+                        }
+                        nb.metadata.prev_doc = prev_doc
                 except KeyError:
                     nb.metadata.prev_doc = False
         # Set Compile Datetime
