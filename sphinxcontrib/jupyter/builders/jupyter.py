@@ -1,6 +1,7 @@
 import codecs
 import os.path
 import docutils.io
+import docutils
 
 import nbformat
 from sphinx.util.osutil import ensuredir, os_path
@@ -216,7 +217,13 @@ class JupyterBuilder(Builder):
             if related and related[2]:
                 try:
                     link = self.get_relative_uri(docname, related[2])
-                    title = titles[related[2]].children[0].astext()
+                    title_relation = titles[related[2]]
+                    # Filter out non-text elements like index entries
+                    if len(title_relation.children) > 1:
+                        text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
+                        title = "".join([item.astext() for item in text_nodes])
+                    else:
+                        title = title_relation.children[0].astext()
                     # link is document uri (i.e. docname) as specified in index
                     if link in self.config.jupyter_nextprev_ignore:
                         pass
@@ -231,7 +238,13 @@ class JupyterBuilder(Builder):
             if related and related[1]:
                 try:
                     link = self.get_relative_uri(docname, related[1])
-                    title = titles[related[1]].children[0].astext()
+                    title_relation = titles[related[2]]
+                    # Filter out non-text elements like index entries
+                    if len(title_relation.children) > 1:
+                        text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
+                        title = "".join([item.astext() for item in text_nodes])
+                    else:
+                        title = title_relation.children[0].astext()
                     # link is document uri (i.e. docname) as specified in index
                     if link in self.config.jupyter_nextprev_ignore:
                         pass
