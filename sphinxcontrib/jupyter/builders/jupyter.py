@@ -217,17 +217,18 @@ class JupyterBuilder(Builder):
             if related and related[2]:
                 try:
                     link = self.get_relative_uri(docname, related[2])
-                    title_relation = titles[related[2]]
-                    # Filter out non-text elements like index entries
-                    if len(title_relation.children) > 1:
-                        text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
-                        title = "".join([item.astext() for item in text_nodes])
-                    else:
-                        title = title_relation.children[0].astext()
                     # link is document uri (i.e. docname) as specified in index
                     if link in self.config.jupyter_nextprev_ignore:
                         pass
                     else:
+                        title_relation = titles[related[2]]
+                        # Filter out non-text elements like index entries
+                        if len(title_relation.children) > 1:
+                            text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
+                            title = "".join([item.astext() for item in text_nodes])
+                        else:
+                            title = title_relation.children[0].astext()
+                        # Set next_doc metadata
                         next_doc = {
                             'link': link,
                             'title': title
@@ -240,17 +241,18 @@ class JupyterBuilder(Builder):
             if related and related[1]:
                 try:
                     link = self.get_relative_uri(docname, related[1])
-                    title_relation = titles[related[2]]
-                    # Filter out non-text elements like index entries
-                    if len(title_relation.children) > 1:
-                        text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
-                        title = "".join([item.astext() for item in text_nodes])
-                    else:
-                        title = title_relation.children[0].astext()
                     # link is document uri (i.e. docname) as specified in index
                     if link in self.config.jupyter_nextprev_ignore:
                         pass
                     else:
+                        title_relation = titles[related[1]]
+                        # Filter out non-text elements like index entries
+                        if len(title_relation.children) > 1:
+                            text_nodes = [item for item in title_relation if isinstance(item, docutils.nodes.Text)]
+                            title = "".join([item.astext() for item in text_nodes])
+                        else:
+                            title = title_relation.children[0].astext()
+                        # Set prev_doc metadata
                         prev_doc = {
                             'link': link,
                             'title': title
