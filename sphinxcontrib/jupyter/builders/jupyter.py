@@ -234,7 +234,7 @@ class JupyterBuilder(Builder):
                         }
                         nb.metadata.next_doc = next_doc
                 except KeyError:
-                    nb.metadata.next_doc = False
+                    pass
             if related and related[1]:
                 try:
                     link = self.get_relative_uri(docname, related[1])
@@ -255,7 +255,7 @@ class JupyterBuilder(Builder):
                         }
                         nb.metadata.prev_doc = prev_doc
                 except KeyError:
-                    nb.metadata.prev_doc = False
+                    pass
         # Set Compile Datetime
         nb.metadata.date = time.time()
         return nb
