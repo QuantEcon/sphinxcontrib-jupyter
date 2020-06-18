@@ -234,7 +234,9 @@ class JupyterBuilder(Builder):
                         }
                         nb.metadata.next_doc = next_doc
                 except KeyError:
-                    pass
+                    self.logger.warning(
+                        "[NB Metadata] No next_doc relation is found for: {}"
+                        .format(docname))
             if related and related[1]:
                 try:
                     link = self.get_relative_uri(docname, related[1])
@@ -255,7 +257,9 @@ class JupyterBuilder(Builder):
                         }
                         nb.metadata.prev_doc = prev_doc
                 except KeyError:
-                    pass
+                    self.logger.warning(
+                        "[NB Metadata] No prev_doc relation is found for: {}"
+                        .format(docname))
         # Set Compile Datetime
         nb.metadata.date = time.time()
         return nb
