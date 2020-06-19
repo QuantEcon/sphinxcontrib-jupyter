@@ -452,7 +452,7 @@ will look as follows in the jupyter notebook
 .. todo::
 
     Currently generating the two sets of notebooks requires two separate
-    runs of sphinx which is incovenient. It would be better to develop a set 
+    runs of sphinx which is inconvenient. It would be better to develop a set 
     of notebooks without solutions (as Default) and a set of notebooks with
     solutions in a subdir.
 
