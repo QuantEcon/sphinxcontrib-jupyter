@@ -67,6 +67,6 @@ setup(
     platforms='any',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['docutils', 'nbformat', 'sphinx', 'dask', 'distributed', 'ipython', 'nbconvert', 'jupyter_client'],
+    install_requires=['docutils', 'nbformat', 'sphinx', 'dask', 'distributed', 'ipython', 'nbconvert', 'jupyter_client','sphinxcontrib-bibtex==1.0'],
     namespace_packages=['sphinxcontrib'],
 )
