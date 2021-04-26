@@ -202,6 +202,9 @@ class JupyterTranslator(JupyterCodeTranslator, object):
         ### preventing image from the index file at the moment
         if self.in_book_index:
             return
+        ### Skip solutions if we say to 
+        if "solution" in node.attributes['classes'] and self.jupyter_drop_solutions:
+            return
         uri = node.attributes["uri"]
         self.images.append(uri)             #TODO: list of image files
         if self.jupyter_download_nb_image_urlpath:
