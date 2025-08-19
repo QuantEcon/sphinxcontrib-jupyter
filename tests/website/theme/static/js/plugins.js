@@ -1086,7 +1086,7 @@ function load_status_table()
 
         updateTable();
     })
-    .error( function() {
+    .fail( function() {
       console.log('Error reading code execution results JSON')
       updateTable();
     });
@@ -1183,7 +1183,7 @@ function load_this_page_badge()
       var page_status = determine_page_status();
       update_page_badge(page_status);
   })
-  .error( function( data ) {
+  .fail( function( data ) {
     console.log('Error reading code execution results JSON')
     update_page_badge(-1);
   });
@@ -1261,7 +1261,7 @@ function load_percentages()
     $('#jl_percentage a').html(get_badge(jl_percentage, 'Julia'));
     
   })
-  .error( function( data ) {
+  .fail( function( data ) {
     console.log('Error reading code execution results JSON');
   });
 }
