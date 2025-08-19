@@ -215,3 +215,6 @@ jupyter_pdf_logo = "_static/img/qe-menubar-logo.png"
 jupyter_bib_file = "_static/test"
 
 jupyter_pdf_author = "QuantEcon Developers"
+
+# BibTeX configuration for sphinxcontrib-bibtex
+bibtex_bibfiles = ['_static/test.bib']
