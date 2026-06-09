@@ -13,7 +13,7 @@ sphinxcontrib.jupyter
 
    New projects should use `sphinx-tojupyter
    <https://github.com/QuantEcon/sphinx-tojupyter>`__. This repository is
-   retained, in archived (read-only) form, for historical reference, as it was
+   retained in an archived (read-only) form for historical reference, as it was
    used extensively to build the QuantEcon lecture series.
 
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
