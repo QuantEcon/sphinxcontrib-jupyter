@@ -1,20 +1,20 @@
 sphinxcontrib.jupyter
 =====================
 
-.. warning::
+⚠️ **DEPRECATED — this project is no longer maintained.**
 
-   **This project is deprecated and is no longer maintained.**
+The notebook writers and translators have been migrated to, and improved in,
+`sphinx-tojupyter <https://github.com/QuantEcon/sphinx-tojupyter>`__, which
+targets modern Sphinx (>= 7) and Python (>= 3.11) and integrates with the
+MyST / Jupyter Book ecosystem (MyST-NB ``glue``, ``sphinx-proof``,
+``sphinx-exercise``, LaTeX macros).
 
-   The notebook writers and translators have been migrated to, and improved
-   in, `sphinx-tojupyter <https://github.com/QuantEcon/sphinx-tojupyter>`__,
-   which targets modern Sphinx (>= 7) and Python (>= 3.11) and integrates with
-   the MyST / Jupyter Book ecosystem (MyST-NB ``glue``, ``sphinx-proof``,
-   ``sphinx-exercise``, LaTeX macros).
+New projects should use `sphinx-tojupyter
+<https://github.com/QuantEcon/sphinx-tojupyter>`__. This repository is retained,
+in archived (read-only) form, for historical reference, as it was used
+extensively to build the QuantEcon lecture series.
 
-   New projects should use `sphinx-tojupyter
-   <https://github.com/QuantEcon/sphinx-tojupyter>`__. This repository is
-   retained, in archived (read-only) form, for historical reference, as it was
-   used extensively to build the QuantEcon lecture series.
+----
 
 A `Sphinx <http://www.sphinx-doc.org/en/stable/>`__ Extension for
 Generating Jupyter Notebooks
