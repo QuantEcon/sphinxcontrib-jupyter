@@ -141,19 +141,6 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
             self.output.metadata.celltoolbar = "Slideshow"
 
 
-        # Update metadata
-        if self.jupyter_kernels is not None:
-            try:
-                self.output.metadata.kernelspec = \
-                    self.jupyter_kernels[self.lang]["kernelspec"]
-                self.output.metadata["filename"] = self.source_file_name.split("/")[-1]
-                self.output.metadata["title"] = self.title
-            except:
-                self.warn(
-                    "Invalid jupyter kernels. "
-                    "jupyter_kernels: {}, lang: {}"
-                    .format(self.jupyter_kernels, self.lang))
-
     def visit_highlightlang(self, node):
         lang = node.attributes["lang"].strip()
         if lang in self.jupyter_kernels:
@@ -205,14 +192,20 @@ class JupyterCodeTranslator(docutils.nodes.GenericNodeVisitor):
         self.in_code_block = True
         self.code_lines = []
 
-        # If the cell being processed contains code written in a language other than the one that
-        # was specified as the default language, do not create a code block for it - turn it into
-        # markup instead.
-        if self.nodelang != self.langTranslator.translate(self.lang):
+        # Update metadata
+        if self.jupyter_kernels is not None and not self.output.metadata:
             if self.nodelang in self.jupyter_lang_synonyms:
-                pass
-            else:
-                self.output_cell_type = JupyterOutputCellGenerators.MARKDOWN
+                self.nodelang = self.default_lang
+            try:
+                self.output.metadata.kernelspec = \
+                    self.jupyter_kernels[self.nodelang]["kernelspec"]
+                self.output.metadata["filename"] = self.source_file_name.split("/")[-1]
+                self.output.metadata["title"] = self.title
+            except:
+                self.warn(
+                    "Invalid jupyter kernels. "
+                    "jupyter_kernels: {}, lang: {}"
+                    .format(self.jupyter_kernels, self.nodelang))
 
     def depart_literal_block(self, node):
         if self.solution and self.jupyter_drop_solutions:    
