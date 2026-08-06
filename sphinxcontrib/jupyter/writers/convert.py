@@ -1,5 +1,6 @@
 import nbformat
-from nbconvert import HTMLExporter
+import nbconvert
+from nbconvert import HTMLExporter, TemplateExporter
 import os
 from io import open
 from sphinx.util.osutil import ensuredir
@@ -16,6 +17,7 @@ class convertToHtmlWriter():
         for path in [self.htmldir]:
             ensuredir(path)
         self.html_exporter = HTMLExporter()
+        self.template_exporter = TemplateExporter()
         
         templateFolder = builderSelf.config['jupyter_template_path']
 
@@ -25,7 +27,10 @@ class convertToHtmlWriter():
             builderSelf.logger.warning("template directory not found")
             exit()
 
-        self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
+        if nbconvert.version_info < (6,0):
+            self.html_exporter.template_file = templateFolder + "/" + builderSelf.config["jupyter_html_template"]
+        else:
+            self.template_exporter.extra_template_basedirs.append(templateFolder + "/" + builderSelf.config["jupyter_html_template"])
 
         
     def convert(self, nb, filename, language, base_path, path=None):
